@@ -117,7 +117,7 @@ function renderProducts(products) {
 
     const priceLabel = document.createElement("span");
     priceLabel.className = "product-price-label";
-    priceLabel.textContent = "售價（最後採購價）";
+    priceLabel.textContent = "售價";
 
     const priceValue = document.createElement("span");
     priceValue.className = "product-price";
