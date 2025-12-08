@@ -1,30 +1,28 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>康醫採購系統（前台查詢）</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>康醫採購系統（前台查詢）</title>
 
-    <!-- 正確的 CSS 路徑 -->
-    <link rel="stylesheet" href="css/style.css">
+  <!-- CSS -->
+  <link rel="stylesheet" href="./css/style.css">
+
+  <!-- Supabase 官方套件 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- 你的 Supabase 客戶端設定 -->
+  <script src="./js/supabase.js" defer></script>
+
+  <!-- 商品 API + 搜尋邏輯 -->
+  <script src="./js/product-list.js" defer></script>
 </head>
+
 <body>
-    <h1>康醫採購系統（前台查詢）</h1>
+  <h1>康醫採購系統（前台查詢）</h1>
 
-    <!-- 搜尋輸入框 -->
-    <input 
-        type="text" 
-        id="searchInput" 
-        placeholder="搜尋商品名稱或規格…" 
-        oninput="filterProducts()"
-    >
+  <input id="searchInput" type="text" placeholder="搜尋商品名稱或規格…" />
 
-    <!-- 商品列表 -->
-    <div id="productList" class="product-list"></div>
-
-    <!-- 正確的 JS 路徑 -->
-    <script src="js/supabase.js"></script>
-    <script src="js/products.js"></script>
-    <script src="js/product-list.js"></script>
+  <div id="productList"></div>
 </body>
 </html>
