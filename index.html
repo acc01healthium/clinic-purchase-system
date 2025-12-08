@@ -5,23 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>康醫採購系統（前台查詢）</title>
 
-  <!-- CSS -->
   <link rel="stylesheet" href="./css/style.css">
 
-  <!-- Supabase 官方套件 -->
+  <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- 你的 Supabase 客戶端設定 -->
+  <!-- 你的 Supabase 設定 -->
   <script src="./js/supabase.js" defer></script>
 
-  <!-- 商品 API + 搜尋邏輯 -->
+  <!-- 商品查詢邏輯 -->
   <script src="./js/product-list.js" defer></script>
 </head>
 
 <body>
   <h1>康醫採購系統（前台查詢）</h1>
 
-  <input id="searchInput" type="text" placeholder="搜尋商品名稱或規格…" />
+  <input id="searchInput" type="text" placeholder="搜尋商品名稱、料號或分類…" />
 
   <div id="productList"></div>
 </body>
