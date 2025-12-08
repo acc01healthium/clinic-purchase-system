@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>康醫採購系統 - 商品查詢</title>
+
+  <link rel="stylesheet" href="./css/style.css" />
+
+  <!-- Supabase CDN -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+
+<body>
+  <header>
+    <h2>康醫採購系統（前台查詢）</h2>
+  </header>
+
+  <section class="search-section">
+    <input id="searchInput" type="text" placeholder="搜尋商品名稱或規格…" />
+  </section>
+
+  <section id="productList" class="product-list">
+    <!-- 商品卡片會自動塞進來 -->
+  </section>
+
+  <!-- JS -->
+  <script src="./js/supabase.js"></script>
+  <script src="./js/products.js"></script>
+
+  <script>
+    // 畫面初始化
+    async function init() {
+      const list = document.getElementById("productList");
+      const searchInput = document.getElementById("searchInput");
+
+      let products = await loadProducts();
+      renderProducts(products);
+
+      // 搜尋功能
+      searchInput.addEventListener("input", () => {
+        const keyword = searchInput.value.trim();
+        const filtered = products.filter(p =>
+          (p.name + p.spec).toLowerCase().includes(keyword.toLowerCase())
+        );
+        renderProducts(filtered);
+      });
+
+      function renderProducts(items) {
+        list.innerHTML = "";
+        items.forEach(p => {
+          const img = p.product_images?.[0]?.url || "";
+          const card = document.createElement("div");
+          card.className = "product-card";
+
+          card.innerHTML = `
+            <img src="${img}" onerror="this.src='https://via.placeholder.com/100';">
+            <h3>${p.name}</h3>
+            <p>${p.spec || ""}</p>
+            <p class="price">最近價格：${p.last_price || "-"} 元</p>
+            <p class="time">更新時間：${p.last_price_updated_at || "-"}</p>
+          `;
+          list.appendChild(card);
+        });
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
