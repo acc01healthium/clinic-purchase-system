@@ -1,45 +1,284 @@
+/* ========= 全局設定 ========= */
+
+:root {
+  --primary: #27c3df;         /* 主題藍綠 */
+  --primary-dark: #1aa1ba;
+  --primary-soft: #e5f7fb;
+  --bg: #f5f7fb;
+  --text-main: #222;
+  --text-sub: #555;
+  --border-soft: #e0e4ef;
+  --card-radius: 16px;
+  --shadow-soft: 0 10px 25px rgba(0, 0, 0, 0.06);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 body {
-  font-family: Arial;
-  padding: 20px;
-  background: #f6f7f8;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  background: radial-gradient(circle at top left, #eaf9ff 0, #f5f7fb 40%, #ffffff 100%);
+  color: var(--text-main);
 }
 
-header h2 {
+/* ========= Header ========= */
+
+.app-header {
+  background: linear-gradient(135deg, var(--primary) 0%, #18b5d9 40%, #1cd0f1 100%);
+  color: #fff;
+  padding: 18px 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.app-header-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.app-title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.app-title {
+  margin: 0;
+  font-size: 1.6rem;
+  letter-spacing: 0.08em;
+}
+
+.app-subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.9;
+}
+
+/* ========= Main Layout ========= */
+
+.app-main {
+  max-width: 1120px;
+  margin: 24px auto 48px;
+  padding: 0 16px 32px;
+}
+
+/* ========= 搜尋區 ========= */
+
+.search-section {
+  background: #ffffff;
+  border-radius: 18px;
+  padding: 18px 16px 14px;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--border-soft);
   margin-bottom: 20px;
 }
 
-.search-section input {
-  width: 100%;
-  padding: 12px;
-  font-size: 16px;
-  margin-bottom: 20px;
+.search-label {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--text-sub);
+  margin-bottom: 8px;
 }
+
+.search-input-wrapper {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+#searchInput {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  background: #fdfefe;
+}
+
+#searchInput::placeholder {
+  color: #a0a7b8;
+}
+
+#searchInput:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(39, 195, 223, 0.2);
+  background: #ffffff;
+}
+
+.btn-secondary {
+  padding: 9px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--primary);
+  background: #ffffff;
+  color: var(--primary-dark);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  white-space: nowrap;
+}
+
+.btn-secondary:hover {
+  background: var(--primary-soft);
+  box-shadow: 0 0 0 2px rgba(39, 195, 223, 0.25);
+}
+
+.search-hint {
+  margin: 6px 2px 0;
+  font-size: 0.8rem;
+  color: var(--text-sub);
+}
+
+/* ========= 狀態訊息 ========= */
+
+.status-message {
+  margin: 10px 2px 0;
+  font-size: 0.9rem;
+  color: #b23b3b;
+}
+
+/* ========= 商品卡片列表 ========= */
 
 .product-list {
+  margin-top: 16px;
   display: grid;
-  gap: 15px;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 18px;
 }
+
+/* 單一卡片 */
 
 .product-card {
-  background: #fff;
-  padding: 15px;
-  border-radius: 10px;
-  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+  border-radius: var(--card-radius);
+  background: #ffffff;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--border-soft);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 260px;
 }
 
-.product-card img {
-  width: 100px;
-  height: 100px;
+/* 卡片圖片區：圖片較大 */
+
+.product-image-wrapper {
+  background: var(--primary-soft);
+  position: relative;
+  padding-top: 62%; /* 16:10 大圖比例 */
+  overflow: hidden;
+}
+
+.product-image-wrapper img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
 }
 
-.price {
-  color: #1a7f37;
-  font-weight: bold;
+/* 若沒有圖片 */
+
+.product-image-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8da3b8;
+  font-size: 0.9rem;
 }
 
-.time {
-  font-size: 12px;
-  color: #888;
+/* 卡片文字內容 */
+
+.product-content {
+  padding: 12px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
+.product-name {
+  font-size: 1.02rem;
+  font-weight: 600;
+  margin: 0 0 3px;
+  color: var(--text-main);
+}
+
+.product-spec {
+  font-size: 0.9rem;
+  color: var(--text-sub);
+  margin: 0 0 6px;
+}
+
+.product-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--text-sub);
+  margin-bottom: 6px;
+}
+
+.product-meta-tag {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+}
+
+/* 價格區 */
+
+.product-price-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-top: 2px;
+}
+
+.product-price-label {
+  font-size: 0.86rem;
+  color: var(--text-sub);
+}
+
+.product-price {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+
+/* 時間區 */
+
+.product-updated-at {
+  margin-top: 4px;
+  font-size: 0.78rem;
+  color: #7c8797;
+}
+
+/* ========= RWD ========= */
+
+@media (max-width: 768px) {
+  .app-header-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .app-main {
+    margin-top: 18px;
+  }
+
+  .product-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .search-section {
+    padding: 14px 12px 10px;
+  }
+}
