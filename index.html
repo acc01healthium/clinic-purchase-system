@@ -1,27 +1,61 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>康醫採購系統（前台查詢）</title>
 
-  <link rel="stylesheet" href="./css/style.css">
-
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- 你的 Supabase 設定 -->
-  <script src="./js/supabase.js" defer></script>
-
-  <!-- 商品查詢邏輯 -->
-  <script src="./js/product-list.js" defer></script>
+  <!-- CSS -->
+  <link rel="stylesheet" href="./css/style.css" />
 </head>
 
 <body>
-  <h1>康醫採購系統（前台查詢）</h1>
+  <!-- 頂部 Banner / 標題區 -->
+  <header class="app-header">
+    <div class="app-header-inner">
+      <div class="app-title-block">
+        <h1 class="app-title">康醫採購系統</h1>
+        <p class="app-subtitle">前台查詢（僅供院內同仁使用）</p>
+      </div>
+    </div>
+  </header>
 
-  <input id="searchInput" type="text" placeholder="搜尋商品名稱、料號或分類…" />
+  <!-- 主內容 -->
+  <main class="app-main">
+    <!-- 搜尋區 -->
+    <section class="search-section">
+      <label for="searchInput" class="search-label">搜尋商品名稱、規格或分類</label>
+      <div class="search-input-wrapper">
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="例如：口罩、手套、點滴架…"
+        />
+        <button id="clearSearchBtn" type="button" class="btn-secondary">
+          清除
+        </button>
+      </div>
+      <p class="search-hint">
+        ※ 僅顯示 <strong>已啟用</strong> 的商品，售價 = 最後採購價
+      </p>
+    </section>
 
-  <div id="productList"></div>
+    <!-- 狀態訊息 -->
+    <section id="statusMessage" class="status-message" hidden></section>
+
+    <!-- 商品卡片列表 -->
+    <section id="productList" class="product-list">
+      <!-- JS 產生卡片 -->
+    </section>
+  </main>
+
+  <!-- Supabase 官方套件 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- 你的 Supabase 客戶端設定 -->
+  <script src="./js/supabase.js" defer></script>
+
+  <!-- 商品 API + 搜尋邏輯 -->
+  <script src="./js/product-list.js" defer></script>
 </body>
 </html>
