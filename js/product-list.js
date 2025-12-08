@@ -1,51 +1,47 @@
-const SUPABASE_URL = "https://utwhtjtgwryeljgwlwzm.supabase.co";
-const SUPABASE_ANON_KEY = "你的 anon key";
+// 不可再重複宣告 SUPABASE_URL 或 SUPABASE_KEY
 
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANONeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0d2h0anRnd3J5ZWxqZ3dsd3ptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxNTkxNDQsImV4cCI6MjA4MDczNTE0NH0.SexZh_JV9IUT5cL7o6KO-bh6D50aFkZUrhZVf4_fNbs_KEY);
-
-// 取得全部商品（前台開放查詢 → 使用 RLS）
 async function loadProducts() {
   const { data, error } = await supabase
     .from("products")
-    .select(`
-        id,
-        name,
-        unit,
-        spec,
-        price,
-        last_price_updated,
-        product_images(url)
-    `)
-    .order("name", { ascending: true });
+    .select("*, product_images(url)")
+    .order("updated_at", { ascending: false });
 
   if (error) {
-    console.error("載入商品失敗：", error);
+    console.error("資料讀取錯誤：", error);
     return;
   }
 
   renderProducts(data);
 }
 
-// 將商品渲染到前端
-function renderProducts(products) {
-  const container = document.getElementById("product-list");
+function renderProducts(list) {
+  const container = document.getElementById("productList");
   container.innerHTML = "";
 
-  products.forEach((p) => {
-    const img = p.product_images?.[0]?.url ?? "no-image.png";
+  list.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "product-card";
 
-    container.innerHTML += `
-      <div class="product-card">
-        <img src="${img}" class="product-img" />
-        <h3>${p.name}</h3>
-        <p>單位：${p.unit}</p>
-        <p>規格：${p.spec}</p>
-        <p class="price">$${p.price}</p>
-        <p class="update-time">最後更新：${p.last_price_updated ?? "—"}</p>
-      </div>
+    div.innerHTML = `
+      <h3>${item.name}</h3>
+      <p>規格：${item.spec}</p>
+      <p>單位：${item.unit}</p>
+      <p class="price">最新價格：${item.last_price ?? "未設定"}</p>
     `;
+
+    container.appendChild(div);
   });
 }
 
-// 初始化
+document.getElementById("searchInput").addEventListener("input", async (e) => {
+  const keyword = e.target.value.trim();
+
+  const { data } = await supabase
+    .from("products")
+    .select("*")
+    .ilike("name", `%${keyword}%`);
+
+  renderProducts(data);
+});
+
 loadProducts();
