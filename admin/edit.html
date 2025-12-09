@@ -155,28 +155,31 @@ document.addEventListener("DOMContentLoaded", () => {
     if (file) previewEl.src = URL.createObjectURL(file);
   });
 
-  // ⭐ 修正版圖片上傳（使用 product-images bucket）
-  async function uploadImage(file) {
-    if (!file) return null;
+  // ⭐ 修正版：上傳圖片到 product-images bucket
+async function uploadImage(file) {
+  if (!file) return null;
 
-    const ext = file.name.split(".").pop();
-    const fileName = `product_${productId}_${Date.now()}.${ext}`;
+  const ext = file.name.split(".").pop();
+  const fileName = `product_${productId}_${Date.now()}.${ext}`;
 
-    const { error: uploadErr } = await supabase.storage
-      .from("product-images")
-      .upload(fileName, file, { upsert: true });
+  // ❶ 上傳圖片
+  const { error: uploadErr } = await db.storage
+    .from("product-images")
+    .upload(fileName, file, { upsert: true });
 
-    if (uploadErr) {
-      alert("圖片上傳失敗：" + uploadErr.message);
-      return null;
-    }
-
-    const { data } = supabase.storage
-      .from("product-images")
-      .getPublicUrl(fileName);
-
-    return data.publicUrl;
+  if (uploadErr) {
+    alert("圖片上傳失敗：" + uploadErr.message);
+    return null;
   }
+
+  // ❷ 取得公開網址
+  const { data } = db.storage
+    .from("product-images")
+    .getPublicUrl(fileName);
+
+  return data.publicUrl;
+}
+
 
   // ⭐ 儲存更新
   document.getElementById("editForm").addEventListener("submit", async (e) => {
