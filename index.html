@@ -2,57 +2,123 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>康醫採購查詢系統（前台查詢）</title>
+  <title>康醫採購管理系統｜後台</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- CSS -->
-  <link rel="stylesheet" href="./css/style.css" />
+  <link rel="stylesheet" href="./css/admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    .btn-edit {
+      background: #2780e3;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-edit:hover { background: #1b5fa7; }
+  </style>
 </head>
 
 <body>
-  <!-- 頂部 Banner / 標題區 -->
-  <header class="app-header">
-    <div class="app-header-inner">
-      <div class="app-title-block">
-        <h1 class="app-title">康醫採購查詢系統</h1>
-        <p class="app-subtitle">前台查詢</p>
-      </div>
+  <header>
+    <div class="title">康醫採購管理系統｜後台</div>
+    <div>
+      <span id="adminEmail"></span>
+      <button onclick="logout()" class="logout-btn">登出</button>
     </div>
   </header>
 
-  <!-- 主內容 -->
-  <main class="app-main">
-    <!-- 搜尋區 -->
-    <section class="search-section">
-      <label for="searchInput" class="search-label">搜尋商品名稱、規格或分類</label>
-      <div class="search-input-wrapper">
-        <input
-          id="searchInput"
-          type="text"
-          placeholder="例如：口罩、手套、點滴架…"
-        />
-        <button id="clearSearchBtn" type="button" class="btn-secondary">
-          清除
-        </button>
-      </div>
-    </section>
+  <main>
+    <div class="actions">
+      <button class="btn" onclick="location.href='add.html'">新增商品</button>
+      <button class="btn" onclick="location.href='upload.html'">CSV 批次匯入</button>
+    </div>
 
-    <!-- 狀態訊息 -->
-    <section id="statusMessage" class="status-message" hidden></section>
+    <h2>商品列表</h2>
 
-    <!-- 商品卡片列表 -->
-    <section id="productList" class="product-list">
-      <!-- JS 產生卡片 -->
-    </section>
+    <table class="product-table">
+      <thead>
+        <tr>
+          <th>名稱</th>
+          <th>類別</th>
+          <th>單位</th>
+          <th>售價</th>
+          <th>價格更新時間</th>
+          <th>狀態</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="productBody">
+        <tr><td colspan="7" style="text-align:center;">載入中…</td></tr>
+      </tbody>
+    </table>
   </main>
 
-  <!-- Supabase 官方套件 -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const supabaseUrl = "https://fjqsrhnwssazcqvjdqqt.supabase.co";
+  const supabaseKey = "YOUR-ANON-KEY";
+  const supa = supabase.createClient(supabaseUrl, supabaseKey);
 
-  <!-- 你的 Supabase 客戶端設定 -->
-  <script src="./js/supabase.js" defer></script>
+  // 顯示管理者 email
+  supa.auth.getUser().then(({ data }) => {
+    if (data?.user) {
+      document.getElementById("adminEmail").innerText = data.user.email;
+      loadProducts();
+    } else {
+      window.location.href = "login.html";
+    }
+  });
 
-  <!-- 商品 API + 搜尋邏輯 -->
-  <script src="./js/product-list.js" defer></script>
+  // 登出
+  async function logout() {
+    await supa.auth.signOut();
+    window.location.href = "login.html";
+  }
+
+  // 載入商品列表
+  async function loadProducts() {
+    const tbody = document.getElementById("productBody");
+    tbody.innerHTML = "<tr><td colspan='7'>載入中…</td></tr>";
+
+    const { data, error } = await supa.from("products")
+      .select("id, name, category, unit, last_price, last_price_updated_at, is_active")
+      .order("id", { ascending: true });
+
+    if (error) {
+      alert("讀取商品失敗：" + error.message);
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      tbody.innerHTML = "<tr><td colspan='7'>尚無資料</td></tr>";
+      return;
+    }
+
+    tbody.innerHTML = "";
+
+    data.forEach(p => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${p.name}</td>
+        <td>${p.category ?? ""}</td>
+        <td>${p.unit ?? ""}</td>
+        <td>NT$ ${p.last_price ?? "-"}</td>
+        <td>${p.last_price_updated_at ?? "-"}</td>
+        <td>${p.is_active ? "啟用" : "停用"}</td>
+        <td>
+          <button class="btn-edit" onclick="edit(${p.id})">編輯</button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function edit(id) {
+    location.href = "edit.html?id=" + id;
+  }
+</script>
+
 </body>
 </html>
