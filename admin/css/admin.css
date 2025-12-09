@@ -1,60 +1,36 @@
-/* 基礎 */
 body {
-  font-family: "Noto Sans TC", sans-serif;
+  font-family: "Microsoft JhengHei", sans-serif;
   margin: 0;
   padding: 20px;
-  background: #f4f7fa;
-  color: #333;
+  background: #f5f7fa;
 }
 
-h1, h2 {
-  color: #005bab;
-  font-weight: 700;
+h1 {
+  font-size: 26px;
+  margin-bottom: 20px;
 }
 
-/* Header */
-.admin-header {
-  background: #0077cc;
-  color: white;
-  padding: 16px;
-  margin-bottom: 24px;
-}
-
-.admin-header-inner {
-  max-width: 1200px;
-  margin: auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* 主區域 */
-.admin-main {
-  max-width: 780px;
-  margin: auto;
+.edit-form {
   background: white;
-  padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  padding: 20px;
+  max-width: 500px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
-/* 表單區塊 */
 .form-group {
-  margin-bottom: 18px;
+  margin-bottom: 15px;
 }
 
-.form-group label {
+label {
   display: block;
-  font-weight: 600;
   margin-bottom: 6px;
+  font-weight: bold;
 }
 
-.form-group input,
-.form-group textarea,
-.form-group select {
+input, textarea, select {
   width: 100%;
-  padding: 10px;
-  font-size: 16px;
+  padding: 8px;
   border: 1px solid #ccc;
   border-radius: 6px;
 }
@@ -63,49 +39,32 @@ textarea {
   min-height: 80px;
 }
 
-/* 圖片預覽 */
 .preview-image {
+  width: 150px;
   margin-top: 10px;
-  width: 160px;
-  height: 160px;
-  border-radius: 8px;
-  object-fit: cover;
+  border-radius: 6px;
   border: 1px solid #ddd;
 }
 
-/* 按鈕 */
-.btn-primary {
-  padding: 10px 20px;
-  background: #0077cc;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 16px;
+.form-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
 }
 
-.btn-primary:hover {
-  background: #005fa3;
+button {
+  padding: 10px 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: #007bff;
+  color: white;
 }
 
 .btn-danger {
-  padding: 10px 20px;
-  background: #cc2e2e;
+  background: #d9534f;
   color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 16px;
-  margin-left: 10px;
-}
-
-.btn-danger:hover {
-  background: #a82828;
-}
-
-/* 按鈕區 */
-.form-actions {
-  margin-top: 30px;
-  display: flex;
-  gap: 12px;
 }
