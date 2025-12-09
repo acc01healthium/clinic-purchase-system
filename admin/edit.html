@@ -1,1 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>編輯商品｜康醫採購管理系統</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="css/admin.css" />
+
+  <style>
+    .form-box {
+      max-width: 500px;
+      margin: 40px auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+    }
+    .form-box h2 {
+      margin-top: 0;
+      color: #0a73bb;
+      text-align: center;
+    }
+    label { font-weight: 600; margin-top: 12px; display:block; }
+    input, textarea, select {
+      width: 100%; padding: 10px; margin-top: 6px;
+      border-radius: 8px; border: 1px solid #ccc;
+    }
+    button {
+      width: 100%; background: #0a73bb; color: #fff;
+      padding: 12px; border: none; border-radius: 8px;
+      margin-top: 20px; cursor: pointer; font-size: 16px;
+    }
+    button:hover { background: #065a94; }
+  </style>
+</head>
+
+<body>
+  <div class="form-box">
+    <h2>編輯商品</h2>
+
+    <label>商品名稱</label>
+    <input id="name">
+
+    <label>分類</label>
+    <input id="category">
+
+    <label>規格</label>
+    <input id="spec">
+
+    <label>單位</label>
+    <input id="unit">
+
+    <label>描述</label>
+    <textarea id="description" rows="2"></textarea>
+
+    <label>售價</label>
+    <input id="price" type="number">
+
+    <label>是否啟用</label>
+    <select id="is_active">
+      <option value="true">啟用</option>
+      <option value="false">停用</option>
+    </select>
+
+    <label>圖片網址（image_url）</label>
+    <input id="image_url">
+
+    <button onclick="saveProduct()">儲存</button>
+    <button onclick="goBack()" style="background:#aaa;margin-top:10px;">返回</button>
+
+    <p id="msg" style="color:red;text-align:center;margin-top:15px;"></p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/edit.js"></script>
+</body>
+</html>
 
