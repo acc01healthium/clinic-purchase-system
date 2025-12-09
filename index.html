@@ -1,130 +1,260 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
-  <title>康醫採購管理系統｜後台</title>
+  <meta charset="UTF-8">
+  <title>康醫採購管理系統｜後台商品列表</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="stylesheet" href="./css/admin.css">
+  <link rel="stylesheet" href="css/admin.css">
+
+  <!-- Supabase CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    .btn-edit { background:#2780e3; color:white; padding:6px 12px; border-radius:6px; border:none; cursor:pointer; }
-    .btn-edit:hover { background:#1b5fa7; }
-    .btn-delete { background:#d9534f; color:white; padding:6px 12px; border-radius:6px; border:none; cursor:pointer; }
-    .btn-delete:hover { background:#b52b27; }
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #f4f7fa;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #0d6efd;
+      color: #fff;
+      padding: 14px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 18px;
+    }
+
+    .btn-logout {
+      padding: 6px 12px;
+      background: #fff;
+      color: #0d6efd;
+      border-radius: 6px;
+      cursor: pointer;
+      border: none;
+      font-weight: bold;
+    }
+
+    .container {
+      padding: 24px;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+    }
+
+    .actions {
+      margin-bottom: 18px;
+    }
+
+    .actions button {
+      padding: 8px 16px;
+      margin-right: 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 15px;
+      color: #fff;
+    }
+
+    .btn-add { background: #198754; }
+    .btn-csv { background: #0d6efd; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #e5e5e5;
+      text-align: center;
+    }
+
+    th {
+      background: #f0f4f8;
+    }
+
+    .btn-edit {
+      background: #ffc107;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #000;
+    }
+
+    .btn-delete {
+      background: #dc3545;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      color: #fff;
+    }
+
+    .status-enable { color: #198754; font-weight: bold; }
+    .status-disable { color: #dc3545; font-weight: bold; }
+
+    #loading {
+      margin-top: 10px;
+      text-align: center;
+      color: #0d6efd;
+      font-size: 15px;
+    }
   </style>
 </head>
 
 <body>
-  <header>
-    <div class="title">康醫採購管理系統｜後台</div>
-    <div>
-      <span id="adminEmail"></span>
-      <button onclick="logout()" class="logout-btn">登出</button>
-    </div>
-  </header>
 
-  <main>
-    <div class="actions">
-      <button onclick="location.href='add.html'" class="btn">新增商品</button>
-      <button onclick="location.href='upload.html'" class="btn">CSV 批次匯入</button>
-    </div>
+<header>
+  <div>康醫採購管理系統 | 後台</div>
+  <button class="btn-logout" onclick="logout()">登出</button>
+</header>
 
-    <h2>商品列表</h2>
+<div class="container">
+  <h2>商品列表</h2>
 
-    <table class="product-table">
-      <thead>
-        <tr>
-          <th>名稱</th>
-          <th>類別</th>
-          <th>單位</th>
-          <th>售價</th>
-          <th>更新時間</th>
-          <th>狀態</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody id="productBody">
-        <tr><td colspan="7" style="text-align:center;">載入中…</td></tr>
-      </tbody>
-    </table>
-  </main>
+  <div class="actions">
+    <button class="btn-add" onclick="location.href='add.html'">新增商品</button>
+    <button class="btn-csv" onclick="location.href='upload.html'">CSV 批次匯入</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>名稱</th>
+        <th>類別</th>
+        <th>單位</th>
+        <th>規格</th>
+        <th>售價</th>
+        <th>價格更新時間</th>
+        <th>狀態</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody id="productTableBody">
+      <tr><td colspan="8">讀取中...</td></tr>
+    </tbody>
+  </table>
+
+  <div id="loading"></div>
+
+</div>
 
 <script>
-  const supabaseUrl = "https://fjqsrhnwssazcqvjdqqt.supabase.co";
-  const supabaseKey = "YOUR_ANON_KEY";
+  // -----------------------------
+  // Supabase 初始化
+  // -----------------------------
+  const supabaseUrl = "https://utwhtjtgwrveljgwlwzm.supabase.co";
+  const supabaseKey = "YOUR_ANON_KEY"; // <-- 記得貼你的 anon key
   const supa = supabase.createClient(supabaseUrl, supabaseKey);
 
-  supa.auth.getUser().then(({ data }) => {
-    if (data?.user) {
-      document.getElementById("adminEmail").innerText = data.user.email;
-      loadProducts();
-    } else {
-      window.location.href = "login.html";
-    }
-  });
-
+  // -----------------------------
+  // 登出
+  // -----------------------------
   async function logout() {
     await supa.auth.signOut();
     location.href = "login.html";
   }
 
+  // -----------------------------
+  // 讀取商品資料
+  // -----------------------------
   async function loadProducts() {
-    const body = document.getElementById("productBody");
-    body.innerHTML = "<tr><td colspan='7'>載入中…</td></tr>";
+    const tbody = document.getElementById("productTableBody");
+    tbody.innerHTML = `<tr><td colspan="8">讀取中...</td></tr>`;
 
     const { data, error } = await supa
       .from("products")
-      .select("*")
-      .order("id");
+      .select(`
+        id,
+        name,
+        category,
+        unit,
+        spec,
+        last_price,
+        last_price_updated_at,
+        is_active
+      `)
+      .order("id", { ascending: true });
 
     if (error) {
-      alert("載入失敗：" + error.message);
+      tbody.innerHTML = `<tr><td colspan="8">讀取錯誤：${error.message}</td></tr>`;
       return;
     }
 
     if (!data || data.length === 0) {
-      body.innerHTML = "<tr><td colspan='7'>尚無資料</td></tr>";
+      tbody.innerHTML = `<tr><td colspan="8">尚無資料</td></tr>`;
       return;
     }
 
-    body.innerHTML = "";
+    tbody.innerHTML = "";
+
     data.forEach(p => {
       const tr = document.createElement("tr");
+
       tr.innerHTML = `
-        <td>${p.name}</td>
+        <td>${p.name ?? ""}</td>
         <td>${p.category ?? ""}</td>
         <td>${p.unit ?? ""}</td>
+        <td>${p.spec ?? ""}</td>
         <td>NT$ ${p.last_price ?? "-"}</td>
-        <td>${p.last_price_updated_at ?? "-"}</td>
-        <td>${p.is_active ? "啟用" : "停用"}</td>
+        <td>${formatDate(p.last_price_updated_at)}</td>
         <td>
-          <button class="btn-edit" onclick="edit(${p.id})">編輯</button>
-          <button class="btn-delete" onclick="remove(${p.id}, '${p.name}')">刪除</button>
+          <span class="${p.is_active ? "status-enable" : "status-disable"}">
+            ${p.is_active ? "啟用" : "停用"}
+          </span>
+        </td>
+        <td>
+          <button class="btn-edit" onclick="editProduct(${p.id})">編輯</button>
+          <button class="btn-delete" onclick="deleteProduct(${p.id}, '${p.name}')">刪除</button>
         </td>
       `;
-      body.appendChild(tr);
+
+      tbody.appendChild(tr);
     });
   }
 
-  function edit(id) {
+  function formatDate(t) {
+    if (!t) return "-";
+    return new Date(t).toLocaleString("zh-TW");
+  }
+
+  // -----------------------------
+  // 前往編輯頁
+  // -----------------------------
+  function editProduct(id) {
     location.href = `edit.html?id=${id}`;
   }
 
-  async function remove(id, name) {
+  // -----------------------------
+  // 刪除商品
+  // -----------------------------
+  async function deleteProduct(id, name) {
     if (!confirm(`確定要刪除「${name}」嗎？`)) return;
 
-    const { error } = await supa.from("products").delete().eq("id", id);
+    const { error } = await supa
+      .from("products")
+      .delete()
+      .eq("id", id);
 
     if (error) {
       alert("刪除失敗：" + error.message);
       return;
     }
 
-    alert("刪除成功！");
+    alert("已刪除！");
     loadProducts();
   }
+
+  // 頁面載入後讀取資料
+  loadProducts();
 </script>
 
 </body>
