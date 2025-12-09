@@ -123,6 +123,12 @@ async function loadProduct() {
 }
 
 loadProduct();
+  
+  imgFileEl.addEventListener("change", () => {
+  const file = imgFileEl.files[0];
+  if (file) previewEl.src = URL.createObjectURL(file);
+});
+
 
 // 🔥 修正版：上傳圖片到 product-images bucket
 async function uploadImage(file) {
@@ -151,34 +157,39 @@ async function uploadImage(file) {
 document.getElementById("editForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  let finalImage = imgUrlEl.value;
+  let finalImageUrl = imgUrlEl.value;
 
   if (imgFileEl.files.length > 0) {
-    const uploaded = await uploadImage(imgFileEl.files[0]);
-    if (uploaded) finalImage = uploaded;
+    const uploadedUrl = await uploadImage(imgFileEl.files[0]);
+    if (uploadedUrl) finalImageUrl = uploadedUrl;
   }
 
-  const { error } = await db
+  const updates = {
+    name: nameEl.value.trim(),
+    category: categoryEl.value.trim(),
+    spec: specEl.value.trim(),
+    unit: unitEl.value.trim(),
+    description: descEl.value.trim(),
+    last_price: Number(priceEl.value),
+    is_active: activeEl.value === "true",
+    image_url: finalImageUrl,
+    last_price_updated_at: new Date().toISOString(),
+  };
+
+  const { error } = await supabase
     .from("products")
-    .update({
-      name: nameEl.value.trim(),
-      category: categoryEl.value.trim(),
-      spec: specEl.value.trim(),
-      unit: unitEl.value.trim(),
-      description: descEl.value.trim(),
-      last_price: Number(priceEl.value),
-      is_active: activeEl.value === "true",
-      image_url: finalImage,
-      last_price_updated_at: new Date().toISOString()
-    })
+    .update(updates)
     .eq("id", productId);
 
-  if (error) alert("更新失敗：" + error.message);
-  else {
-    alert("更新成功！");
-    location.href = "index.html";
+  if (error) {
+    alert("更新失敗：" + error.message);
+    return;
   }
+
+  alert("商品更新成功！");
+  location.href = "index.html";
 });
+
 
 // ⭐ 刪除商品
 document.getElementById("deleteBtn").addEventListener("click", async () => {
