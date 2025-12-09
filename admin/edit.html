@@ -1,27 +1,218 @@
-const db = window.supabaseClient;
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>編輯商品｜康醫採購管理系統</title>
 
-async function loadProduct() {
-  const { data, error } = await db
-    .from("products")
-    .select("*")
-    .eq("id", productId)
-    .single();
+  <!-- CSS -->
+  <link rel="stylesheet" href="../css/admin.css?v=3" />
 
-  if (error) {
-    alert("讀取商品失敗：" + error.message);
-    return;
-  }
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase.js?v=3" defer></script>
 
-  name.value = data.name || "";
-  category.value = data.category || "";
-  spec.value = data.spec || "";
-  unit.value = data.unit || "";
-  description.value = data.description || "";
-  last_price.value = data.last_price || "";
-  is_active.value = data.is_active ? "true" : "false";
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .edit-form { max-width: 600px; margin: 0 auto; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; margin-bottom: 6px; font-weight: bold; }
+    input, textarea, select {
+      width: 100%; padding: 8px; font-size: 15px;
+      border: 1px solid #ccc; border-radius: 6px;
+    }
+    .preview-image {
+      width: 150px; height: 150px; object-fit: cover;
+      border-radius: 8px; margin-top: 8px; border: 1px solid #ddd;
+    }
+    .form-actions {
+      display: flex; gap: 12px; margin-top: 20px;
+    }
+    .btn-primary {
+      background: #007bff; color: #fff; padding: 10px 18px;
+      border: none; border-radius: 6px; cursor: pointer;
+    }
+    .btn-danger {
+      background: #d9534f; color: #fff; padding: 10px 18px;
+      border: none; border-radius: 6px; cursor: pointer;
+    }
+  </style>
+</head>
 
-  if (data.image_url) {
-    image_url.value = data.image_url;
-    previewImage.src = data.image_url;
-  }
-}
+<body>
+
+  <h1>編輯商品</h1>
+  <button onclick="window.location.href='index.html'" style="margin-bottom:20px;">返回列表</button>
+
+  <form id="editForm" class="edit-form">
+
+    <!-- 商品圖片 -->
+    <div class="form-group">
+      <label>商品圖片</label>
+      <input type="file" id="imageFile" accept="image/*" />
+      <img id="previewImage" class="preview-image" src="">
+    </div>
+
+    <div class="form-group">
+      <label>商品名稱</label>
+      <input type="text" id="name" required />
+    </div>
+
+    <div class="form-group">
+      <label>分類</label>
+      <input type="text" id="category" />
+    </div>
+
+    <div class="form-group">
+      <label>規格</label>
+      <input type="text" id="spec" />
+    </div>
+
+    <div class="form-group">
+      <label>單位</label>
+      <input type="text" id="unit" />
+    </div>
+
+    <div class="form-group">
+      <label>描述</label>
+      <textarea id="description"></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>售價（last_price）</label>
+      <input type="number" id="last_price" />
+    </div>
+
+    <div class="form-group">
+      <label>是否啟用</label>
+      <select id="is_active">
+        <option value="true">啟用</option>
+        <option value="false">停用</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>圖片網址（image_url）</label>
+      <input type="text" id="image_url" readonly />
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-primary">儲存修改</button>
+      <button type="button" id="deleteBtn" class="btn-danger">刪除商品</button>
+    </div>
+  </form>
+
+  <script>
+    const db = window.supabaseClient;  // ⭐ 正確連線方式
+
+    // URL 取得商品 ID
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get("id");
+
+    if (!productId) {
+      alert("缺少商品 ID");
+      window.location.href = "index.html";
+    }
+
+    // 預覽圖片
+    imageFile.addEventListener("change", () => {
+      const file = imageFile.files[0];
+      if (file) previewImage.src = URL.createObjectURL(file);
+    });
+
+    // ⭐ 載入商品資料
+    async function loadProduct() {
+      const { data, error } = await db
+        .from("products")
+        .select("*")
+        .eq("id", productId)
+        .single();
+
+      if (error) {
+        alert("讀取商品失敗：" + error.message);
+        return;
+      }
+
+      // 填入表單
+      name.value = data.name ?? "";
+      category.value = data.category ?? "";
+      spec.value = data.spec ?? "";
+      unit.value = data.unit ?? "";
+      description.value = data.description ?? "";
+      last_price.value = data.last_price ?? "";
+      is_active.value = data.is_active ? "true" : "false";
+      image_url.value = data.image_url ?? "";
+
+      if (data.image_url) previewImage.src = data.image_url;
+    }
+
+    loadProduct(); // ⭐ 執行
+
+    // ⭐ 圖片上傳
+    async function uploadImage(file) {
+      if (!file) return image_url.value;
+
+      const ext = file.name.split(".").pop();
+      const fileName = `product_${productId}_${Date.now()}.${ext}`;
+
+      const { error } = await db.storage
+        .from("products")
+        .upload(fileName, file, { upsert: true });
+
+      if (error) {
+        alert("圖片上傳失敗：" + error.message);
+        return image_url.value;
+      }
+
+      const { data } = db.storage.from("products").getPublicUrl(fileName);
+      return data.publicUrl;
+    }
+
+    // ⭐ 儲存修改
+    editForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      let newImageUrl = image_url.value;
+
+      if (imageFile.files.length > 0) {
+        newImageUrl = await uploadImage(imageFile.files[0]);
+      }
+
+      const { error } = await db
+        .from("products")
+        .update({
+          name: name.value,
+          category: category.value,
+          spec: spec.value,
+          unit: unit.value,
+          description: description.value,
+          last_price: Number(last_price.value),
+          is_active: is_active.value === "true",
+          image_url: newImageUrl,
+          last_price_updated_at: new Date().toISOString()
+        })
+        .eq("id", productId);
+
+      if (error) {
+        alert("更新失敗：" + error.message);
+      } else {
+        alert("更新成功！");
+        window.location.href = "index.html";
+      }
+    });
+
+    // ⭐ 刪除商品
+    deleteBtn.addEventListener("click", async () => {
+      if (!confirm("確定要刪除商品？")) return;
+
+      const { error } = await db.from("products").delete().eq("id", productId);
+
+      if (error) alert("刪除失敗：" + error.message);
+      else {
+        alert("刪除成功！");
+        window.location.href = "index.html";
+      }
+    });
+  </script>
+</body>
+</html>
