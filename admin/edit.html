@@ -1,221 +1,57 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>編輯商品｜康醫採購管理系統</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <link rel="stylesheet" href="../css/admin.css">
+  <link rel="stylesheet" href="css/admin.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../js/supabaseClient.js"></script>
-
-  <style>
-    .form-container {
-      width: 90%;
-      max-width: 900px;
-      margin: 30px auto;
-      background: #fff;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    }
-
-    .form-group { margin-bottom: 18px; }
-    label { font-weight:bold; margin-bottom:6px; display:block; }
-
-    input, textarea, select {
-      width:100%; padding:10px; font-size:15px;
-      border-radius:6px; border:1px solid #ccc;
-    }
-    textarea { min-height:90px; }
-
-    #previewImage {
-      max-width:160px; border-radius:6px;
-      border:1px solid #ddd; padding:5px; margin-bottom:10px;
-    }
-
-    button {
-      background:#1f6fb2; color:#fff; border:none;
-      padding:12px 20px; border-radius:8px;
-      cursor:pointer; font-size:15px;
-    }
-    button:hover { background:#155a8d; }
-  </style>
 </head>
 
 <body>
+  <div class="container">
+    <h1>編輯商品</h1>
 
-<div class="form-container">
-  <h2 style="text-align:center;color:#1f6fb2;">編輯商品</h2>
-
-  <div class="form-group">
     <label>商品圖片</label>
-    <img id="previewImage" src="">
-    <input type="file" id="imageUpload" accept="image/*">
-    <input type="hidden" id="image_url">
-  </div>
+    <input type="file" id="imageFile" accept="image/*" />
 
-  <div class="form-group">
+    <img id="previewImg" style="width:160px;margin-top:10px;display:none;" />
+
     <label>商品名稱</label>
-    <input id="name">
-  </div>
+    <input id="name" type="text" />
 
-  <div class="form-group">
     <label>分類</label>
-    <input id="category">
-  </div>
+    <input id="category" type="text" />
 
-  <div class="form-group">
     <label>規格</label>
-    <input id="spec">
-  </div>
+    <input id="spec" type="text" />
 
-  <div class="form-group">
     <label>單位</label>
-    <input id="unit">
-  </div>
+    <input id="unit" type="text" />
 
-  <div class="form-group">
     <label>描述</label>
     <textarea id="description"></textarea>
-  </div>
 
-  <div class="form-group">
     <label>售價</label>
-    <input id="last_price" type="number">
-  </div>
+    <input id="last_price" type="number" />
 
-  <div class="form-group">
     <label>是否啟用</label>
     <select id="is_active">
       <option value="true">啟用</option>
       <option value="false">停用</option>
     </select>
+
+    <label>圖片網址（image_url）</label>
+    <input id="image_url" type="text" readonly />
+
+    <br /><br />
+
+    <button id="saveBtn">儲存修改</button>
+    <button id="deleteBtn" style="background:#b23b3b;color:white;">刪除商品</button>
   </div>
 
-  <div style="text-align:center;margin-top:25px;">
-    <button id="saveBtn">儲存變更</button>
-    <button id="deleteBtn" style="background:#c0392b;margin-left:10px;">刪除商品</button>
-  </div>
-</div>
-
-<script>
-const supabase = window.supabaseClient;
-
-const urlParams = new URLSearchParams(window.location.search);
-const productId = urlParams.get("id");
-
-if (!productId) {
-  alert("找不到商品 ID");
-  window.location.href = "./index.html";
-}
-
-// ========= 圖片上傳 =========
-async function uploadImage(file) {
-  if (!file) return null;
-
-  const ext = file.name.split(".").pop();
-  const fileName = `${productId}-${Date.now()}.${ext}`;
-
-  const { error: uploadError } = await supabase.storage
-    .from("products")
-    .upload(fileName, file, { upsert: true });
-
-  if (uploadError) {
-    alert("圖片上傳失敗：" + uploadError.message);
-    return null;
-  }
-
-  const publicUrl = supabase.storage
-    .from("products")
-    .getPublicUrl(fileName).data.publicUrl;
-
-  return publicUrl;
-}
-
-document.getElementById("imageUpload").addEventListener("change", async (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const url = await uploadImage(file);
-  if (url) {
-    document.getElementById("image_url").value = url;
-    document.getElementById("previewImage").src = url;
-  }
-});
-
-// ========= 載入商品資料 =========
-async function loadProduct() {
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .eq("id", productId)
-    .single();
-
-  if (error) {
-    alert("讀取商品失敗：" + error.message);
-    return;
-  }
-
-  document.getElementById("name").value = data.name ?? "";
-  document.getElementById("category").value = data.category ?? "";
-  document.getElementById("spec").value = data.spec ?? "";
-  document.getElementById("unit").value = data.unit ?? "";
-  document.getElementById("description").value = data.description ?? "";
-  document.getElementById("last_price").value = data.last_price ?? "";
-  document.getElementById("is_active").value = data.is_active ? "true" : "false";
-  document.getElementById("image_url").value = data.image_url ?? "";
-  document.getElementById("previewImage").src = data.image_url ?? "";
-}
-
-loadProduct();
-
-// ========= 儲存更新 =========
-document.getElementById("saveBtn").addEventListener("click", async () => {
-  const payload = {
-    name: document.getElementById("name").value,
-    category: document.getElementById("category").value,
-    spec: document.getElementById("spec").value,
-    unit: document.getElementById("unit").value,
-    description: document.getElementById("description").value,
-    last_price: Number(document.getElementById("last_price").value),
-    is_active: document.getElementById("is_active").value === "true",
-    image_url: document.getElementById("image_url").value,
-    last_price_updated_at: new Date().toISOString()
-  };
-
-  const { error } = await supabase
-    .from("products")
-    .update(payload)
-    .eq("id", productId);
-
-  if (error) {
-    alert("更新失敗：" + error.message);
-    return;
-  }
-
-  alert("更新成功！");
-  window.location.href = "./index.html";
-});
-
-// ========= 刪除商品 =========
-document.getElementById("deleteBtn").addEventListener("click", async () => {
-  if (!confirm("確定要刪除該商品嗎？")) return;
-
-  const { error } = await supabase
-    .from("products")
-    .delete()
-    .eq("id", productId);
-
-  if (error) {
-    alert("刪除失敗：" + error.message);
-    return;
-  }
-
-  alert("商品已刪除");
-  window.location.href = "./index.html";
-});
-</script>
+  <script src="../supabase.js"></script>
+  <script src="js/edit.js"></script>
 
 </body>
 </html>
