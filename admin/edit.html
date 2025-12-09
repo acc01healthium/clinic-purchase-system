@@ -1,78 +1,170 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
-  <title>編輯商品｜康醫採購管理系統</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="css/admin.css" />
+  <title>編輯商品 | 康醫採購管理系統</title>
+  <link rel="stylesheet" href="../css/admin.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    window.SUPABASE_URL = "https://utwhtjtgwryeljgwlwzm.supabase.co";
+    window.SUPABASE_ANON_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0d2h0anRnd3J5ZWxqZ3dsd3ptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxNTkxNDQsImV4cCI6MjA4MDczNTE0NH0.SexZh_JV9IUT5cL7o6KO-bh6D50aFkZUrhZVf4_fNbs";
+
+    window.supabaseClient = supabase.createClient(
+      window.SUPABASE_URL,
+      window.SUPABASE_ANON_KEY
+    );
+  </script>
 
   <style>
-    .form-box {
-      max-width: 500px;
-      margin: 40px auto;
-      background: #fff;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.07);
-    }
-    .form-box h2 {
-      margin-top: 0;
-      color: #0a73bb;
-      text-align: center;
-    }
-    label { font-weight: 600; margin-top: 12px; display:block; }
+    body { padding: 40px; }
+    .form-group { margin-bottom: 20px; }
+    label { font-weight: bold; display: block; margin-bottom: 6px; }
     input, textarea, select {
-      width: 100%; padding: 10px; margin-top: 6px;
-      border-radius: 8px; border: 1px solid #ccc;
+      width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #ccc;
     }
     button {
-      width: 100%; background: #0a73bb; color: #fff;
-      padding: 12px; border: none; border-radius: 8px;
-      margin-top: 20px; cursor: pointer; font-size: 16px;
+      padding: 10px 20px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
     }
-    button:hover { background: #065a94; }
+    .btn-primary { background: #0d6efd; color: white; }
+    .btn-danger { background: #c0392b; color: white; margin-left: 10px; }
   </style>
 </head>
 
 <body>
-  <div class="form-box">
-    <h2>編輯商品</h2>
+  <h2>編輯商品</h2>
 
-    <label>商品名稱</label>
-    <input id="name">
+  <div id="formContainer" style="display:none;">
+    <div class="form-group">
+      <label>商品名稱</label>
+      <input id="name" />
+    </div>
 
-    <label>分類</label>
-    <input id="category">
+    <div class="form-group">
+      <label>分類</label>
+      <input id="category" />
+    </div>
 
-    <label>規格</label>
-    <input id="spec">
+    <div class="form-group">
+      <label>規格</label>
+      <input id="spec" />
+    </div>
 
-    <label>單位</label>
-    <input id="unit">
+    <div class="form-group">
+      <label>單位</label>
+      <input id="unit" />
+    </div>
 
-    <label>描述</label>
-    <textarea id="description" rows="2"></textarea>
+    <div class="form-group">
+      <label>描述</label>
+      <textarea id="description"></textarea>
+    </div>
 
-    <label>售價</label>
-    <input id="price" type="number">
+    <div class="form-group">
+      <label>售價</label>
+      <input type="number" id="last_price" />
+    </div>
 
-    <label>是否啟用</label>
-    <select id="is_active">
-      <option value="true">啟用</option>
-      <option value="false">停用</option>
-    </select>
+    <div class="form-group">
+      <label>是否啟用</label>
+      <select id="is_active">
+        <option value="true">啟用</option>
+        <option value="false">停用</option>
+      </select>
+    </div>
 
-    <label>圖片網址（image_url）</label>
-    <input id="image_url">
+    <div class="form-group">
+      <label>圖片網址（image_url）</label>
+      <input id="image_url" />
+    </div>
 
-    <button onclick="saveProduct()">儲存</button>
-    <button onclick="goBack()" style="background:#aaa;margin-top:10px;">返回</button>
-
-    <p id="msg" style="color:red;text-align:center;margin-top:15px;"></p>
+    <button class="btn-primary" onclick="saveProduct()">儲存修改</button>
+    <button class="btn-danger" onclick="deleteProduct()">刪除商品</button>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/edit.js"></script>
+  <script>
+    const supabase = window.supabaseClient;
+
+    // 取得網址 ID
+    const urlParams = new URLSearchParams(window.location.search);
+    const productId = urlParams.get("id");
+
+    if (!productId) {
+      alert("找不到商品 ID");
+    } else {
+      loadProduct();
+    }
+
+    // 讀取商品資料
+    async function loadProduct() {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("id", productId)
+        .single();
+
+      if (error) {
+        alert("讀取錯誤：" + error.message);
+        return;
+      }
+
+      document.getElementById("formContainer").style.display = "block";
+
+      document.getElementById("name").value = data.name || "";
+      document.getElementById("category").value = data.category || "";
+      document.getElementById("spec").value = data.spec || "";
+      document.getElementById("unit").value = data.unit || "";
+      document.getElementById("description").value = data.description || "";
+      document.getElementById("last_price").value = data.last_price || "";
+      document.getElementById("image_url").value = data.image_url || "";
+      document.getElementById("is_active").value = data.is_active ? "true" : "false";
+    }
+
+    // 儲存修改
+    async function saveProduct() {
+      const updates = {
+        name: document.getElementById("name").value,
+        category: document.getElementById("category").value,
+        spec: document.getElementById("spec").value,
+        unit: document.getElementById("unit").value,
+        description: document.getElementById("description").value,
+        last_price: Number(document.getElementById("last_price").value),
+        image_url: document.getElementById("image_url").value,
+        is_active: document.getElementById("is_active").value === "true",
+      };
+
+      const { error } = await supabase
+        .from("products")
+        .update(updates)
+        .eq("id", productId);
+
+      if (error) {
+        alert("修改失敗：" + error.message);
+      } else {
+        alert("修改成功！");
+        window.location.href = "index.html";
+      }
+    }
+
+    // 刪除商品
+    async function deleteProduct() {
+      if (!confirm("確定要刪除這個商品？")) return;
+
+      const { error } = await supabase
+        .from("products")
+        .delete()
+        .eq("id", productId);
+
+      if (error) {
+        alert("刪除失敗：" + error.message);
+      } else {
+        alert("已刪除！");
+        window.location.href = "index.html";
+      }
+    }
+  </script>
 </body>
 </html>
-
