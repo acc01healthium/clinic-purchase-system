@@ -26,7 +26,7 @@ const previewEl = document.getElementById("previewImage");
 // 🔹 載入商品資料
 async function loadProduct() {
   const { data, error } = await supabase
-    .from("products")
+    .from("product-images")
     .select("*")
     .eq("id", productId)
     .single();
