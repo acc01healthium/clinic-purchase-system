@@ -1,0 +1,23 @@
+.login-container {
+  width: 380px;
+  margin: 80px auto;
+  padding: 40px 35px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.login-container input {
+  width: 100%;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  font-size: 15px;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  outline: none;
+}
+
+.login-container input:focus {
+  border-color: #1ca7ec;
+  box-shadow: 0 0 0 2px rgba(28, 167, 236, 0.25);
+}
