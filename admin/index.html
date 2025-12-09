@@ -3,55 +3,243 @@
 <head>
   <meta charset="UTF-8" />
   <title>康醫採購管理系統｜後台</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="css/admin.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
-    body { background:#f5f8fa; margin:0; font-family:"Segoe UI", sans-serif; }
-    header {
-      background:#0a73bb; color:white; padding:16px 24px;
-      display:flex; justify-content:space-between; align-items:center;
-      font-size:20px;
+    * {
+      box-sizing: border-box;
     }
-    header .right { font-size:14px; display:flex; align-items:center; gap:12px; }
 
-    .container { padding: 30px; max-width: 1000px; margin:auto; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
+        "Microsoft JhengHei", sans-serif;
+      background: #f3f7fb;
+      color: #222;
+    }
+
+    header {
+      background: linear-gradient(90deg, #0f9fd9, #0d71b8);
+      color: #fff;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    header .title {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    header .right-area {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+    }
+
+    header .email-label {
+      opacity: 0.9;
+    }
+
+    header button {
+      border: none;
+      padding: 6px 14px;
+      border-radius: 16px;
+      font-size: 13px;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+
+    header button:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }
+
+    main {
+      max-width: 1080px;
+      margin: 18px auto 40px;
+      padding: 0 16px;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .toolbar-left {
+      font-size: 18px;
+      font-weight: 600;
+      color: #174f82;
+    }
+
+    .toolbar-right {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      border-radius: 20px;
+      border: none;
+      padding: 7px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .btn-primary {
+      background: #0f8ad2;
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #0b6ca7;
+    }
+
+    .btn-outline {
+      background: #ffffff;
+      border: 1px solid #d1d9e6;
+      color: #0f8ad2;
+    }
+
+    .btn-outline:hover {
+      background: #eef5ff;
+    }
 
     table {
-      width:100%; border-collapse:collapse; margin-top:20px; background:white;
-      border-radius:10px; overflow:hidden;
+      width: 100%;
+      border-collapse: collapse;
+      background: #ffffff;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(15, 82, 124, 0.12);
     }
-    th, td { padding:14px; border-bottom:1px solid #eee; text-align:left; }
-    th { background:#eaf6ff; font-weight:600; }
 
-    button {
-      padding:6px 14px; border:none; border-radius:6px; cursor:pointer;
+    thead {
+      background: #f3f7fc;
     }
-    .btn-blue { background:#0a73bb; color:white; }
-    .btn-green { background:#28a745; color:white; }
-    .btn-gray { background:#6c757d; color:white; }
-    .btn-small { padding:4px 10px; }
 
-    #top-buttons { display:flex; gap:12px; margin-bottom:20px; }
+    th,
+    td {
+      padding: 10px 10px;
+      font-size: 13px;
+      text-align: left;
+      border-bottom: 1px solid #edf0f5;
+    }
+
+    th {
+      color: #496485;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: #f7fbff;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      min-width: 56px;
+    }
+
+    .status-on {
+      background: #e5f7ed;
+      color: #1c7a3c;
+    }
+
+    .status-off {
+      background: #f7e5e5;
+      color: #a53737;
+    }
+
+    .actions {
+      display: inline-flex;
+      gap: 6px;
+    }
+
+    .btn-sm {
+      border-radius: 16px;
+      padding: 3px 8px;
+      font-size: 12px;
+      border: 1px solid #d0d7e2;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .btn-sm:hover {
+      background: #f2f6ff;
+    }
+
+    .btn-sm.danger:hover {
+      background: #ffecec;
+      border-color: #f39c9c;
+      color: #c0392b;
+    }
+
+    .empty-row td {
+      text-align: center;
+      padding: 18px 10px;
+      color: #888;
+      font-size: 14px;
+    }
+
+    .message {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #c0392b;
+    }
   </style>
+
+  <!-- Supabase JS v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
   <header>
-    <div>康醫採購管理系統｜後台</div>
-    <div class="right">
-      <span id="adminEmail"></span>
-      <button class="btn-gray btn-small" onclick="logout()">登出</button>
+    <div class="title">康醫採購管理系統｜後台</div>
+    <div class="right-area">
+      <span id="adminEmail" class="email-label"></span>
+      <button id="logoutBtn">登出</button>
     </div>
   </header>
 
-  <div class="container">
-    <div id="top-buttons">
-      <button class="btn-blue" onclick="goNew()">新增商品</button>
-      <button class="btn-blue" onclick="goUpload()">CSV 批次匯入</button>
+  <main>
+    <div class="toolbar">
+      <div class="toolbar-left">商品列表</div>
+      <div class="toolbar-right">
+        <button
+          class="btn btn-primary"
+          type="button"
+          onclick="goToCreate()"
+        >
+          新增商品
+        </button>
+        <button
+          class="btn btn-outline"
+          type="button"
+          onclick="goToUpload()"
+        >
+          CSV 批次匯入
+        </button>
+      </div>
     </div>
-
-    <h2>商品列表</h2>
 
     <table>
       <thead>
@@ -59,17 +247,221 @@
           <th>名稱</th>
           <th>類別</th>
           <th>單位</th>
+          <th>規格</th>
           <th>售價</th>
           <th>價格更新時間</th>
           <th>狀態</th>
           <th>操作</th>
         </tr>
       </thead>
-      <tbody id="productTable"></tbody>
+      <tbody id="productTableBody">
+        <tr class="empty-row">
+          <td colspan="8">載入中…</td>
+        </tr>
+      </tbody>
     </table>
-  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/index.js"></script>
+    <div id="messageBox" class="message"></div>
+  </main>
+
+  <script>
+    // === Supabase 連線設定（B 專案） ===
+    const SUPABASE_URL = "https://utwhtjtgwryeljgwlwzm.supabase.co";
+    const SUPABASE_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0d2h0anRnd3J5ZWxqZ3dsd3ptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxNTkxNDQsImV4cCI6MjA4MDczNTE0NH0.SexZh_JV9IUT5cL7o6KO-bh6D50aFkZUrhZVf4_fNbs";
+
+    const supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const tbody = document.getElementById("productTableBody");
+    const messageBox = document.getElementById("messageBox");
+    const adminEmailLabel = document.getElementById("adminEmail");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    // 轉址函式（避免 root 路徑造成 GitHub Pages 404）
+    function goToCreate() {
+      window.location.href = "edit.html"; // 之後在 edit.html 做「新增/編輯」判斷
+    }
+
+    function goToUpload() {
+      window.location.href = "upload.html";
+    }
+
+    // 顯示訊息
+    function showMessage(text) {
+      messageBox.textContent = text || "";
+    }
+
+    // 格式化價格
+    function formatPrice(value) {
+      if (value == null || value === "") return "—";
+      const num = Number(value);
+      if (Number.isNaN(num)) return value;
+      return "NT$ " + num.toLocaleString("zh-TW");
+    }
+
+    // 格式化時間
+    function formatDateTime(iso) {
+      if (!iso) return "—";
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return "—";
+      return d.toLocaleString("zh-TW", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    }
+
+    // 讀取商品列表
+    async function loadProducts() {
+      showMessage("");
+
+      // 先顯示載入中
+      tbody.innerHTML =
+        '<tr class="empty-row"><td colspan="8">載入中…</td></tr>';
+
+      try {
+        const { data, error } = await supa
+          .from("products")
+          .select(
+            `
+            id,
+            name,
+            category,
+            unit,
+            description,
+            last_price,
+            last_price_updated_at,
+            is_active
+          `
+          )
+          .order("name", { ascending: true });
+
+        if (error) {
+          console.error("讀取商品錯誤：", error);
+          showMessage("讀取商品失敗：" + (error.message || "未知錯誤"));
+          tbody.innerHTML =
+            '<tr class="empty-row"><td colspan="8">讀取失敗</td></tr>';
+          return;
+        }
+
+        if (!data || data.length === 0) {
+          tbody.innerHTML =
+            '<tr class="empty-row"><td colspan="8">目前沒有任何商品</td></tr>';
+          return;
+        }
+
+        // 渲染列表
+        tbody.innerHTML = "";
+        for (const p of data) {
+          const tr = document.createElement("tr");
+          tr.dataset.id = p.id;
+
+          tr.innerHTML = `
+            <td>${p.name || ""}</td>
+            <td>${p.category || ""}</td>
+            <td>${p.unit || ""}</td>
+            <td>${p.description || ""}</td>
+            <td>${formatPrice(p.last_price)}</td>
+            <td>${formatDateTime(p.last_price_updated_at)}</td>
+            <td>
+              <span class="status-pill ${
+                p.is_active ? "status-on" : "status-off"
+              }">
+                ${p.is_active ? "啟用" : "停用"}
+              </span>
+            </td>
+            <td>
+              <div class="actions">
+                <button class="btn-sm" data-action="edit">編輯</button>
+                <button class="btn-sm danger" data-action="delete">刪除</button>
+              </div>
+            </td>
+          `;
+
+          tbody.appendChild(tr);
+        }
+      } catch (err) {
+        console.error("讀取商品例外：", err);
+        showMessage("讀取商品失敗：" + (err.message || "無法連線"));
+        tbody.innerHTML =
+          '<tr class="empty-row"><td colspan="8">讀取失敗</td></tr>';
+      }
+    }
+
+    // 事件代理：處理編輯 / 刪除按鈕
+    tbody.addEventListener("click", async (e) => {
+      const btn = e.target.closest("button");
+      if (!btn) return;
+
+      const action = btn.dataset.action;
+      const tr = btn.closest("tr");
+      const id = tr && tr.dataset.id;
+      if (!id) return;
+
+      if (action === "edit") {
+        // 帶 id 去 edit.html
+        window.location.href = `edit.html?id=${encodeURIComponent(id)}`;
+      } else if (action === "delete") {
+        const ok = window.confirm("確定要刪除這筆商品嗎？\n刪除後無法復原。");
+        if (!ok) return;
+
+        try {
+          const { error } = await supa
+            .from("products")
+            .delete()
+            .eq("id", id);
+
+          if (error) {
+            console.error("刪除錯誤：", error);
+            alert("刪除失敗：" + (error.message || "未知錯誤"));
+            return;
+          }
+
+          // 從畫面移除該列
+          tr.remove();
+          if (!tbody.children.length) {
+            tbody.innerHTML =
+              '<tr class="empty-row"><td colspan="8">目前沒有任何商品</td></tr>';
+          }
+        } catch (err) {
+          console.error("刪除例外：", err);
+          alert("刪除失敗：" + (err.message || "無法連線"));
+        }
+      }
+    });
+
+    // 登出
+    logoutBtn.addEventListener("click", async () => {
+      try {
+        await supa.auth.signOut();
+      } catch (err) {
+        console.error("登出例外：", err);
+      } finally {
+        window.location.href = "login.html";
+      }
+    });
+
+    // 初始化：確認登入狀態 + 載入商品
+    (async () => {
+      try {
+        const { data, error } = await supa.auth.getUser();
+
+        if (error || !data?.user) {
+          // 未登入 → 回登入頁
+          window.location.href = "login.html";
+          return;
+        }
+
+        adminEmailLabel.textContent = data.user.email || "";
+
+        await loadProducts();
+      } catch (err) {
+        console.error("檢查登入狀態例外：", err);
+        alert("讀取商品失敗：Failed to fetch");
+      }
+    })();
+  </script>
 </body>
 </html>
