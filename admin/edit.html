@@ -38,10 +38,19 @@
   <h2>編輯商品</h2>
 
   <div id="formContainer" style="display:none;">
-    <div class="form-group">
-      <label>商品名稱</label>
-      <input id="name" />
-    </div>
+   <div class="form-group">
+  <label>商品圖片</label>
+  
+  <!-- 預覽 -->
+  <img id="previewImage" src="" style="max-width:180px;padding:10px;border:1px solid #ddd;border-radius:6px;" />
+
+  <!-- 上傳檔案 -->
+  <input type="file" id="imageUpload" accept="image/*" />
+
+  <!-- 隱藏欄位：真正存入資料庫的 URL -->
+  <input id="image_url" type="hidden" />
+</div>
+
 
     <div class="form-group">
       <label>分類</label>
