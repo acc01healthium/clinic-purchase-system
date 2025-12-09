@@ -124,23 +124,23 @@ async function loadProduct() {
 
 loadProduct();
 
-// ⭐ 上傳圖片（使用正確 bucket：product-images）
+// 🔥 修正版：上傳圖片到 product-images bucket
 async function uploadImage(file) {
   if (!file) return null;
 
   const ext = file.name.split(".").pop();
   const fileName = `product_${productId}_${Date.now()}.${ext}`;
 
-  const { error } = await db.storage
+  const { error: uploadErr } = await supabase.storage
     .from("product-images")
     .upload(fileName, file, { upsert: true });
 
-  if (error) {
-    alert("圖片上傳失敗：" + error.message);
+  if (uploadErr) {
+    alert("圖片上傳失敗：" + uploadErr.message);
     return null;
   }
 
-  const { data } = db.storage
+  const { data } = supabase.storage
     .from("product-images")
     .getPublicUrl(fileName);
 
