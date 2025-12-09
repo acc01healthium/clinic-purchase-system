@@ -1,121 +1,197 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>康醫採購管理系統｜登入</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- 載入 Supabase 套件（必要） -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- 載入前台共用的 Supabase 設定（很重要！請確認路徑 ../js/supabase.js 存在） -->
-  <script src="../js/supabase.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "微軟正黑體", sans-serif;
-      background: #e9f4f9;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
       margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC",
+        "Microsoft JhengHei", sans-serif;
+      background: #e9f4fb;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-wrapper {
+      width: 100%;
+      max-width: 420px;
+      padding: 24px;
     }
 
     .login-card {
-      width: 340px;
-      background: #fff;
-      padding: 28px;
-      border-radius: 14px;
-      box-shadow: 0 4px 18px rgba(0,0,0,0.1);
+      width: 100%;
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 32px 28px 28px;
+      box-shadow: 0 10px 30px rgba(15, 82, 124, 0.18);
       text-align: center;
     }
 
-    h2 {
-      color: #0a7eb5;
-      margin-bottom: 20px;
+    .login-title {
+      margin: 0 0 4px;
       font-size: 22px;
+      font-weight: 700;
+      color: #115c9b;
     }
 
-    input {
-      width: 100%;
-      padding: 12px;
-      font-size: 15px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
+    .login-subtitle {
+      margin: 0 0 24px;
+      font-size: 13px;
+      color: #6b6b6b;
+    }
+
+    .form-group {
+      text-align: left;
       margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+      color: #333;
+    }
+
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #d0d7e2;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    input[type="email"]:focus,
+    input[type="password"]:focus {
+      border-color: #1980d4;
+      box-shadow: 0 0 0 2px rgba(25, 128, 212, 0.16);
     }
 
     button {
       width: 100%;
-      padding: 12px;
-      background: #0a7eb5;
+      margin-top: 10px;
+      padding: 10px 14px;
+      border-radius: 999px;
       border: none;
+      background: #0f70b7;
       color: #fff;
       font-size: 15px;
-      border-radius: 8px;
+      font-weight: 600;
       cursor: pointer;
-      margin-top: 6px;
+      letter-spacing: 1px;
+      transition: background 0.15s ease, transform 0.05s ease;
     }
 
     button:hover {
-      background: #08658e;
+      background: #0c5c98;
+    }
+
+    button:active {
+      transform: translateY(1px);
     }
 
     .error {
-      color: red;
-      font-size: 14px;
       margin-top: 10px;
-      min-height: 20px;
+      min-height: 18px;
+      font-size: 13px;
+      color: #c0392b;
     }
   </style>
+
+  <!-- Supabase JS v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body>
-  <div class="login-card">
-    <h2>康醫採購管理系統</h2>
+  <div class="login-wrapper">
+    <div class="login-card">
+      <h1 class="login-title">康醫採購管理系統</h1>
+      <p class="login-subtitle">後台登入（僅管理者使用）</p>
 
-    <input id="email" type="email" placeholder="管理者 Email">
-    <input id="password" type="password" placeholder="密碼">
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="email">管理者 Email</label>
+          <input
+            id="email"
+            type="email"
+            autocomplete="email"
+            placeholder="acc.01.healthium@gmail.com"
+            required
+          />
+        </div>
 
-    <button onclick="login()">登入</button>
+        <div class="form-group">
+          <label for="password">密碼</label>
+          <input
+            id="password"
+            type="password"
+            autocomplete="current-password"
+            placeholder="請輸入密碼"
+            required
+          />
+        </div>
 
-    <div id="errorBox" class="error"></div>
+        <button type="submit">登入</button>
+        <div id="errorBox" class="error"></div>
+      </form>
+    </div>
   </div>
 
   <script>
-    // 使用共用 client
-    const supa = window.supabaseClient;
+    // === Supabase 連線設定（B 專案） ===
+    const SUPABASE_URL = "https://utwhtjtgwryeljgwlwzm.supabase.co";
+    const SUPABASE_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0d2h0anRnd3J5ZWxqZ3dsd3ptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUxNTkxNDQsImV4cCI6MjA4MDczNTE0NH0.SexZh_JV9IUT5cL7o6KO-bh6D50aFkZUrhZVf4_fNbs";
 
-    async function login() {
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
-      const errorBox = document.getElementById("errorBox");
+    const supa = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const loginForm = document.getElementById("loginForm");
+    const errorBox = document.getElementById("errorBox");
+
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
       errorBox.textContent = "";
 
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+
       if (!email || !password) {
-        errorBox.textContent = "請輸入 Email 與密碼";
+        errorBox.textContent = "請輸入帳號與密碼";
         return;
       }
 
       try {
         const { data, error } = await supa.auth.signInWithPassword({
           email,
-          password
+          password,
         });
 
         if (error) {
-          errorBox.textContent = "登入失敗：" + error.message;
+          console.error("登入錯誤：", error);
+          errorBox.textContent = "登入失敗：" + (error.message || "請確認帳密");
           return;
         }
 
-        // 登入成功 → 跳到後台首頁
-        window.location.href = "index.html";   // 重要：不能用 /admin/index.html（會 404）
-      } 
-      catch (err) {
-        errorBox.textContent = "登入錯誤：" + (err.message || "未知錯誤");
+        // 登入成功 → 導向後台首頁（使用相對路徑，避免 GitHub Pages 404）
+        window.location.href = "index.html";
+      } catch (err) {
+        console.error("登入例外：", err);
+        errorBox.textContent =
+          "登入失敗：" + (err.message || "無法連線到伺服器，請稍後再試");
       }
-    }
+    });
   </script>
 </body>
 </html>
