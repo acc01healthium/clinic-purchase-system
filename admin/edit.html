@@ -94,6 +94,33 @@
     <button class="btn-danger" onclick="deleteProduct()">刪除商品</button>
   </div>
 
+  async function uploadImage(file) {
+  if (!file) return null;
+
+  const ext = file.name.split(".").pop();
+  const fileName = `${productId}-${Date.now()}.${ext}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from("products")
+    .upload(fileName, file, {
+      cacheControl: "3600",
+      upsert: true
+    });
+
+  if (uploadError) {
+    alert("圖片上傳失敗：" + uploadError.message);
+    return null;
+  }
+
+  // 取得公開網址
+  const url = supabase.storage
+    .from("products")
+    .getPublicUrl(fileName).data.publicUrl;
+
+  return url;
+}
+
+
   <script>
     const supabase = window.supabaseClient;
 
