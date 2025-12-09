@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>編輯商品｜康醫採購管理系統</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <link rel="stylesheet" href="../css/admin.css" />
+  <link rel="stylesheet" href="../css/admin.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/supabaseClient.js"></script>
 
@@ -20,224 +20,202 @@
       box-shadow: 0 4px 20px rgba(0,0,0,0.08);
     }
 
-    .form-group {
-      margin-bottom: 18px;
-    }
-
-    label {
-      font-weight: bold;
-      display: block;
-      margin-bottom: 6px;
-    }
+    .form-group { margin-bottom: 18px; }
+    label { font-weight:bold; margin-bottom:6px; display:block; }
 
     input, textarea, select {
-      width: 100%;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 15px;
+      width:100%; padding:10px; font-size:15px;
+      border-radius:6px; border:1px solid #ccc;
     }
-
-    textarea {
-      min-height: 90px;
-    }
+    textarea { min-height:90px; }
 
     #previewImage {
-      max-width: 180px;
-      border-radius: 6px;
-      margin-bottom: 10px;
-      border: 1px solid #ddd;
-      padding: 5px;
+      max-width:160px; border-radius:6px;
+      border:1px solid #ddd; padding:5px; margin-bottom:10px;
     }
 
     button {
-      background: #1f6fb2;
-      color: #fff;
-      border: none;
-      padding: 12px 20px;
-      font-size: 16px;
-      border-radius: 8px;
-      cursor: pointer;
+      background:#1f6fb2; color:#fff; border:none;
+      padding:12px 20px; border-radius:8px;
+      cursor:pointer; font-size:15px;
     }
-
-    button:hover {
-      background: #155a8d;
-    }
+    button:hover { background:#155a8d; }
   </style>
 </head>
 
 <body>
 
-  <div class="form-container">
-    <h2 style="text-align:center;color:#1f6fb2;">編輯商品</h2>
+<div class="form-container">
+  <h2 style="text-align:center;color:#1f6fb2;">編輯商品</h2>
 
-    <div class="form-group">
-      <label>商品名稱</label>
-      <input id="name" />
-    </div>
-
-    <div class="form-group">
-      <label>分類</label>
-      <input id="category" />
-    </div>
-
-    <div class="form-group">
-      <label>規格</label>
-      <input id="spec" />
-    </div>
-
-    <div class="form-group">
-      <label>單位</label>
-      <input id="unit" />
-    </div>
-
-    <div class="form-group">
-      <label>描述</label>
-      <textarea id="description"></textarea>
-    </div>
-
-    <div class="form-group">
-      <label>售價（last_price）</label>
-      <input id="last_price" type="number" />
-    </div>
-
-    <div class="form-group">
-      <label>是否啟用</label>
-      <select id="is_active">
-        <option value="true">啟用</option>
-        <option value="false">停用</option>
-      </select>
-    </div>
-
-    <!-- ＝＝＝＝＝＝＝＝＝＝ 圖片顯示＋上傳 ＝＝＝＝＝＝＝＝＝＝ -->
-    <div class="form-group">
-      <label>商品圖片</label>
-
-      <!-- 預覽 -->
-      <img id="previewImage" src="" />
-
-      <!-- 上傳檔案 -->
-      <input type="file" id="imageUpload" accept="image/*" />
-
-      <!-- 真正存到資料庫的圖片網址 -->
-      <input type="hidden" id="image_url" />
-    </div>
-
-    <div style="text-align:center;margin-top:25px;">
-      <button id="saveBtn">儲存變更</button>
-    </div>
+  <div class="form-group">
+    <label>商品圖片</label>
+    <img id="previewImage" src="">
+    <input type="file" id="imageUpload" accept="image/*">
+    <input type="hidden" id="image_url">
   </div>
 
-  <script>
-    const supabase = window.supabaseClient;
+  <div class="form-group">
+    <label>商品名稱</label>
+    <input id="name">
+  </div>
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const productId = urlParams.get("id");
+  <div class="form-group">
+    <label>分類</label>
+    <input id="category">
+  </div>
 
-    if (!productId) {
-      alert("找不到商品 ID");
-      window.location.href = "./index.html";
-    }
+  <div class="form-group">
+    <label>規格</label>
+    <input id="spec">
+  </div>
 
-    // ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
-    // Step 1：圖片上傳到 Supabase Storage
-    // ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
-    async function uploadImage(file) {
-      if (!file) return null;
+  <div class="form-group">
+    <label>單位</label>
+    <input id="unit">
+  </div>
 
-      const ext = file.name.split(".").pop();
-      const fileName = `${productId}-${Date.now()}.${ext}`;
+  <div class="form-group">
+    <label>描述</label>
+    <textarea id="description"></textarea>
+  </div>
 
-      const { error: uploadError } = await supabase.storage
-        .from("products")
-        .upload(fileName, file, {
-          upsert: true,
-          cacheControl: "3600"
-        });
+  <div class="form-group">
+    <label>售價</label>
+    <input id="last_price" type="number">
+  </div>
 
-      if (uploadError) {
-        alert("圖片上傳失敗：" + uploadError.message);
-        return null;
-      }
+  <div class="form-group">
+    <label>是否啟用</label>
+    <select id="is_active">
+      <option value="true">啟用</option>
+      <option value="false">停用</option>
+    </select>
+  </div>
 
-      const publicUrl = supabase.storage
-        .from("products")
-        .getPublicUrl(fileName).data.publicUrl;
+  <div style="text-align:center;margin-top:25px;">
+    <button id="saveBtn">儲存變更</button>
+    <button id="deleteBtn" style="background:#c0392b;margin-left:10px;">刪除商品</button>
+  </div>
+</div>
 
-      return publicUrl;
-    }
+<script>
+const supabase = window.supabaseClient;
 
-    // 綁定上傳事件
-    document.getElementById("imageUpload").addEventListener("change", async (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+const urlParams = new URLSearchParams(window.location.search);
+const productId = urlParams.get("id");
 
-      const url = await uploadImage(file);
+if (!productId) {
+  alert("找不到商品 ID");
+  window.location.href = "./index.html";
+}
 
-      if (url) {
-        document.getElementById("image_url").value = url;
-        document.getElementById("previewImage").src = url;
-      }
-    });
+// ========= 圖片上傳 =========
+async function uploadImage(file) {
+  if (!file) return null;
 
-    // ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
-    // Step 2：讀取商品資料
-    // ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
-    async function loadProduct() {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("id", productId)
-        .single();
+  const ext = file.name.split(".").pop();
+  const fileName = `${productId}-${Date.now()}.${ext}`;
 
-      if (error) {
-        alert("讀取商品失敗：" + error.message);
-        return;
-      }
+  const { error: uploadError } = await supabase.storage
+    .from("products")
+    .upload(fileName, file, { upsert: true });
 
-      document.getElementById("name").value = data.name || "";
-      document.getElementById("category").value = data.category || "";
-      document.getElementById("spec").value = data.spec || "";
-      document.getElementById("unit").value = data.unit || "";
-      document.getElementById("description").value = data.description || "";
-      document.getElementById("last_price").value = data.last_price || "";
-      document.getElementById("is_active").value = data.is_active ? "true" : "false";
+  if (uploadError) {
+    alert("圖片上傳失敗：" + uploadError.message);
+    return null;
+  }
 
-      document.getElementById("image_url").value = data.image_url || "";
-      document.getElementById("previewImage").src = data.image_url || "";
-    }
+  const publicUrl = supabase.storage
+    .from("products")
+    .getPublicUrl(fileName).data.publicUrl;
 
-    // ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
-    // Step 3：儲存更新
-    // ＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
-    document.getElementById("saveBtn").addEventListener("click", async () => {
-      const payload = {
-        name: document.getElementById("name").value,
-        category: document.getElementById("category").value,
-        spec: document.getElementById("spec").value,
-        unit: document.getElementById("unit").value,
-        description: document.getElementById("description").value,
-        last_price: Number(document.getElementById("last_price").value),
-        is_active: document.getElementById("is_active").value === "true",
-        image_url: document.getElementById("image_url").value,
-        last_price_updated_at: new Date().toISOString()
-      };
+  return publicUrl;
+}
 
-      const { error } = await supabase
-        .from("products")
-        .update(payload)
-        .eq("id", productId);
+document.getElementById("imageUpload").addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
 
-      if (error) {
-        alert("儲存失敗：" + error.message);
-        return;
-      }
+  const url = await uploadImage(file);
+  if (url) {
+    document.getElementById("image_url").value = url;
+    document.getElementById("previewImage").src = url;
+  }
+});
 
-      alert("更新成功");
-      window.location.href = "./index.html";
-    });
+// ========= 載入商品資料 =========
+async function loadProduct() {
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .eq("id", productId)
+    .single();
 
-    loadProduct();
-  </script>
+  if (error) {
+    alert("讀取商品失敗：" + error.message);
+    return;
+  }
+
+  document.getElementById("name").value = data.name ?? "";
+  document.getElementById("category").value = data.category ?? "";
+  document.getElementById("spec").value = data.spec ?? "";
+  document.getElementById("unit").value = data.unit ?? "";
+  document.getElementById("description").value = data.description ?? "";
+  document.getElementById("last_price").value = data.last_price ?? "";
+  document.getElementById("is_active").value = data.is_active ? "true" : "false";
+  document.getElementById("image_url").value = data.image_url ?? "";
+  document.getElementById("previewImage").src = data.image_url ?? "";
+}
+
+loadProduct();
+
+// ========= 儲存更新 =========
+document.getElementById("saveBtn").addEventListener("click", async () => {
+  const payload = {
+    name: document.getElementById("name").value,
+    category: document.getElementById("category").value,
+    spec: document.getElementById("spec").value,
+    unit: document.getElementById("unit").value,
+    description: document.getElementById("description").value,
+    last_price: Number(document.getElementById("last_price").value),
+    is_active: document.getElementById("is_active").value === "true",
+    image_url: document.getElementById("image_url").value,
+    last_price_updated_at: new Date().toISOString()
+  };
+
+  const { error } = await supabase
+    .from("products")
+    .update(payload)
+    .eq("id", productId);
+
+  if (error) {
+    alert("更新失敗：" + error.message);
+    return;
+  }
+
+  alert("更新成功！");
+  window.location.href = "./index.html";
+});
+
+// ========= 刪除商品 =========
+document.getElementById("deleteBtn").addEventListener("click", async () => {
+  if (!confirm("確定要刪除該商品嗎？")) return;
+
+  const { error } = await supabase
+    .from("products")
+    .delete()
+    .eq("id", productId);
+
+  if (error) {
+    alert("刪除失敗：" + error.message);
+    return;
+  }
+
+  alert("商品已刪除");
+  window.location.href = "./index.html";
+});
+</script>
+
 </body>
 </html>
