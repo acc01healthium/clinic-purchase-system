@@ -3,83 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>編輯商品｜康醫採購管理系統</title>
+  <title>編輯商品</title>
 
-  <link rel="stylesheet" href="../css/admin.css" />
-  
-  <!-- Supabase CDN -->
+  <link rel="stylesheet" href="../css/admin.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- 你的 supabase 設定檔 -->
+  <!-- Supabase 初始化 -->
   <script src="../js/supabase.js"></script>
-
-  <style>
-    body {
-      font-family: "Microsoft JhengHei", sans-serif;
-      padding: 20px;
-      background: #fafafa;
-    }
-
-    h1 {
-      margin-bottom: 20px;
-    }
-
-    .edit-form {
-      width: 360px;
-      padding: 15px;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    .form-group {
-      margin-bottom: 12px;
-    }
-
-    label {
-      font-weight: bold;
-      margin-bottom: 4px;
-      display: inline-block;
-    }
-
-    input, textarea, select {
-      width: 100%;
-      padding: 6px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-
-    .preview-image {
-      width: 160px;
-      border: 1px solid #ddd;
-      border-radius: 6px;
-      margin-top: 8px;
-    }
-
-    .form-actions {
-      margin-top: 20px;
-      display: flex;
-      gap: 10px;
-    }
-
-    .btn-primary {
-      background-color: #4285f4;
-      color: white;
-      padding: 8px 12px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .btn-danger {
-      background-color: #d9534f;
-      color: white;
-      padding: 8px 12px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-  </style>
 </head>
 
 <body>
@@ -89,6 +19,7 @@
 
 <form id="editForm" class="edit-form">
 
+  <!-- 圖片上傳 -->
   <div class="form-group">
     <label>商品圖片</label>
     <input type="file" id="imageFile" accept="image/*">
@@ -146,10 +77,9 @@
 </form>
 
 <script>
-// ⭐ 啟用 Supabase
-const db = window.supabaseClient;
+const supabase = window.supabaseClient;
 
-// ⭐ 取得 URL 參數 id
+// 取得 URL 參數的商品 ID
 const urlParams = new URLSearchParams(window.location.search);
 const productId = urlParams.get("id");
 
@@ -158,7 +88,7 @@ if (!productId) {
   location.href = "index.html";
 }
 
-// ⭐ 取得 DOM 元素
+// 取得 DOM 元素
 const nameEl = document.getElementById("name");
 const categoryEl = document.getElementById("category");
 const specEl = document.getElementById("spec");
@@ -170,9 +100,10 @@ const imgUrlEl = document.getElementById("image_url");
 const imgFileEl = document.getElementById("imageFile");
 const previewEl = document.getElementById("previewImage");
 
-// ⭐ 載入現有商品資料
+
+// 🚀 載入商品資料
 async function loadProduct() {
-  const { data, error } = await db
+  const { data, error } = await supabase
     .from("products")
     .select("*")
     .eq("id", productId)
@@ -183,62 +114,68 @@ async function loadProduct() {
     return;
   }
 
-  nameEl.value = data.name;
-  categoryEl.value = data.category;
-  specEl.value = data.spec;
-  unitEl.value = data.unit;
-  descEl.value = data.description;
-  priceEl.value = data.last_price;
+  nameEl.value = data.name || "";
+  categoryEl.value = data.category || "";
+  specEl.value = data.spec || "";
+  unitEl.value = data.unit || "";
+  descEl.value = data.description || "";
+  priceEl.value = data.last_price || "";
   activeEl.value = data.is_active ? "true" : "false";
-  imgUrlEl.value = data.image_url;
+  imgUrlEl.value = data.image_url || "";
 
   if (data.image_url) previewEl.src = data.image_url;
 }
 
 loadProduct();
 
-// ⭐ 上傳圖片（修正版，使用 product-images bucket）
-async function uploadImage(file) {
-  if (!file) return null;
 
-  const ext = file.name.split(".").pop();
-  const fileName = `product_${productId}_${Date.now()}.${ext}`;
-
-  const { error: uploadErr } = await db.storage
-    .from("product-images")
-    .upload(fileName, file, { upsert: true });
-
-  if (uploadErr) {
-    alert("圖片上傳失敗： " + uploadErr.message);
-    return null;
-  }
-
-  // ⭐ 取得公開網址
-  const { data } = db.storage
-    .from("product-images")
-    .getPublicUrl(fileName);
-
-  return data.publicUrl;
-}
-
-// ⭐ 預覽圖片
+// 即時顯示上傳圖片預覽
 imgFileEl.addEventListener("change", () => {
   const file = imgFileEl.files[0];
   if (file) previewEl.src = URL.createObjectURL(file);
 });
 
-// ⭐ 更新商品
+
+// 🔥【最重要】安全檔名圖片上傳（避免中文檔名上傳失敗）
+async function uploadImage(file) {
+  if (!file) return null;
+
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  // ❌ 不使用中文或特殊符號檔名  
+  // ✔ 使用安全英文檔名
+  const safeFileName = `product_${productId}_${Date.now()}.${ext}`;
+
+  const { error: uploadErr } = await supabase.storage
+    .from("product-images")
+    .upload(safeFileName, file, { upsert: true });
+
+  if (uploadErr) {
+    alert("圖片上傳失敗：" + uploadErr.message);
+    return null;
+  }
+
+  const { data } = supabase.storage
+    .from("product-images")
+    .getPublicUrl(safeFileName);
+
+  return data.publicUrl;
+}
+
+
+// ⭐ 儲存更新
 document.getElementById("editForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   let finalImageUrl = imgUrlEl.value;
 
+  // 如果有選新圖片 → 上傳並更新 URL
   if (imgFileEl.files.length > 0) {
     const uploadedUrl = await uploadImage(imgFileEl.files[0]);
     if (uploadedUrl) finalImageUrl = uploadedUrl;
   }
 
-  const updateData = {
+  const updates = {
     name: nameEl.value.trim(),
     category: categoryEl.value.trim(),
     spec: specEl.value.trim(),
@@ -250,9 +187,9 @@ document.getElementById("editForm").addEventListener("submit", async (e) => {
     last_price_updated_at: new Date().toISOString(),
   };
 
-  const { error } = await db
+  const { error } = await supabase
     .from("products")
-    .update(updateData)
+    .update(updates)
     .eq("id", productId);
 
   if (error) {
@@ -264,11 +201,12 @@ document.getElementById("editForm").addEventListener("submit", async (e) => {
   location.href = "index.html";
 });
 
-// ⭐ 刪除商品
+
+// 🔥 刪除商品
 document.getElementById("deleteBtn").addEventListener("click", async () => {
   if (!confirm("確定刪除？")) return;
 
-  const { error } = await db
+  const { error } = await supabase
     .from("products")
     .delete()
     .eq("id", productId);
