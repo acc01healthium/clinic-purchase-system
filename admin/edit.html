@@ -5,48 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>編輯商品｜康醫採購管理系統</title>
 
-  <!-- CSS -->
   <link rel="stylesheet" href="../css/admin.css?v=3" />
 
-  <!-- Supabase JS -->
+  <!-- Supabase 套件 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../js/supabase.js?v=3" defer></script>
-
-  <style>
-    body { font-family: sans-serif; padding: 20px; }
-    .edit-form { max-width: 600px; margin: 0 auto; }
-    .form-group { margin-bottom: 16px; }
-    label { display: block; margin-bottom: 6px; font-weight: bold; }
-    input, textarea, select {
-      width: 100%; padding: 8px; font-size: 15px;
-      border: 1px solid #ccc; border-radius: 6px;
-    }
-    .preview-image {
-      width: 150px; height: 150px; object-fit: cover;
-      border-radius: 8px; margin-top: 8px; border: 1px solid #ddd;
-    }
-    .form-actions {
-      display: flex; gap: 12px; margin-top: 20px;
-    }
-    .btn-primary {
-      background: #007bff; color: #fff; padding: 10px 18px;
-      border: none; border-radius: 6px; cursor: pointer;
-    }
-    .btn-danger {
-      background: #d9534f; color: #fff; padding: 10px 18px;
-      border: none; border-radius: 6px; cursor: pointer;
-    }
-  </style>
+  <script src="../js/supabase.js?v=3"></script>
 </head>
 
 <body>
 
   <h1>編輯商品</h1>
-  <button onclick="window.location.href='index.html'" style="margin-bottom:20px;">返回列表</button>
+  <button onclick="window.location.href='index.html'">返回列表</button>
 
   <form id="editForm" class="edit-form">
 
-    <!-- 商品圖片 -->
     <div class="form-group">
       <label>商品圖片</label>
       <input type="file" id="imageFile" accept="image/*" />
@@ -102,25 +74,24 @@
     </div>
   </form>
 
-  <script>
-    const db = window.supabaseClient;  // ⭐ 正確連線方式
 
-    // URL 取得商品 ID
+  <!-- ⭐ 重要：所有 JS 必須放在 script 裡 -->
+  <script>
+    const db = window.supabaseClient;
+
     const urlParams = new URLSearchParams(window.location.search);
     const productId = urlParams.get("id");
 
     if (!productId) {
-      alert("缺少商品 ID");
+      alert("無法取得商品 ID");
       window.location.href = "index.html";
     }
 
-    // 預覽圖片
     imageFile.addEventListener("change", () => {
       const file = imageFile.files[0];
       if (file) previewImage.src = URL.createObjectURL(file);
     });
 
-    // ⭐ 載入商品資料
     async function loadProduct() {
       const { data, error } = await db
         .from("products")
@@ -133,7 +104,6 @@
         return;
       }
 
-      // 填入表單
       name.value = data.name ?? "";
       category.value = data.category ?? "";
       spec.value = data.spec ?? "";
@@ -142,13 +112,11 @@
       last_price.value = data.last_price ?? "";
       is_active.value = data.is_active ? "true" : "false";
       image_url.value = data.image_url ?? "";
-
       if (data.image_url) previewImage.src = data.image_url;
     }
 
-    loadProduct(); // ⭐ 執行
+    loadProduct();
 
-    // ⭐ 圖片上傳
     async function uploadImage(file) {
       if (!file) return image_url.value;
 
@@ -168,12 +136,10 @@
       return data.publicUrl;
     }
 
-    // ⭐ 儲存修改
     editForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
       let newImageUrl = image_url.value;
-
       if (imageFile.files.length > 0) {
         newImageUrl = await uploadImage(imageFile.files[0]);
       }
@@ -189,23 +155,24 @@
           last_price: Number(last_price.value),
           is_active: is_active.value === "true",
           image_url: newImageUrl,
-          last_price_updated_at: new Date().toISOString()
+          last_price_updated_at: new Date().toISOString(),
         })
         .eq("id", productId);
 
-      if (error) {
-        alert("更新失敗：" + error.message);
-      } else {
+      if (error) alert("更新失敗：" + error.message);
+      else {
         alert("更新成功！");
         window.location.href = "index.html";
       }
     });
 
-    // ⭐ 刪除商品
     deleteBtn.addEventListener("click", async () => {
-      if (!confirm("確定要刪除商品？")) return;
+      if (!confirm("確定要刪除嗎？")) return;
 
-      const { error } = await db.from("products").delete().eq("id", productId);
+      const { error } = await db
+        .from("products")
+        .delete()
+        .eq("id", productId);
 
       if (error) alert("刪除失敗：" + error.message);
       else {
