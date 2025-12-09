@@ -26,7 +26,7 @@ const previewEl = document.getElementById("previewImage");
 // 🔹 載入商品資料
 async function loadProduct() {
   const { data, error } = await supabase
-    .from("products")
+    .from("product-images")
     .select("*")
     .eq("id", productId)
     .single();
@@ -58,7 +58,7 @@ async function uploadImage(file) {
   const fileName = `product_${productId}_${Date.now()}.${ext}`;
 
   const { error: uploadErr } = await supabase.storage
-    .from("products")
+    .from("product-images")
     .upload(fileName, file, { upsert: true });
 
   if (uploadErr) {
@@ -68,7 +68,7 @@ async function uploadImage(file) {
 
   // 取得可公開存取連結
   const { data } = supabase.storage
-    .from("products")
+    .from("product-images")
     .getPublicUrl(fileName);
 
   return data.publicUrl;
@@ -98,7 +98,7 @@ document.getElementById("editForm").addEventListener("submit", async (e) => {
   };
 
   const { error } = await supabase
-    .from("products")
+    .from("product-images")
     .update(updates)
     .eq("id", productId);
 
@@ -116,7 +116,7 @@ document.getElementById("deleteBtn").addEventListener("click", async () => {
   if (!confirm("確定要刪除這個商品嗎？")) return;
 
   const { error } = await supabase
-    .from("products")
+    .from("product-images")
     .delete()
     .eq("id", productId);
 
