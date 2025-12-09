@@ -1,133 +1,58 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>康醫採購管理系統 | 商品列表</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>康醫採購查詢系統（商品列表）</title>
 
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+  <!-- 卡片 UI 的 CSS -->
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
 
-    <style>
-      body {
-        background: #f5f7fa;
-      }
-
-      .header-bar {
-        background: #0d6efd;
-        color: white;
-        padding: 14px 20px;
-        font-size: 20px;
-        font-weight: 600;
-      }
-
-      .search-area {
-        margin: 20px auto;
-        max-width: 600px;
-      }
-
-      /* 卡片樣式 */
-      .product-card {
-        background: white;
-        border-radius: 10px;
-        padding: 16px;
-        margin-bottom: 18px;
-        display: flex;
-        gap: 16px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-      }
-
-      .product-image-wrapper {
-        width: 120px;
-        height: 120px;
-        border-radius: 8px;
-        overflow: hidden;
-        background: #eaeaea;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .product-image-wrapper img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-      }
-
-      .product-content {
-        flex: 1;
-      }
-
-      .product-name {
-        font-size: 20px;
-        font-weight: 600;
-        margin-bottom: 6px;
-        color: #333;
-      }
-
-      .product-spec {
-        font-size: 14px;
-        color: #666;
-        margin-bottom: 10px;
-      }
-
-      .product-meta-row span {
-        background: #eef5ff;
-        color: #0d6efd;
-        padding: 4px 8px;
-        border-radius: 6px;
-        margin-right: 6px;
-        font-size: 12px;
-      }
-
-      .product-price-row {
-        font-size: 18px;
-        margin-top: 6px;
-      }
-
-      .product-updated-at {
-        font-size: 13px;
-        color: #999;
-        margin-top: 4px;
-      }
-
-      #statusMessage {
-        text-align: center;
-        margin: 10px auto;
-      }
-    </style>
-  </head>
-
-  <body>
-    <div class="header-bar">康醫採購管理系統 | 商品列表</div>
-
-    <!-- 搜尋列 -->
-    <div class="search-area input-group">
-      <input
-        id="searchInput"
-        class="form-control"
-        placeholder="搜尋商品名稱 / 規格 / 分類"
-      />
-      <button id="clearSearchBtn" class="btn btn-outline-secondary">
-        清除
-      </button>
+<body>
+  <!-- 頂部 Banner / 標題區 -->
+  <header class="app-header">
+    <div class="app-header-inner">
+      <div class="app-title-block">
+        <h1 class="app-title">康醫採購查詢系統</h1>
+        <p class="app-subtitle">商品列表</p>
+      </div>
     </div>
+  </header>
+
+  <!-- 主內容 -->
+  <main class="app-main">
+    <!-- 搜尋區 -->
+    <section class="search-section">
+      <label for="searchInput" class="search-label">搜尋商品名稱、規格或分類</label>
+      <div class="search-input-wrapper">
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="例如：口罩、手套、點滴架…"
+        />
+        <button id="clearSearchBtn" type="button" class="btn-secondary">
+          清除
+        </button>
+      </div>
+    </section>
 
     <!-- 狀態訊息 -->
-    <div id="statusMessage" hidden></div>
+    <section id="statusMessage" class="status-message" hidden></section>
 
-    <!-- 商品列表 -->
-    <div class="container mt-3">
-      <div id="productList"></div>
-    </div>
+    <!-- 商品卡片列表 -->
+    <section id="productList" class="product-list">
+      <!-- 由 JS 動態產生 -->
+    </section>
+  </main>
 
-    <!-- 載入 Supabase + 前台 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Supabase 官方套件 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- 正確順序：先 supabase.js 再 product-list.js -->
-    <script src="js/supabase.js"></script>
-    <script src="js/product-list.js"></script>
-  </body>
+  <!-- 你的 Supabase 設定（前台 & 後台共用） -->
+  <script src="./js/supabase.js"></script>
+
+  <!-- 前台商品讀取 & 搜尋邏輯（必須存在） -->
+  <script src="./js/product-list.js"></script>
+</body>
 </html>
