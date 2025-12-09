@@ -1,24 +1,26 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>康醫採購管理系統｜後台商品列表</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/admin.css" />
 
-  <!-- Supabase CDN -->
+  <!-- 先載入 Supabase 官方套件 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- 再載入「前台共用」的 Supabase 設定（這一隻一定要跟前台一樣，路徑注意 ../ ） -->
+  <script src="../js/supabase.js"></script>
 
   <style>
     body {
-      font-family: "Segoe UI", sans-serif;
+      font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, "Microsoft JhengHei", sans-serif;
       background: #f4f7fa;
       margin: 0;
       padding: 0;
     }
     header {
-      background: #0d6efd;
+      background: #00a9d9;
       color: #fff;
       padding: 14px 24px;
       display: flex;
@@ -26,29 +28,24 @@
       align-items: center;
       font-size: 18px;
     }
-
     .btn-logout {
       padding: 6px 12px;
       background: #fff;
-      color: #0d6efd;
+      color: #00a9d9;
       border-radius: 6px;
       cursor: pointer;
       border: none;
       font-weight: bold;
     }
-
     .container {
       padding: 24px;
     }
-
     h2 {
       margin-bottom: 20px;
     }
-
     .actions {
       margin-bottom: 18px;
     }
-
     .actions button {
       padding: 8px 16px;
       margin-right: 10px;
@@ -58,7 +55,6 @@
       font-size: 15px;
       color: #fff;
     }
-
     .btn-add { background: #198754; }
     .btn-csv { background: #0d6efd; }
 
@@ -69,13 +65,12 @@
       border-radius: 10px;
       overflow: hidden;
     }
-
     th, td {
       padding: 12px;
       border-bottom: 1px solid #e5e5e5;
       text-align: center;
+      font-size: 14px;
     }
-
     th {
       background: #f0f4f8;
     }
@@ -87,8 +82,8 @@
       border-radius: 6px;
       cursor: pointer;
       color: #000;
+      margin-right: 6px;
     }
-
     .btn-delete {
       background: #dc3545;
       padding: 6px 10px;
@@ -101,161 +96,160 @@
     .status-enable { color: #198754; font-weight: bold; }
     .status-disable { color: #dc3545; font-weight: bold; }
 
-    #loading {
+    #statusMessage {
       margin-top: 10px;
-      text-align: center;
+      font-size: 14px;
       color: #0d6efd;
-      font-size: 15px;
     }
   </style>
 </head>
 
 <body>
+  <header>
+    <div>康醫採購管理系統｜後台</div>
+    <button class="btn-logout" onclick="logout()">登出</button>
+  </header>
 
-<header>
-  <div>康醫採購管理系統 | 後台</div>
-  <button class="btn-logout" onclick="logout()">登出</button>
-</header>
+  <div class="container">
+    <h2>商品列表</h2>
 
-<div class="container">
-  <h2>商品列表</h2>
+    <div class="actions">
+      <button class="btn-add" onclick="location.href='add.html'">新增商品</button>
+      <button class="btn-csv" onclick="location.href='upload.html'">CSV 批次匯入</button>
+    </div>
 
-  <div class="actions">
-    <button class="btn-add" onclick="location.href='add.html'">新增商品</button>
-    <button class="btn-csv" onclick="location.href='upload.html'">CSV 批次匯入</button>
+    <table>
+      <thead>
+        <tr>
+          <th>名稱</th>
+          <th>類別</th>
+          <th>單位</th>
+          <th>規格</th>
+          <th>售價</th>
+          <th>價格更新時間</th>
+          <th>狀態</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="productTableBody">
+        <tr><td colspan="8">讀取中…</td></tr>
+      </tbody>
+    </table>
+
+    <div id="statusMessage"></div>
   </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>名稱</th>
-        <th>類別</th>
-        <th>單位</th>
-        <th>規格</th>
-        <th>售價</th>
-        <th>價格更新時間</th>
-        <th>狀態</th>
-        <th>操作</th>
-      </tr>
-    </thead>
-    <tbody id="productTableBody">
-      <tr><td colspan="8">讀取中...</td></tr>
-    </tbody>
-  </table>
+  <script>
+    // 從共用的 supabase.js 拿 client（前台用的那個）
+    const supa = window.supabaseClient;
 
-  <div id="loading"></div>
-
-</div>
-
-<script>
-  // -----------------------------
-  // Supabase 初始化
-  // -----------------------------
-  const supabaseUrl = "https://utwhtjtgwrveljgwlwzm.supabase.co";
-  const supabaseKey = "YOUR_ANON_KEY"; // <-- 記得貼你的 anon key
-  const supa = supabase.createClient(supabaseUrl, supabaseKey);
-
-  // -----------------------------
-  // 登出
-  // -----------------------------
-  async function logout() {
-    await supa.auth.signOut();
-    location.href = "login.html";
-  }
-
-  // -----------------------------
-  // 讀取商品資料
-  // -----------------------------
-  async function loadProducts() {
-    const tbody = document.getElementById("productTableBody");
-    tbody.innerHTML = `<tr><td colspan="8">讀取中...</td></tr>`;
-
-    const { data, error } = await supa
-      .from("products")
-      .select(`
-        id,
-        name,
-        category,
-        unit,
-        spec,
-        last_price,
-        last_price_updated_at,
-        is_active
-      `)
-      .order("id", { ascending: true });
-
-    if (error) {
-      tbody.innerHTML = `<tr><td colspan="8">讀取錯誤：${error.message}</td></tr>`;
-      return;
+    function formatDateTime(iso) {
+      if (!iso) return "-";
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return "-";
+      return d.toLocaleString("zh-TW");
     }
 
-    if (!data || data.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="8">尚無資料</td></tr>`;
-      return;
+    async function logout() {
+      if (!supa) {
+        alert("Supabase 尚未初始化，無法登出");
+        return;
+      }
+      await supa.auth.signOut();
+      // 注意：不能寫 /admin/login.html，會變成專案根目錄，GitHub 會 404
+      window.location.href = "login.html";
     }
 
-    tbody.innerHTML = "";
+    async function loadProducts() {
+      const tbody = document.getElementById("productTableBody");
+      const statusEl = document.getElementById("statusMessage");
 
-    data.forEach(p => {
-      const tr = document.createElement("tr");
+      if (!supa) {
+        tbody.innerHTML = `<tr><td colspan="8">Supabase 尚未初始化，請確認 ../js/supabase.js 是否載入成功</td></tr>`;
+        return;
+      }
 
-      tr.innerHTML = `
-        <td>${p.name ?? ""}</td>
-        <td>${p.category ?? ""}</td>
-        <td>${p.unit ?? ""}</td>
-        <td>${p.spec ?? ""}</td>
-        <td>NT$ ${p.last_price ?? "-"}</td>
-        <td>${formatDate(p.last_price_updated_at)}</td>
-        <td>
-          <span class="${p.is_active ? "status-enable" : "status-disable"}">
-            ${p.is_active ? "啟用" : "停用"}
-          </span>
-        </td>
-        <td>
-          <button class="btn-edit" onclick="editProduct(${p.id})">編輯</button>
-          <button class="btn-delete" onclick="deleteProduct(${p.id}, '${p.name}')">刪除</button>
-        </td>
-      `;
+      tbody.innerHTML = `<tr><td colspan="8">讀取中…</td></tr>`;
+      statusEl.textContent = "";
 
-      tbody.appendChild(tr);
-    });
-  }
+      try {
+        const { data, error } = await supa
+          .from("products")
+          .select(`
+            id,
+            name,
+            category,
+            unit,
+            spec,
+            last_price,
+            last_price_updated_at,
+            is_active
+          `)
+          .order("id", { ascending: true });
 
-  function formatDate(t) {
-    if (!t) return "-";
-    return new Date(t).toLocaleString("zh-TW");
-  }
+        if (error) {
+          console.error("讀取商品錯誤：", error);
+          alert("讀取商品失敗：" + error.message);
+          tbody.innerHTML = `<tr><td colspan="8">讀取商品失敗：${error.message}</td></tr>`;
+          return;
+        }
 
-  // -----------------------------
-  // 前往編輯頁
-  // -----------------------------
-  function editProduct(id) {
-    location.href = `edit.html?id=${id}`;
-  }
+        if (!data || data.length === 0) {
+          tbody.innerHTML = `<tr><td colspan="8">目前尚無商品資料</td></tr>`;
+          return;
+        }
 
-  // -----------------------------
-  // 刪除商品
-  // -----------------------------
-  async function deleteProduct(id, name) {
-    if (!confirm(`確定要刪除「${name}」嗎？`)) return;
+        tbody.innerHTML = "";
 
-    const { error } = await supa
-      .from("products")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      alert("刪除失敗：" + error.message);
-      return;
+        data.forEach((p) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${p.name ?? ""}</td>
+            <td>${p.category ?? ""}</td>
+            <td>${p.unit ?? ""}</td>
+            <td>${p.spec ?? ""}</td>
+            <td>NT$ ${p.last_price ?? "-"}</td>
+            <td>${formatDateTime(p.last_price_updated_at)}</td>
+            <td>
+              <span class="${p.is_active ? "status-enable" : "status-disable"}">
+                ${p.is_active ? "啟用" : "停用"}
+              </span>
+            </td>
+            <td>
+              <button class="btn-edit" onclick="editProduct(${p.id})">編輯</button>
+              <button class="btn-delete" onclick="deleteProduct(${p.id}, '${p.name ?? ""}')">刪除</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error("讀取商品例外：", err);
+        alert("讀取商品失敗：" + (err.message || "Unknown error"));
+        tbody.innerHTML = `<tr><td colspan="8">讀取商品失敗：${err.message || "Unknown error"}</td></tr>`;
+      }
     }
 
-    alert("已刪除！");
-    loadProducts();
-  }
+    function editProduct(id) {
+      window.location.href = `edit.html?id=${id}`;
+    }
 
-  // 頁面載入後讀取資料
-  loadProducts();
-</script>
+    async function deleteProduct(id, name) {
+      if (!confirm(`確定要刪除「${name}」嗎？`)) return;
 
+      try {
+        const { error } = await supa.from("products").delete().eq("id", id);
+        if (error) {
+          alert("刪除失敗：" + error.message);
+          return;
+        }
+        alert("已刪除！");
+        loadProducts();
+      } catch (err) {
+        alert("刪除失敗：" + (err.message || "Unknown error"));
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", loadProducts);
+  </script>
 </body>
 </html>
