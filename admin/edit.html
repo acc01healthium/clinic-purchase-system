@@ -6,9 +6,11 @@
   <title>編輯商品</title>
 
   <link rel="stylesheet" href="../css/admin.css">
+
+  <!-- Supabase v2 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Supabase 初始化 -->
+  <!-- 初始化 Supabase -->
   <script src="../js/supabase.js"></script>
 </head>
 
@@ -77,18 +79,17 @@
 </form>
 
 <script>
+// 正確取得 supabase instance
 const supabase = window.supabaseClient;
 
-// 取得 URL 參數的商品 ID
-const urlParams = new URLSearchParams(window.location.search);
-const productId = urlParams.get("id");
-
+// 取得 URL ID
+const productId = new URLSearchParams(window.location.search).get("id");
 if (!productId) {
   alert("找不到商品 ID");
   location.href = "index.html";
 }
 
-// 取得 DOM 元素
+// DOM 元素
 const nameEl = document.getElementById("name");
 const categoryEl = document.getElementById("category");
 const specEl = document.getElementById("spec");
@@ -100,8 +101,7 @@ const imgUrlEl = document.getElementById("image_url");
 const imgFileEl = document.getElementById("imageFile");
 const previewEl = document.getElementById("previewImage");
 
-
-// 🚀 載入商品資料
+// 載入商品資料
 async function loadProduct() {
   const { data, error } = await supabase
     .from("products")
@@ -121,32 +121,28 @@ async function loadProduct() {
   descEl.value = data.description || "";
   priceEl.value = data.last_price || "";
   activeEl.value = data.is_active ? "true" : "false";
-  imgUrlEl.value = data.image_url || "";
 
-  if (data.image_url) previewEl.src = data.image_url;
+  if (data.image_url) {
+    imgUrlEl.value = data.image_url;
+    previewEl.src = data.image_url;
+  }
 }
-
 loadProduct();
 
-
-// 即時顯示上傳圖片預覽
+// 圖片即時預覽
 imgFileEl.addEventListener("change", () => {
   const file = imgFileEl.files[0];
   if (file) previewEl.src = URL.createObjectURL(file);
 });
 
-
-// 🔥【最重要】安全檔名圖片上傳（避免中文檔名上傳失敗）
+// 安全檔名上傳
 async function uploadImage(file) {
   if (!file) return null;
 
-  // 將中文檔名轉成安全格式
   const safeName = Date.now() + "_" + file.name.replace(/[^\w.-]/g, "_");
-
   const filePath = `uploads/${safeName}`;
 
-  const { data, error } = await supabaseClient
-    .storage
+  const { data, error } = await supabase.storage
     .from("product-images")
     .upload(filePath, file, {
       cacheControl: "3600",
@@ -155,38 +151,35 @@ async function uploadImage(file) {
 
   if (error) {
     alert("圖片上傳失敗：" + error.message);
-    console.error("Upload error:", error);
+    console.error(error);
     return null;
   }
 
-  // 取得公開 URL
-  const { data: publicData } = supabaseClient
-    .storage
+  const { data: urlData } = supabase.storage
     .from("product-images")
     .getPublicUrl(filePath);
 
-  return publicData.publicUrl;
+  return urlData.publicUrl;
 }
 
-
-// ⭐ 儲存更新
+// 儲存更新
 document.getElementById("editForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   let finalImageUrl = imgUrlEl.value;
 
-  // 如果有選新圖片 → 上傳並更新 URL
+  // 有新圖片 → 上傳
   if (imgFileEl.files.length > 0) {
     const uploadedUrl = await uploadImage(imgFileEl.files[0]);
     if (uploadedUrl) finalImageUrl = uploadedUrl;
   }
 
   const updates = {
-    name: nameEl.value.trim(),
-    category: categoryEl.value.trim(),
-    spec: specEl.value.trim(),
-    unit: unitEl.value.trim(),
-    description: descEl.value.trim(),
+    name: nameEl.value,
+    category: categoryEl.value,
+    spec: specEl.value,
+    unit: unitEl.value,
+    description: descEl.value,
     last_price: Number(priceEl.value),
     is_active: activeEl.value === "true",
     image_url: finalImageUrl,
@@ -207,8 +200,7 @@ document.getElementById("editForm").addEventListener("submit", async (e) => {
   location.href = "index.html";
 });
 
-
-// 🔥 刪除商品
+// 刪除商品
 document.getElementById("deleteBtn").addEventListener("click", async () => {
   if (!confirm("確定刪除？")) return;
 
@@ -219,10 +211,11 @@ document.getElementById("deleteBtn").addEventListener("click", async () => {
 
   if (error) {
     alert("刪除失敗：" + error.message);
-  } else {
-    alert("刪除成功！");
-    location.href = "index.html";
+    return;
   }
+
+  alert("刪除成功！");
+  location.href = "index.html";
 });
 </script>
 
