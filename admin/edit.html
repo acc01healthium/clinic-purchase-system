@@ -1,498 +1,78 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0"
-    />
-    <title>編輯商品</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>編輯商品</title>
 
-    <link rel="stylesheet" href="../css/admin.css" />
+  <link rel="stylesheet" href="./css/admin.css" />
+</head>
+<body>
+  <h1>編輯商品</h1>
+  <button onclick="location.href='index.html'">返回列表</button>
 
-    <!-- Supabase v2 CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- 加版本號避免快取卡住 -->
-    <script src="../js/supabase.js?v=4"></script>
-
-    <style>
-      body {
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          sans-serif;
-      }
-
-      h1 {
-        margin-top: 16px;
-        margin-left: 16px;
-      }
-
-      button {
-        cursor: pointer;
-      }
-
-      .edit-form {
-        max-width: 480px;
-        margin: 16px;
-      }
-
-      .form-group {
-        margin-bottom: 12px;
-      }
-
-      label {
-        display: block;
-        margin-bottom: 4px;
-        font-weight: 600;
-      }
-
-      input[type="text"],
-      input[type="number"],
-      textarea,
-      select {
-        width: 100%;
-        padding: 6px 8px;
-        border-radius: 6px;
-        border: 1px solid #cbd5e1;
-        box-sizing: border-box;
-        font-size: 14px;
-      }
-
-      textarea {
-        resize: vertical;
-        min-height: 60px;
-      }
-
-      .form-actions {
-        margin-top: 16px;
-      }
-
-      .btn-primary {
-        background: #1f7ed5;
-        color: #fff;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 999px;
-        margin-right: 8px;
-      }
-
-      .btn-primary:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-      }
-
-      .btn-danger {
-        padding: 8px 16px;
-        border-radius: 999px;
-        border: 1px solid #ef4444;
-        color: #b91c1c;
-        background: #fff;
-      }
-
-      .preview-image {
-        display: block;
-        width: 220px;
-        max-height: 220px;
-        object-fit: contain;
-        margin-top: 8px;
-        border-radius: 8px;
-        border: 1px solid #e5e7eb;
-        background: #f9fafb;
-      }
-
-      /* Loading 遮罩 */
-      .loading-overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(15, 23, 42, 0.45);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        color: #fff;
-        z-index: 9999;
-      }
-
-      .loading-overlay.hidden {
-        display: none;
-      }
-
-      .loading-spinner {
-        width: 40px;
-        height: 40px;
-        border-radius: 999px;
-        border: 4px solid rgba(255, 255, 255, 0.5);
-        border-top-color: #fff;
-        animation: spin 0.8s linear infinite;
-        margin-bottom: 12px;
-      }
-
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
-    </style>
-  </head>
-
-  <body>
-    <h1>編輯商品</h1>
-    <button onclick="location.href='../index.html'">返回列表</button>
-
-    <form id="editForm" class="edit-form">
-      <!-- 圖片上傳 -->
-      <div class="form-group">
-        <label>商品圖片</label>
-        <input type="file" id="imageFile" accept="image/*" />
-        <img id="previewImage" class="preview-image" src="" />
-      </div>
-
-      <div class="form-group">
-        <label>商品名稱（必填）</label>
-        <input type="text" id="name" required />
-      </div>
-
-      <div class="form-group">
-        <label>分類</label>
-        <input type="text" id="category" />
-      </div>
-
-      <div class="form-group">
-        <label>規格</label>
-        <input type="text" id="spec" />
-      </div>
-
-      <div class="form-group">
-        <label>單位</label>
-        <input type="text" id="unit" />
-      </div>
-
-      <div class="form-group">
-        <label>描述</label>
-        <textarea id="description"></textarea>
-      </div>
-
-      <div class="form-group">
-        <label>售價（last_price，必填）</label>
-        <input type="number" id="last_price" />
-      </div>
-
-      <div class="form-group">
-        <label>是否啟用</label>
-        <select id="is_active">
-          <option value="true">啟用</option>
-          <option value="false">停用</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label>圖片網址（image_url）</label>
-        <input type="text" id="image_url" readonly />
-      </div>
-
-      <div class="form-actions">
-        <button type="submit" class="btn-primary">儲存修改</button>
-        <button type="button" id="deleteBtn" class="btn-danger">
-          刪除商品
-        </button>
-      </div>
-    </form>
-
-    <!-- Loading 遮罩 -->
-    <div
-      id="loadingOverlay"
-      class="loading-overlay hidden"
-    >
-      <div class="loading-spinner"></div>
-      <p>儲存中，請稍候…</p>
+  <form id="editForm" class="edit-form">
+    <div class="form-group">
+      <label>商品圖片</label>
+      <input type="file" id="imageFile" accept="image/*" />
+      <img id="previewImage" class="preview-image" src="" />
     </div>
 
-    <script>
-      const supabase = window.supabaseClient;
+    <div class="form-group">
+      <label>商品名稱（必填）</label>
+      <input type="text" id="name" required />
+    </div>
 
-      // 取得 URL 參數的商品 ID
-      const urlParams = new URLSearchParams(window.location.search);
-      const productId = urlParams.get("id");
+    <div class="form-group">
+      <label>分類</label>
+      <input type="text" id="category" />
+    </div>
 
-      if (!productId) {
-        alert("找不到商品 ID");
-        location.href = "../index.html";
-      }
+    <div class="form-group">
+      <label>規格</label>
+      <input type="text" id="spec" />
+    </div>
 
-      // 取得 DOM 元素
-      const nameEl = document.getElementById("name");
-      const categoryEl = document.getElementById("category");
-      const specEl = document.getElementById("spec");
-      const unitEl = document.getElementById("unit");
-      const descEl = document.getElementById("description");
-      const priceEl = document.getElementById("last_price");
-      const activeEl = document.getElementById("is_active");
-      const imgUrlEl = document.getElementById("image_url");
-      const imgFileEl = document.getElementById("imageFile");
-      const previewEl = document.getElementById("previewImage");
-      const overlayEl = document.getElementById("loadingOverlay");
+    <div class="form-group">
+      <label>單位</label>
+      <input type="text" id="unit" />
+    </div>
 
-      function setLoading(isLoading) {
-        const submitBtn = document.querySelector('button[type="submit"]');
-        const deleteBtn = document.getElementById("deleteBtn");
+    <div class="form-group">
+      <label>描述</label>
+      <textarea id="description"></textarea>
+    </div>
 
-        if (isLoading) {
-          overlayEl.classList.remove("hidden");
-          if (submitBtn) submitBtn.disabled = true;
-          if (deleteBtn) deleteBtn.disabled = true;
-        } else {
-          overlayEl.classList.add("hidden");
-          if (submitBtn) submitBtn.disabled = false;
-          if (deleteBtn) deleteBtn.disabled = false;
-        }
-      }
+    <div class="form-group">
+      <label>售價（last_price，必填）</label>
+      <input type="number" id="last_price" required />
+    </div>
 
-      // 🚀 載入商品資料
-      async function loadProduct() {
-        const { data, error } = await supabase
-          .from("products")
-          .select("*")
-          .eq("id", productId)
-          .single();
+    <div class="form-group">
+      <label>是否啟用</label>
+      <select id="is_active">
+        <option value="true">啟用</option>
+        <option value="false">停用</option>
+      </select>
+    </div>
 
-        if (error) {
-          alert("讀取資料失敗：" + error.message);
-          console.error(error);
-          return;
-        }
+    <div class="form-group">
+      <label>圖片網址（image_url）</label>
+      <input type="text" id="image_url" readonly />
+    </div>
 
-        nameEl.value = data.name || "";
-        categoryEl.value = data.category || "";
-        specEl.value = data.spec || "";
-        unitEl.value = data.unit || "";
-        descEl.value = data.description || "";
-        priceEl.value = data.last_price ?? "";
-        activeEl.value = data.is_active ? "true" : "false";
-        imgUrlEl.value = data.image_url || "";
+    <div class="form-actions">
+      <button type="submit" class="btn-primary">儲存修改</button>
+      <button type="button" id="deleteBtn" class="btn-danger">刪除商品</button>
+    </div>
+  </form>
 
-        if (data.image_url) previewEl.src = data.image_url;
-      }
+  <div id="loadingMask" class="loading-mask" style="display:none;">
+    <div class="loading-text">儲存中，請稍候…</div>
+  </div>
 
-      // 即時顯示上傳圖片預覽
-      imgFileEl.addEventListener("change", () => {
-        const file = imgFileEl.files[0];
-        if (file) previewEl.src = URL.createObjectURL(file);
-      });
-
-      // 圖片壓縮：限制最大寬高 800px、品質 0.8
-      function compressImage(file, maxWidth = 800, maxHeight = 800, quality = 0.8) {
-        return new Promise((resolve, reject) => {
-          const img = new Image();
-          const reader = new FileReader();
-
-          reader.onload = (e) => {
-            img.onload = () => {
-              let { width, height } = img;
-
-              const ratio = Math.min(
-                maxWidth / width || 1,
-                maxHeight / height || 1,
-                1
-              );
-              width = width * ratio;
-              height = height * ratio;
-
-              const canvas = document.createElement("canvas");
-              canvas.width = width;
-              canvas.height = height;
-              const ctx = canvas.getContext("2d");
-              ctx.drawImage(img, 0, 0, width, height);
-
-              canvas.toBlob(
-                (blob) => {
-                  if (!blob) {
-                    reject(new Error("圖片壓縮失敗"));
-                    return;
-                  }
-                  // 保留原檔名副檔名
-                  const compressedFile = new File([blob], file.name, {
-                    type: blob.type,
-                  });
-                  resolve(compressedFile);
-                },
-                "image/jpeg",
-                quality
-              );
-            };
-
-            img.onerror = reject;
-            img.src = e.target.result;
-          };
-
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
-      }
-
-      // 嘗試刪除舊圖片（若無權限就只記錄錯誤，不阻擋）
-      async function tryDeleteOldImage(oldUrl) {
-        try {
-          if (!oldUrl) return;
-
-          const marker = "/product-images/";
-          const idx = oldUrl.indexOf(marker);
-          if (idx === -1) return;
-
-          const path = oldUrl.substring(idx + marker.length);
-          if (!path) return;
-
-          const { error } = await supabase.storage
-            .from("product-images")
-            .remove([path]);
-
-          if (error) {
-            console.warn("刪除舊圖片失敗（可能是 RLS 未開 DELETE）：", error.message);
-          }
-        } catch (err) {
-          console.warn("刪除舊圖片時發生例外：", err);
-        }
-      }
-
-      // 🔥 上傳圖片到 product-images bucket（含中文檔名安全處理＋壓縮）
-      async function uploadImage(file) {
-        if (!file) return null;
-
-        // 先壓縮
-        const compressed = await compressImage(file);
-
-        // 將中文或特殊字元轉成安全檔名
-        const ext = (compressed.name.split(".").pop() || "jpg").toLowerCase();
-        const safeName =
-          Date.now() +
-          "_" +
-          String(productId) +
-          "_" +
-          compressed.name.replace(/[^\w.-]/g, "_");
-        const filePath = `products/${productId}/${safeName}.${ext}`;
-
-        const { error: uploadErr } = await supabase.storage
-          .from("product-images")
-          .upload(filePath, compressed, {
-            cacheControl: "3600",
-            upsert: false, // 每次用新檔名，不覆蓋
-          });
-
-        if (uploadErr) {
-          alert("圖片上傳失敗：" + uploadErr.message);
-          console.error("Upload error:", uploadErr);
-          return null;
-        }
-
-        const { data: publicData } = supabase.storage
-          .from("product-images")
-          .getPublicUrl(filePath);
-
-        return publicData.publicUrl;
-      }
-
-      // 表單防呆驗證
-      function validateForm() {
-        const errors = [];
-
-        if (!nameEl.value.trim()) {
-          errors.push("請輸入商品名稱");
-        }
-
-        const priceVal = Number(priceEl.value);
-        if (!priceEl.value || Number.isNaN(priceVal) || priceVal <= 0) {
-          errors.push("售價必須為大於 0 的數字");
-        }
-
-        if (errors.length > 0) {
-          alert(errors.join("\n"));
-          return false;
-        }
-
-        return true;
-      }
-
-      // ⭐ 儲存更新
-      document
-        .getElementById("editForm")
-        .addEventListener("submit", async (e) => {
-          e.preventDefault();
-
-          if (!validateForm()) return;
-
-          setLoading(true);
-
-          try {
-            let finalImageUrl = imgUrlEl.value;
-
-            // 如果有選新圖片 → 嘗試刪除舊圖＋上傳新圖
-            if (imgFileEl.files.length > 0) {
-              const newFile = imgFileEl.files[0];
-
-              if (finalImageUrl) {
-                await tryDeleteOldImage(finalImageUrl);
-              }
-
-              const uploadedUrl = await uploadImage(newFile);
-              if (uploadedUrl) finalImageUrl = uploadedUrl;
-            }
-
-            const updates = {
-              name: nameEl.value.trim(),
-              category: categoryEl.value.trim(),
-              spec: specEl.value.trim(),
-              unit: unitEl.value.trim(),
-              description: descEl.value.trim(),
-              last_price: Number(priceEl.value),
-              is_active: activeEl.value === "true",
-              image_url: finalImageUrl || null,
-              last_price_updated_at: new Date().toISOString(),
-            };
-
-            const { error } = await supabase
-              .from("products")
-              .update(updates)
-              .eq("id", productId);
-
-            if (error) {
-              alert("更新失敗：" + error.message);
-              console.error(error);
-              return;
-            }
-
-            alert("更新成功！");
-            location.href = "../index.html";
-          } finally {
-            setLoading(false);
-          }
-        });
-
-      // 🔥 刪除商品
-      document
-        .getElementById("deleteBtn")
-        .addEventListener("click", async () => {
-          if (!confirm("確定要刪除這個商品嗎？")) return;
-
-          setLoading(true);
-          try {
-            const { error } = await supabase
-              .from("products")
-              .delete()
-              .eq("id", productId);
-
-            if (error) {
-              alert("刪除失敗：" + error.message);
-              console.error(error);
-              return;
-            }
-
-            alert("刪除成功！");
-            location.href = "../index.html";
-          } finally {
-            setLoading(false);
-          }
-        });
-
-      // 初始化
-      loadProduct();
-    </script>
-  </body>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase.js?v=4"></script>
+  <script src="./js/edit.js?v=4"></script>
+</body>
 </html>
