@@ -1,121 +1,163 @@
 // /admin/js/add.js
-
 const supabase = window.supabaseClient;
 
-const addForm = document.getElementById("addForm");
+const form = document.getElementById("addForm");
 const imgFileEl = document.getElementById("imageFile");
 const previewEl = document.getElementById("previewImage");
 const loadingMask = document.getElementById("loadingMask");
 
-const nameEl = document.getElementById("name");
-const categoryEl = document.getElementById("category");
-const specEl = document.getElementById("spec");
-const unitEl = document.getElementById("unit");
-const descEl = document.getElementById("description");
-const priceEl = document.getElementById("last_price");
-const activeEl = document.getElementById("is_active");
-
-// 即時預覽
+// 即時預覽圖片
 imgFileEl.addEventListener("change", () => {
   const file = imgFileEl.files[0];
-  if (file) previewEl.src = URL.createObjectURL(file);
+  if (file) {
+    previewEl.src = URL.createObjectURL(file);
+  } else {
+    previewEl.src = "";
+  }
 });
 
-/** 簡單壓縮圖片（寬度最大 1000px） */
-function compressImage(file, maxWidth = 1000) {
-  return new Promise((resolve) => {
+// 簡易圖片壓縮（壓到大約 300KB 內）
+async function compressImage(file, maxWidth = 1200, quality = 0.8) {
+  return new Promise((resolve, reject) => {
     const img = new Image();
+    const url = URL.createObjectURL(file);
+
     img.onload = () => {
-      const scale = Math.min(1, maxWidth / img.width);
-      if (scale === 1) {
-        resolve(file); // 不用壓縮
-        return;
-      }
+      URL.revokeObjectURL(url);
       const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      const scale = Math.min(1, maxWidth / img.width);
       canvas.width = img.width * scale;
       canvas.height = img.height * scale;
-      const ctx = canvas.getContext("2d");
+
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
       canvas.toBlob(
         (blob) => {
-          const compressed = new File([blob], file.name, { type: blob.type });
-          resolve(compressed);
+          if (!blob) return reject(new Error("壓縮失敗"));
+          resolve(new File([blob], file.name, { type: "image/jpeg" }));
         },
         "image/jpeg",
-        0.85
+        quality
       );
     };
-    img.src = URL.createObjectURL(file);
+
+    img.onerror = reject;
+    img.src = url;
   });
 }
 
 async function uploadImage(file) {
   if (!file) return null;
 
-  const safeName = Date.now() + "_" + file.name.replace(/[^\w.-]/g, "_");
-  const path = `uploads/${safeName}`;
+  // 壓縮
+  try {
+    file = await compressImage(file);
+  } catch (e) {
+    console.warn("圖片壓縮失敗，改用原檔", e);
+  }
 
-  const { error } = await supabase.storage
+  // 安全檔名
+  const safeName =
+    Date.now() + "_" + file.name.replace(/[^\w.-]/g, "_").toLowerCase();
+  const filePath = `uploads/${safeName}`;
+
+  const { data, error } = await supabase.storage
     .from("product-images")
-    .upload(path, file, {
+    .upload(filePath, file, {
       cacheControl: "3600",
       upsert: false,
     });
 
   if (error) {
+    console.error("圖片上傳失敗", error);
     alert("圖片上傳失敗：" + error.message);
-    console.error(error);
     return null;
   }
 
-  const { data } = supabase.storage.from("product-images").getPublicUrl(path);
-  return data.publicUrl;
+  const { data: publicData } = supabase.storage
+    .from("product-images")
+    .getPublicUrl(filePath);
+
+  return publicData.publicUrl;
 }
 
-addForm.addEventListener("submit", async (e) => {
+function generateSku(name, id) {
+  const prefix = (name || "")
+    .replace(/[^\w]/g, "")
+    .toUpperCase()
+    .slice(0, 4) || "ITEM";
+  const num = String(id).padStart(3, "0");
+  return `${prefix}-${num}`;
+}
+
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  if (!nameEl.value.trim()) {
-    alert("商品名稱為必填");
-    nameEl.focus();
+  const name = document.getElementById("name").value.trim();
+  const category = document.getElementById("category").value.trim();
+  const spec = document.getElementById("spec").value.trim();
+  const unit = document.getElementById("unit").value.trim();
+  const last_price = Number(document.getElementById("last_price").value || 0);
+  const is_active =
+    document.getElementById("is_active").value === "true" ? true : false;
+  const description = document.getElementById("description").value.trim();
+
+  if (!name) {
+    alert("請輸入商品名稱");
     return;
   }
-  if (!priceEl.value) {
-    alert("售價為必填");
-    priceEl.focus();
+  if (!last_price || last_price < 0) {
+    alert("請輸入合法售價");
     return;
   }
 
   loadingMask.style.display = "flex";
 
-  let finalImageUrl = null;
-  if (imgFileEl.files.length > 0) {
-    const compressed = await compressImage(imgFileEl.files[0]);
-    finalImageUrl = await uploadImage(compressed);
+  try {
+    let imageUrl = null;
+    if (imgFileEl.files.length > 0) {
+      imageUrl = await uploadImage(imgFileEl.files[0]);
+    }
+
+    // 先插入一筆，取得 id
+    const { data: inserted, error } = await supabase
+      .from("products")
+      .insert({
+        name,
+        category,
+        spec,
+        unit,
+        last_price,
+        is_active,
+        description,
+        image_url: imageUrl,
+        last_price_updated_at: new Date().toISOString(),
+      })
+      .select("id")
+      .single();
+
+    if (error) {
+      console.error("新增失敗", error);
+      alert("新增失敗：" + error.message);
+      return;
+    }
+
+    // 自動產生 SKU：PREFIX-001
+    const sku = generateSku(name, inserted.id);
+    const { error: skuErr } = await supabase
+      .from("products")
+      .update({ sku })
+      .eq("id", inserted.id);
+
+    if (skuErr) {
+      console.warn("SKU 更新失敗", skuErr);
+    }
+
+    alert("新增成功！");
+    location.href = "index.html";
+  } finally {
+    loadingMask.style.display = "none";
   }
-
-  const payload = {
-    name: nameEl.value.trim(),
-    category: categoryEl.value.trim(),
-    spec: specEl.value.trim(),
-    unit: unitEl.value.trim(),
-    description: descEl.value.trim(),
-    last_price: Number(priceEl.value),
-    is_active: activeEl.value === "true",
-    image_url: finalImageUrl,
-    last_price_updated_at: new Date().toISOString(),
-  };
-
-  const { error } = await supabase.from("products").insert(payload);
-
-  loadingMask.style.display = "none";
-
-  if (error) {
-    alert("新增失敗：" + error.message);
-    console.error(error);
-    return;
-  }
-
-  alert("新增成功！");
-  location.href = "index.html";
 });
