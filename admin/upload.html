@@ -1,98 +1,155 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CSV 批次匯入商品｜康醫採購管理系統</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>CSV 批次匯入商品｜康醫採購管理系統</title>
 
-  <link rel="stylesheet" href="/clinic-purchase-system/admin/css/admin.css" />
+    <link rel="stylesheet" href="css/admin.css?v=2" />
 
-  <!-- Supabase JS -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase.js?v=4"></script>
+    <!-- Supabase JS v2 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <script defer src="js/upload.js?v=3"></script>
-</head>
+    <!-- 共用 Supabase client -->
+    <script src="js/supabase.js?v=4"></script>
 
-<body>
-  <header class="admin-header">
-    <div class="admin-header-inner">
-      <div>
-        <h1 class="admin-title">康醫採購管理系統｜後台</h1>
-        <p class="admin-subtitle">CSV 批次匯入商品</p>
+    <!-- 匯入邏輯 -->
+    <script defer src="js/upload.js?v=3"></script>
+  </head>
+  <body>
+    <header class="admin-header">
+      <div class="admin-header-inner">
+        <div>
+          <h1 class="admin-title">康醫採購管理系統｜後台</h1>
+          <p class="admin-subtitle">CSV 批次匯入商品</p>
+        </div>
+        <button
+          type="button"
+          class="btn-ghost"
+          onclick="location.href='index.html'"
+        >
+          返回商品列表
+        </button>
       </div>
-      <button type="button" onclick="location.href='index.html'">
-        返回商品列表
-      </button>
-    </div>
-  </header>
+    </header>
 
-  <main class="admin-main">
+    <main class="admin-main">
+      <!-- 說明 -->
+      <section class="card">
+        <h2>匯入說明</h2>
+        <p>
+          請先從 Excel
+          另存為 <strong>UTF-8 編碼的 .csv 檔</strong>，欄位名稱請使用下列格式：
+        </p>
 
-    <!-- ==================== 匯入說明 ==================== -->
-    <section class="card">
-      <h2>匯入說明（請使用 UTF-8 CSV）</h2>
-      <p>請將 Excel 表格另存為 <strong>UTF-8 編碼 .csv</strong>，欄位名稱請依下列格式：</p>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>欄位名稱</th>
+                <th>說明</th>
+                <th>是否必填</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>name</td>
+                <td>商品名稱</td>
+                <td>必填</td>
+              </tr>
+              <tr>
+                <td>category</td>
+                <td>類別</td>
+                <td>必填</td>
+              </tr>
+              <tr>
+                <td>spec</td>
+                <td>規格</td>
+                <td>必填</td>
+              </tr>
+              <tr>
+                <td>unit</td>
+                <td>單位（盒、包、瓶…）</td>
+                <td>必填</td>
+              </tr>
+              <tr>
+                <td>last_price</td>
+                <td>進價（數字）</td>
+                <td>必填</td>
+              </tr>
+              <tr>
+                <td>suggested_price</td>
+                <td>建議售價（數字）</td>
+                <td>選填</td>
+              </tr>
+              <tr>
+                <td>is_active</td>
+                <td>
+                  是否啟用（可填 1、0、true、false、啟用、停用）
+                </td>
+                <td>必填</td>
+              </tr>
+              <tr>
+                <td>description</td>
+                <td>描述（最多 1000 字）</td>
+                <td>選填</td>
+              </tr>
+              <tr>
+                <td>sku</td>
+                <td>SKU，若留空會自動產生</td>
+                <td>選填</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-      <table border="1" cellpadding="6" cellspacing="0">
-        <thead>
-          <tr>
-            <th>欄位名稱</th>
-            <th>說明</th>
-            <th>是否必填</th>
-          </tr>
-        </thead>
+        <p class="hint-text">
+          ※ 系統會以 <strong>name + spec</strong> 判斷是否為同一筆商品：<br />
+          &nbsp;&nbsp;▪ 已存在：更新該商品<br />
+          &nbsp;&nbsp;▪ 不存在：新增新商品
+        </p>
+      </section>
 
-        <tbody>
-          <tr><td>name</td><td>商品名稱</td><td>必填</td></tr>
-          <tr><td>spec</td><td>規格</td><td>必填</td></tr>
-          <tr><td>category</td><td>分類</td><td>必填</td></tr>
-          <tr><td>unit</td><td>單位（盒、包、瓶…）</td><td>必填</td></tr>
+      <!-- 匯入操作 -->
+      <section class="card">
+        <h2>選擇 CSV 檔案</h2>
+        <form id="csvForm" class="csv-form">
+          <input
+            id="csvFile"
+            type="file"
+            accept=".csv"
+            required
+          />
+          <button
+            type="submit"
+            id="importBtn"
+            class="btn-primary"
+          >
+            開始匯入
+          </button>
+        </form>
 
-          <tr><td>last_price</td><td>進價（數字）</td><td>必填</td></tr>
-          <tr><td>suggested_price</td><td>建議售價（數字）</td><td>選填</td></tr>
+        <p id="statusMsg" class="status-message"></p>
 
-          <tr><td>is_active</td><td>啟用狀態（1/0 或 true/false）</td><td>必填</td></tr>
-
-          <tr><td>description</td><td>描述（長文字）</td><td>選填</td></tr>
-        </tbody>
-      </table>
-
-      <p style="margin-top: 8px; font-size: 0.9rem; color: #555;">
-        ※ 系統會以 <strong>name + spec</strong> 判斷是否同一商品：<br />
-        &nbsp;&nbsp;▪ 若已存在 → 更新該筆商品<br />
-        &nbsp;&nbsp;▪ 若不存在 → 建立新的商品
-      </p>
-    </section>
-
-    <!-- ==================== CSV 上傳區 ==================== -->
-    <section class="card">
-      <h2>選擇 CSV 檔案</h2>
-      <form id="csvForm">
-        <input id="csvFile" type="file" accept=".csv" />
-        <button type="submit" id="importBtn">開始匯入</button>
-      </form>
-
-      <p id="statusMsg" style="margin-top: 12px; font-size: 0.9rem;"></p>
-
-      <table
-        id="resultTable"
-        border="1"
-        cellpadding="6"
-        cellspacing="0"
-        style="margin-top: 16px; display: none;"
-      >
-        <thead>
-          <tr>
-            <th>動作</th>
-            <th>筆數</th>
-            <th>說明</th>
-          </tr>
-        </thead>
-        <tbody id="resultBody"></tbody>
-      </table>
-    </section>
-
-  </main>
-</body>
+        <div class="table-wrapper" id="resultWrapper" style="display: none;">
+          <table
+            id="resultTable"
+            class="data-table"
+          >
+            <thead>
+              <tr>
+                <th>動作</th>
+                <th>筆數</th>
+                <th>說明</th>
+              </tr>
+            </thead>
+            <tbody id="resultBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </body>
 </html>
