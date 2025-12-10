@@ -2,23 +2,27 @@
 <html lang="zh-Hant">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
     <title>康醫採購查詢系統</title>
 
     <!-- 前台樣式 -->
-    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/style.css?v=2" />
 
     <!-- Supabase v2 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- 共用 Supabase client（從 /admin/js 引用） -->
+    <!-- 共用 Supabase client（沿用 admin/js/supabase.js） -->
     <script src="admin/js/supabase.js?v=4"></script>
 
     <!-- 前台邏輯 -->
-    <script defer src="js/index.js?v=4"></script>
+    <script defer src="js/index.js?v=3"></script>
   </head>
 
   <body>
+    <!-- 頂部主視覺 -->
     <header class="app-header">
       <div class="app-header-inner">
         <div class="app-title-block">
@@ -28,10 +32,11 @@
       </div>
     </header>
 
+    <!-- 內容區 -->
     <main class="app-main">
       <!-- 搜尋區 -->
       <section class="search-section">
-        <label class="search-label" for="searchInput">
+        <label for="searchInput" class="search-label">
           搜尋商品名稱、規格或分類
         </label>
         <div class="search-input-wrapper">
@@ -40,19 +45,21 @@
             type="text"
             placeholder="例如：口罩、手套、點滴架…"
           />
-          <button id="clearBtn" class="btn-secondary">清除</button>
+          <button id="clearBtn" class="btn-secondary" type="button">
+            清除
+          </button>
         </div>
-        <p class="search-hint">僅顯示「啟用」商品。</p>
-        <p id="statusMessage" class="status-message"></p>
+        <p class="search-hint">支援商品名稱、類別、規格等關鍵字模糊查詢</p>
+        <div id="frontStatus" class="status-message"></div>
       </section>
 
       <!-- 商品卡片 -->
       <section>
         <div id="productList" class="product-list">
-          <!-- JS 動態插入卡片 -->
+          <!-- JS 會動態插入卡片 -->
         </div>
 
-        <div id="emptyState" class="empty-state" style="display: none">
+        <div id="emptyState" class="empty-state" style="display: none;">
           目前沒有符合條件的商品
         </div>
       </section>
