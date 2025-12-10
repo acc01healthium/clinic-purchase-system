@@ -1,56 +1,51 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>康醫採購查詢系統（商品列表）</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>康醫採購查詢系統</title>
 
-  <!-- 卡片 UI 的 CSS -->
-  <link rel="stylesheet" href="./css/style.css" />
-</head>
+    <!-- 前台樣式（你原本的 style.css） -->
+    <link rel="stylesheet" href="css/style.css" />
 
-<body>
-  <!-- 頂部 Banner / 標題區 -->
-  <header class="app-header">
-    <div class="app-header-inner">
-      <div class="app-title-block">
-        <h1 class="app-title">康醫採購查詢系統</h1>
-        <p class="app-subtitle">商品列表</p>
-      </div>
-    </div>
-  </header>
+    <!-- Supabase v2 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- 主內容 -->
-  <main class="app-main">
-    <!-- 搜尋區 -->
-    <section class="search-section">
-      <label for="searchInput" class="search-label">搜尋商品名稱、規格或分類</label>
-      <div class="search-input-wrapper">
-        <input
-          id="searchInput"
-          type="text"
-          placeholder="例如：口罩、手套、點滴架…"
-        />
-        <button id="clearSearchBtn" type="button" class="btn-secondary">
-          清除
-        </button>
-      </div>
-    </section>
+    <!-- 共用 Supabase client：注意從根目錄指向 admin/js -->
+    <script src="admin/js/supabase.js?v=4"></script>
 
-    <!-- 狀態訊息 -->
-    <section id="statusMessage" class="status-message" hidden></section>
+    <!-- 前台邏輯 -->
+    <script defer src="js/index.js?v=3"></script>
+  </head>
 
-    <!-- 商品卡片列表 -->
-    <section id="productList" class="product-list">
-      <!-- 由 JS 動態產生 -->
-    </section>
-  </main>
+  <body>
+    <header class="app-header">
+      <div class="app-title">康醫採購查詢系統</div>
+      <div class="app-subtitle">商品列表</div>
+    </header>
 
- <!-- Supabase JS v2 (CDN) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- 共用 Supabase client -->
-  <script src="./js/supabase.js?v=4"></script>
-  <!-- 前台列表邏輯 -->
-  <script src="./js/index.js?v=4"></script>
-</body>
+    <main class="app-main">
+      <section class="search-section">
+        <div class="search-row">
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="搜尋商品名稱、規格或分類"
+          />
+          <button id="clearBtn" class="btn-secondary">清除</button>
+        </div>
+        <p class="search-hint">例如：口罩、手套、點滴架…</p>
+      </section>
+
+      <section class="products-section">
+        <div id="productList" class="product-card-grid">
+          <!-- JS 會動態插入商品卡片 -->
+        </div>
+
+        <div id="emptyState" class="empty-state" style="display: none">
+          目前沒有符合條件的商品
+        </div>
+      </section>
+    </main>
+  </body>
 </html>
