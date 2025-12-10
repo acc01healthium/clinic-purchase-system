@@ -1,152 +1,227 @@
 // admin/js/upload.js
-// CSV 匯入：name + spec 判斷同一商品，更新 / 新增
-console.log("upload.js 載入");
+// 後台：CSV 批次匯入商品（name + spec 判斷同筆）
 
-const supabase = window.supabaseClient;
-const fileInput = document.getElementById("csvFile");
-const uploadBtn = document.getElementById("uploadBtn");
-const logBox = document.getElementById("logBox");
+console.log("✅ upload.js 載入");
 
-function log(msg) {
-  logBox.textContent += msg + "\n";
+const db = window.supabaseClient;
+
+const csvForm = document.getElementById("csvForm");
+const csvFileInput = document.getElementById("csvFile");
+const statusMsgEl = document.getElementById("statusMsg");
+const resultTable = document.getElementById("resultTable");
+const resultBody = document.getElementById("resultBody");
+
+function setStatus(text, isError = false) {
+  if (!statusMsgEl) return;
+  statusMsgEl.textContent = text || "";
+  statusMsgEl.style.color = isError ? "#c62828" : "#333";
 }
 
+function parseBool(val) {
+  if (val == null) return false;
+  const s = String(val).trim().toLowerCase();
+  return ["1", "true", "y", "yes", "啟用", "是"].includes(s);
+}
+
+function parseNumber(val) {
+  if (val == null || val === "") return null;
+  const n = Number(String(val).replace(/,/g, ""));
+  return Number.isNaN(n) ? null : n;
+}
+
+function genSku(name, spec) {
+  const n = (name || "").replace(/\s+/g, "").slice(0, 6);
+  const s = (spec || "").replace(/\s+/g, "").slice(0, 6);
+  return `${n || "ITEM"}-${s || "SPEC"}-${Date.now().toString(36)}`.toUpperCase();
+}
+
+// 從 CSV 文字解析為物件陣列
 function parseCsv(text) {
-  const lines = text.split(/\r?\n/).filter((l) => l.trim() !== "");
-  if (lines.length <= 1) return [];
+  const lines = text
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+
+  if (lines.length === 0) return [];
 
   const header = lines[0].split(",").map((h) => h.trim());
   const rows = [];
 
   for (let i = 1; i < lines.length; i++) {
     const cols = lines[i].split(",");
-    if (cols.length === 1 && cols[0].trim() === "") continue;
-
-    const rowObj = {};
+    const row = {};
     header.forEach((h, idx) => {
-      rowObj[h] = (cols[idx] || "").trim();
+      row[h] = (cols[idx] || "").replace(/^"|"$/g, "").trim();
     });
-
-    rows.push(rowObj);
+    rows.push(row);
   }
+
   return rows;
 }
 
-async function upsertRow(row) {
-  const name = row.name?.trim();
-  const spec = row.spec?.trim();
-  const category = row.category?.trim() || null;
-  const unit = row.unit?.trim() || null;
+async function handleCsvSubmit(e) {
+  e.preventDefault();
 
-  if (!name) {
-    log(`略過一筆資料：缺少 name`);
+  if (!csvFileInput.files || csvFileInput.files.length === 0) {
+    setStatus("請先選擇 CSV 檔案", true);
     return;
   }
 
-  const last_price =
-    row.last_price !== undefined && row.last_price !== ""
-      ? Number(row.last_price)
-      : null;
+  const file = csvFileInput.files[0];
 
-  const suggested_price =
-    row.suggested_price !== undefined && row.suggested_price !== ""
-      ? Number(row.suggested_price)
-      : null;
+  setStatus("讀取檔案中…");
+  resultTable.style.display = "none";
+  resultBody.innerHTML = "";
 
-  let is_active = true;
-  if (row.is_active !== undefined && row.is_active !== "") {
-    const v = row.is_active.toString().toLowerCase();
-    is_active = v === "1" || v === "true" || v === "t" || v === "yes";
-  }
+  const reader = new FileReader();
 
-  // 先用 name + spec 找是否已存在
-  const { data: existList, error: selErr } = await supabase
-    .from("products")
-    .select("id,last_price")
-    .eq("name", name)
-    .eq("spec", spec || null);
+  reader.onload = async (ev) => {
+    try {
+      const text = ev.target.result;
+      const rows = parseCsv(text);
 
-  if (selErr) {
-    log(`查詢失敗：${selErr.message}`);
-    return;
-  }
+      if (rows.length === 0) {
+        setStatus("檔案沒有資料列", true);
+        return;
+      }
 
-  const nowIso = new Date().toISOString();
+      let inserted = 0;
+      let updated = 0;
+      let failed = 0;
 
-  if (existList && existList.length > 0) {
-    const target = existList[0];
+      setStatus("匯入中，請稍候…");
 
-    const updateData = {
-      category,
-      unit,
-      is_active,
-    };
+      for (const r of rows) {
+        const name = r.name?.trim();
+        const spec = r.spec?.trim();
 
-    if (last_price !== null) {
-      updateData.last_price = last_price;
-      updateData.last_price_updated_at = nowIso;
+        if (!name || !spec) {
+          failed++;
+          continue;
+        }
+
+        const unit = r.unit?.trim() || "";
+        const category = r.category?.trim() || "";
+        const description = r.description?.trim() || "";
+        const lastPrice = parseNumber(r.last_price);
+        const suggestPrice = parseNumber(r.suggest_price);
+        const isActive = parseBool(r.is_active);
+
+        // 先查是否已存在 name + spec
+        const { data: existed, error: queryErr } = await db
+          .from("products")
+          .select("id, sku")
+          .eq("name", name)
+          .eq("spec", spec)
+          .maybeSingle();
+
+        if (queryErr) {
+          console.error("查詢錯誤：", queryErr);
+          failed++;
+          continue;
+        }
+
+        const nowIso = new Date().toISOString();
+
+        if (!existed) {
+          // 新增
+          const insertData = {
+            name,
+            spec,
+            unit,
+            category,
+            description,
+            last_price: lastPrice,
+            suggest_price: suggestPrice,
+            is_active: isActive,
+            sku: r.sku?.trim() || genSku(name, spec),
+          };
+          if (lastPrice != null) {
+            insertData.last_price_updated_at = nowIso;
+          }
+
+          const { error: insErr } = await db
+            .from("products")
+            .insert([insertData]);
+
+          if (insErr) {
+            console.error("新增錯誤：", insErr);
+            failed++;
+          } else {
+            inserted++;
+          }
+        } else {
+          // 更新
+          const updateData = {
+            unit,
+            category,
+            description,
+            is_active: isActive,
+          };
+
+          if (lastPrice != null) {
+            updateData.last_price = lastPrice;
+            updateData.last_price_updated_at = nowIso;
+          }
+
+          if (suggestPrice != null) {
+            updateData.suggest_price = suggestPrice;
+          }
+
+          if (r.sku && r.sku.trim()) {
+            updateData.sku = r.sku.trim();
+          }
+
+          const { error: updErr } = await db
+            .from("products")
+            .update(updateData)
+            .eq("id", existed.id);
+
+          if (updErr) {
+            console.error("更新錯誤：", updErr);
+            failed++;
+          } else {
+            updated++;
+          }
+        }
+      }
+
+      // 顯示結果
+      resultBody.innerHTML = "";
+
+      const makeRow = (action, count, desc) => {
+        const tr = document.createElement("tr");
+        const td1 = document.createElement("td");
+        const td2 = document.createElement("td");
+        const td3 = document.createElement("td");
+        td1.textContent = action;
+        td2.textContent = count;
+        td3.textContent = desc;
+        tr.appendChild(td1);
+        tr.appendChild(td2);
+        tr.appendChild(td3);
+        resultBody.appendChild(tr);
+      };
+
+      makeRow("新增", inserted, "原本不存在的 name+spec，已新增");
+      makeRow("更新", updated, "已存在的 name+spec，已更新資料");
+      makeRow("失敗", failed, "欄位缺漏或資料庫錯誤");
+
+      resultTable.style.display = "";
+      setStatus("匯入完成！");
+    } catch (err) {
+      console.error("匯入例外：", err);
+      setStatus("匯入過程發生錯誤：" + err.message, true);
     }
+  };
 
-    if (suggested_price !== null) {
-      updateData.suggested_price = suggested_price;
-    }
+  reader.onerror = () => {
+    setStatus("讀取檔案失敗", true);
+  };
 
-    const { error: upErr } = await supabase
-      .from("products")
-      .update(updateData)
-      .eq("id", target.id);
-
-    if (upErr) {
-      log(`更新失敗（${name}/${spec}）：${upErr.message}`);
-    } else {
-      log(`更新成功：${name} / ${spec || ""}`);
-    }
-  } else {
-    // 新增
-    const insertData = {
-      name,
-      spec: spec || null,
-      category,
-      unit,
-      is_active,
-      last_price: last_price,
-      suggested_price: suggested_price,
-      last_price_updated_at: last_price ? nowIso : null,
-    };
-
-    const { error: insErr } = await supabase
-      .from("products")
-      .insert([insertData]);
-
-    if (insErr) {
-      log(`新增失敗（${name}/${spec}）：${insErr.message}`);
-    } else {
-      log(`新增成功：${name} / ${spec || ""}`);
-    }
-  }
+  reader.readAsText(file, "utf-8");
 }
 
-uploadBtn.addEventListener("click", async () => {
-  logBox.textContent = "";
-
-  const file = fileInput.files[0];
-  if (!file) {
-    alert("請先選擇 CSV 檔案");
-    return;
-  }
-
-  const text = await file.text();
-  const rows = parseCsv(text);
-  if (rows.length === 0) {
-    alert("檔案內容為空或格式不正確");
-    return;
-  }
-
-  log(`開始匯入，共 ${rows.length} 筆資料…`);
-
-  for (let i = 0; i < rows.length; i++) {
-    await upsertRow(rows[i]);
-  }
-
-  log("匯入完成！");
-});
+if (csvForm) {
+  csvForm.addEventListener("submit", handleCsvSubmit);
+}
