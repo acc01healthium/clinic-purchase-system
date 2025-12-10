@@ -140,26 +140,32 @@ imgFileEl.addEventListener("change", () => {
 async function uploadImage(file) {
   if (!file) return null;
 
-  const ext = file.name.split('.').pop().toLowerCase();
+  // 將中文檔名轉成安全格式
+  const safeName = Date.now() + "_" + file.name.replace(/[^\w.-]/g, "_");
 
-  // ❌ 不使用中文或特殊符號檔名  
-  // ✔ 使用安全英文檔名
-  const safeFileName = `product_${productId}_${Date.now()}.${ext}`;
+  const filePath = `uploads/${safeName}`;
 
-  const { error: uploadErr } = await supabase.storage
+  const { data, error } = await supabaseClient
+    .storage
     .from("product-images")
-    .upload(safeFileName, file, { upsert: true });
+    .upload(filePath, file, {
+      cacheControl: "3600",
+      upsert: false
+    });
 
-  if (uploadErr) {
-    alert("圖片上傳失敗：" + uploadErr.message);
+  if (error) {
+    alert("圖片上傳失敗：" + error.message);
+    console.error("Upload error:", error);
     return null;
   }
 
-  const { data } = supabase.storage
+  // 取得公開 URL
+  const { data: publicData } = supabaseClient
+    .storage
     .from("product-images")
-    .getPublicUrl(safeFileName);
+    .getPublicUrl(filePath);
 
-  return data.publicUrl;
+  return publicData.publicUrl;
 }
 
 
