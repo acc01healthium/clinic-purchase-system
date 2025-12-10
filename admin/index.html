@@ -1,48 +1,82 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>康醫採購管理系統｜後台</title>
-  <link rel="stylesheet" href="./css/admin.css" />
-</head>
-<body>
-  <header class="admin-header">
-    <div class="admin-title">康醫採購管理系統｜後台</div>
-    <div class="admin-user">acc01.healthium@gmail.com</div>
-  </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>康醫採購管理系統｜後台</title>
 
-  <main class="admin-main">
-    <div class="admin-toolbar">
-      <h1>商品列表</h1>
-      <div class="toolbar-actions">
-        <button id="addBtn" class="btn-primary">新增商品（預留）</button>
-        <button id="csvBtn" class="btn-secondary">CSV 批次匯入</button>
+    <!-- 後台樣式（你之前的 admin.css） -->
+    <link rel="stylesheet" href="css/admin.css" />
+
+    <!-- Supabase v2 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- 共用 Supabase client（注意路徑） -->
+    <script src="js/supabase.js?v=4"></script>
+
+    <!-- 後台列表邏輯 -->
+    <script defer src="js/index.js?v=3"></script>
+  </head>
+
+  <body>
+    <header class="admin-header">
+      <div class="admin-header-left">
+        <div class="app-title">康醫採購管理系統｜後台</div>
       </div>
-    </div>
+      <div class="admin-header-right">
+        <span class="user-email">acc01.healthium@gmail.com</span>
+        <button class="btn-outline" onclick="location.href='login.html'">
+          登出
+        </button>
+      </div>
+    </header>
 
-    <table class="admin-table">
-      <thead>
-        <tr>
-          <th>名稱</th>
-          <th>類別</th>
-          <th>規格</th>
-          <th>單位</th>
-          <th>售價</th>
-          <th>價格更新時間</th>
-          <th>狀態</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody id="productTbody">
-        <!-- JS 產生 -->
-      </tbody>
-    </table>
-  </main>
+    <main class="admin-main">
+      <section class="page-header">
+        <h1>商品列表</h1>
+        <div class="page-header-actions">
+          <button
+            class="btn-primary"
+            type="button"
+            onclick="location.href='add.html'"
+          >
+            新增商品（預留）
+          </button>
+          <button
+            class="btn-secondary"
+            type="button"
+            onclick="location.href='upload.html'"
+          >
+            CSV 批次匯入
+          </button>
+        </div>
+      </section>
 
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../js/supabase.js?v=4"></script>
-  <script src="./js/index.js?v=4"></script>
-</body>
+      <section class="card">
+        <div class="table-wrapper">
+          <table class="product-table">
+            <thead>
+              <tr>
+                <th>名稱</th>
+                <th>類別</th>
+                <th>規格</th>
+                <th>單位</th>
+                <th>售價</th>
+                <th>價格更新時間</th>
+                <th>狀態</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="productTbody">
+              <!-- JS 會插入資料列 -->
+            </tbody>
+          </table>
+
+          <div id="tableEmpty" class="table-empty" style="display: none">
+            尚未建立商品
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
 </html>
