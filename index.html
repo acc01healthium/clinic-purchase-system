@@ -46,13 +46,11 @@
     </section>
   </main>
 
-  <!-- Supabase 官方套件 -->
+ <!-- Supabase JS v2 (CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- 你的 Supabase 設定（前台 & 後台共用） -->
-  <script src="./js/supabase.js"></script>
-
-  <!-- 前台商品讀取 & 搜尋邏輯（必須存在） -->
-  <script src="./js/product-list.js"></script>
+  <!-- 共用 Supabase client -->
+  <script src="./js/supabase.js?v=4"></script>
+  <!-- 前台列表邏輯 -->
+  <script src="./js/index.js?v=4"></script>
 </body>
 </html>
