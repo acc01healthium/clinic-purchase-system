@@ -1,78 +1,90 @@
+<!-- /admin/edit.html -->
 <!DOCTYPE html>
 <html lang="zh-Hant">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>編輯商品</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>編輯商品｜康醫採購管理系統</title>
 
-  <link rel="stylesheet" href="./css/admin.css" />
-</head>
-<body>
-  <h1>編輯商品</h1>
-  <button onclick="location.href='index.html'">返回列表</button>
+    <link rel="stylesheet" href="css/admin.css" />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js?v=4"></script>
+    <script defer src="js/edit.js?v=3"></script>
+  </head>
+  <body>
+    <header class="admin-header">
+      <div class="admin-header-inner">
+        <div>
+          <h1 class="admin-title">康醫採購管理系統｜後台</h1>
+          <p class="admin-subtitle">編輯商品</p>
+        </div>
+      </div>
+    </header>
 
-  <form id="editForm" class="edit-form">
-    <div class="form-group">
-      <label>商品圖片</label>
-      <input type="file" id="imageFile" accept="image/*" />
-      <img id="previewImage" class="preview-image" src="" />
+    <div id="loadingMask" class="loading-mask" style="display:none;">
+      <div class="loading-box">儲存中，請稍候…</div>
     </div>
 
-    <div class="form-group">
-      <label>商品名稱（必填）</label>
-      <input type="text" id="name" required />
-    </div>
+    <main class="admin-main">
+      <section class="card form-card">
+        <form id="editForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>商品名稱（必填）</label>
+              <input type="text" id="name" required />
+            </div>
 
-    <div class="form-group">
-      <label>分類</label>
-      <input type="text" id="category" />
-    </div>
+            <div class="form-group">
+              <label>類別</label>
+              <input type="text" id="category" />
+            </div>
 
-    <div class="form-group">
-      <label>規格</label>
-      <input type="text" id="spec" />
-    </div>
+            <div class="form-group">
+              <label>規格</label>
+              <input type="text" id="spec" />
+            </div>
 
-    <div class="form-group">
-      <label>單位</label>
-      <input type="text" id="unit" />
-    </div>
+            <div class="form-group">
+              <label>單位</label>
+              <input type="text" id="unit" />
+            </div>
 
-    <div class="form-group">
-      <label>描述</label>
-      <textarea id="description"></textarea>
-    </div>
+            <div class="form-group">
+              <label>售價（必填）</label>
+              <input type="number" id="last_price" min="0" step="1" />
+            </div>
 
-    <div class="form-group">
-      <label>售價（last_price，必填）</label>
-      <input type="number" id="last_price" required />
-    </div>
+            <div class="form-group">
+              <label>是否啟用</label>
+              <select id="is_active">
+                <option value="true">啟用</option>
+                <option value="false">停用</option>
+              </select>
+            </div>
 
-    <div class="form-group">
-      <label>是否啟用</label>
-      <select id="is_active">
-        <option value="true">啟用</option>
-        <option value="false">停用</option>
-      </select>
-    </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label>描述</label>
+              <textarea id="description"></textarea>
+            </div>
 
-    <div class="form-group">
-      <label>圖片網址（image_url）</label>
-      <input type="text" id="image_url" readonly />
-    </div>
+            <div class="form-group image-preview-wrapper" style="grid-column: 1 / -1;">
+              <label>商品圖片</label>
+              <input type="file" id="imageFile" accept="image/*" />
+              <img id="previewImage" class="preview-image" src="" alt="" />
+            </div>
+          </div>
 
-    <div class="form-actions">
-      <button type="submit" class="btn-primary">儲存修改</button>
-      <button type="button" id="deleteBtn" class="btn-danger">刪除商品</button>
-    </div>
-  </form>
-
-  <div id="loadingMask" class="loading-mask" style="display:none;">
-    <div class="loading-text">儲存中，請稍候…</div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../js/supabase.js?v=4"></script>
-  <script src="./js/edit.js?v=4"></script>
-</body>
+          <div class="form-footer">
+            <button type="submit" class="btn-primary">儲存修改</button>
+            <button type="button" class="btn-danger" id="deleteBtn">
+              刪除商品
+            </button>
+            <button type="button" class="btn-secondary" onclick="history.back()">
+              返回列表
+            </button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </body>
 </html>
