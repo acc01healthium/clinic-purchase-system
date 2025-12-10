@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>康醫採購查詢系統</title>
 
-    <!-- 前台樣式（你原本的 style.css） -->
+    <!-- 前台樣式 -->
     <link rel="stylesheet" href="css/style.css" />
 
-    <!-- Supabase v2 -->
+    <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- 共用 Supabase client：注意從根目錄指向 admin/js -->
+    <!-- 共用 Supabase client -->
     <script src="admin/js/supabase.js?v=4"></script>
 
     <!-- 前台邏輯 -->
@@ -19,27 +19,38 @@
   </head>
 
   <body>
+    <!-- ========= Header ========= -->
     <header class="app-header">
-      <div class="app-title">康醫採購查詢系統</div>
-      <div class="app-subtitle">商品列表</div>
+      <div class="app-header-inner">
+        <div class="app-title-block">
+          <h1 class="app-title">康醫採購查詢系統</h1>
+          <p class="app-subtitle">商品列表</p>
+        </div>
+      </div>
     </header>
 
     <main class="app-main">
+      <!-- ========= 搜尋區 ========= -->
       <section class="search-section">
-        <div class="search-row">
+        <label class="search-label" for="searchInput">搜尋商品名稱、規格或分類</label>
+
+        <div class="search-input-wrapper">
           <input
             id="searchInput"
             type="text"
-            placeholder="搜尋商品名稱、規格或分類"
+            placeholder="例如：口罩、手套、點滴架…"
           />
           <button id="clearBtn" class="btn-secondary">清除</button>
         </div>
+
         <p class="search-hint">例如：口罩、手套、點滴架…</p>
+        <p id="statusMsg" class="status-message"></p>
       </section>
 
+      <!-- ========= 商品列表 ========= -->
       <section class="products-section">
         <div id="productList" class="product-list">
-          <!-- JS 會動態插入商品卡片 -->
+          <!-- JS 動態插入 -->
         </div>
 
         <div id="emptyState" class="empty-state" style="display: none">
