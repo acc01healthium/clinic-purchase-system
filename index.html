@@ -6,20 +6,19 @@
     <title>康醫採購查詢系統</title>
 
     <!-- 前台樣式 -->
-   <link rel="stylesheet" href="/clinic-purchase-system/css/style.css" />
+    <link rel="stylesheet" href="css/style.css" />
 
-    <!-- Supabase -->
+    <!-- Supabase v2 -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- 共用 Supabase client -->
+    <!-- 共用 Supabase client（從 /admin/js 引用） -->
     <script src="admin/js/supabase.js?v=4"></script>
 
     <!-- 前台邏輯 -->
-    <script defer src="js/index.js?v=3"></script>
+    <script defer src="js/index.js?v=4"></script>
   </head>
 
   <body>
-    <!-- ========= Header ========= -->
     <header class="app-header">
       <div class="app-header-inner">
         <div class="app-title-block">
@@ -30,10 +29,11 @@
     </header>
 
     <main class="app-main">
-      <!-- ========= 搜尋區 ========= -->
+      <!-- 搜尋區 -->
       <section class="search-section">
-        <label class="search-label" for="searchInput">搜尋商品名稱、規格或分類</label>
-
+        <label class="search-label" for="searchInput">
+          搜尋商品名稱、規格或分類
+        </label>
         <div class="search-input-wrapper">
           <input
             id="searchInput"
@@ -42,15 +42,14 @@
           />
           <button id="clearBtn" class="btn-secondary">清除</button>
         </div>
-
-        <p class="search-hint">例如：口罩、手套、點滴架…</p>
-        <p id="statusMsg" class="status-message"></p>
+        <p class="search-hint">僅顯示「啟用」商品。</p>
+        <p id="statusMessage" class="status-message"></p>
       </section>
 
-      <!-- ========= 商品列表 ========= -->
-      <section class="products-section">
+      <!-- 商品卡片 -->
+      <section>
         <div id="productList" class="product-list">
-          <!-- JS 動態插入 -->
+          <!-- JS 動態插入卡片 -->
         </div>
 
         <div id="emptyState" class="empty-state" style="display: none">
