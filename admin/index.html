@@ -1,271 +1,48 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0"
-    />
-    <title>康醫採購管理系統｜商品列表</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>康醫採購管理系統｜後台</title>
+  <link rel="stylesheet" href="./css/admin.css" />
+</head>
+<body>
+  <header class="admin-header">
+    <div class="admin-title">康醫採購管理系統｜後台</div>
+    <div class="admin-user">acc01.healthium@gmail.com</div>
+  </header>
 
-    <!-- 你的列表頁 CSS（如果你原本有 style.css 可以留著） -->
-    <link rel="stylesheet" href="./css/style.css" />
-
-   <!-- Supabase JS v2 (CDN) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- 共用 Supabase client -->
-  <script src="./js/supabase.js?v=4"></script>
-  <!-- 前台列表邏輯 -->
-  <script src="./js/index.js?v=4"></script>
-
-    <style>
-      body {
-        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-          sans-serif;
-        margin: 0;
-        background: #f5f7fb;
-      }
-
-      header {
-        background: #1f7ed5;
-        color: #fff;
-        padding: 16px 24px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-
-      header h1 {
-        margin: 0;
-        font-size: 20px;
-      }
-
-      main {
-        max-width: 1080px;
-        margin: 24px auto;
-        background: #fff;
-        padding: 16px 24px 32px;
-        border-radius: 12px;
-        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
-      }
-
-      .toolbar {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 12px;
-      }
-
-      .btn-primary {
-        background: #1f7ed5;
-        color: #fff;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 999px;
-        cursor: pointer;
-        font-size: 14px;
-      }
-
-      .btn-primary:hover {
-        background: #1760a2;
-      }
-
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 8px;
-        font-size: 14px;
-      }
-
-      thead {
-        background: #f1f5f9;
-      }
-
-      th,
-      td {
-        padding: 8px 10px;
-        border-bottom: 1px solid #e2e8f0;
-        text-align: left;
-        white-space: nowrap;
-      }
-
-      tbody tr:hover {
-        background: #f9fafb;
-      }
-
-      .tag {
-        display: inline-block;
-        padding: 2px 8px;
-        border-radius: 999px;
-        font-size: 12px;
-      }
-
-      .tag-green {
-        background: #ecfdf3;
-        color: #027a48;
-      }
-
-      .tag-gray {
-        background: #f3f4f6;
-        color: #4b5563;
-      }
-
-      .btn-small {
-        padding: 4px 10px;
-        border-radius: 999px;
-        font-size: 12px;
-        border: 1px solid #cbd5e1;
-        background: #fff;
-        cursor: pointer;
-        margin-right: 4px;
-      }
-
-      .btn-small:hover {
-        background: #e5f0ff;
-      }
-
-      .text-right {
-        text-align: right;
-      }
-
-      .text-center {
-        text-align: center;
-      }
-
-      .empty {
-        text-align: center;
-        padding: 24px;
-        color: #6b7280;
-      }
-    </style>
-  </head>
-
-  <body>
-    <header>
-      <h1>康醫採購管理系統｜後台</h1>
-      <div>acc01.healthium@gmail.com</div>
-    </header>
-
-    <main>
-      <div class="toolbar">
-        <h2>商品列表</h2>
-        <!-- 目前新增商品先保留，之後你要再做 new.html 再接上 -->
-        <button
-          type="button"
-          class="btn-primary"
-          id="btnAddProduct"
-        >
-          新增商品（預留）
-        </button>
+  <main class="admin-main">
+    <div class="admin-toolbar">
+      <h1>商品列表</h1>
+      <div class="toolbar-actions">
+        <button id="addBtn" class="btn-primary">新增商品（預留）</button>
+        <button id="csvBtn" class="btn-secondary">CSV 批次匯入</button>
       </div>
+    </div>
 
-      <table>
-        <thead>
-          <tr>
-            <th>名稱</th>
-            <th>類別</th>
-            <th>規格</th>
-            <th>單位</th>
-            <th class="text-right">售價</th>
-            <th>價格更新時間</th>
-            <th class="text-center">狀態</th>
-            <th class="text-center">操作</th>
-          </tr>
-        </thead>
-        <tbody id="productTableBody">
-          <tr>
-            <td class="empty" colspan="8">載入中…</td>
-          </tr>
-        </tbody>
-      </table>
-    </main>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>名稱</th>
+          <th>類別</th>
+          <th>規格</th>
+          <th>單位</th>
+          <th>售價</th>
+          <th>價格更新時間</th>
+          <th>狀態</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="productTbody">
+        <!-- JS 產生 -->
+      </tbody>
+    </table>
+  </main>
 
-    <script>
-      const supabase = window.supabaseClient;
-
-      const tbody = document.getElementById("productTableBody");
-      const btnAdd = document.getElementById("btnAddProduct");
-
-      btnAdd.addEventListener("click", () => {
-        alert("新增商品功能先保留，之後再一起規劃頁面 😊");
-      });
-
-      function formatDateTime(iso) {
-        if (!iso) return "-";
-        const d = new Date(iso);
-        if (Number.isNaN(d.getTime())) return "-";
-        const y = d.getFullYear();
-        const m = String(d.getMonth() + 1).padStart(2, "0");
-        const day = String(d.getDate()).padStart(2, "0");
-        const hh = String(d.getHours()).padStart(2, "0");
-        const mm = String(d.getMinutes()).padStart(2, "0");
-        return `${y}/${m}/${day} ${hh}:${mm}`;
-      }
-
-      function renderRows(products) {
-        if (!products || products.length === 0) {
-          tbody.innerHTML =
-            '<tr><td class="empty" colspan="8">目前尚無商品</td></tr>';
-          return;
-        }
-
-        tbody.innerHTML = "";
-
-        for (const p of products) {
-          const tr = document.createElement("tr");
-
-          tr.innerHTML = `
-          <td>${p.name ?? ""}</td>
-          <td>${p.category ?? ""}</td>
-          <td>${p.spec ?? ""}</td>
-          <td>${p.unit ?? ""}</td>
-          <td class="text-right">NT$ ${p.last_price ?? 0}</td>
-          <td>${formatDateTime(p.last_price_updated_at)}</td>
-          <td class="text-center">
-            <span class="tag ${
-              p.is_active ? "tag-green" : "tag-gray"
-            }">${p.is_active ? "啟用" : "停用"}</span>
-          </td>
-          <td class="text-center">
-            <button class="btn-small btn-edit" data-id="${p.id}">編輯</button>
-          </td>
-        `;
-
-          tbody.appendChild(tr);
-        }
-
-        // 綁定編輯按鈕
-        tbody.querySelectorAll(".btn-edit").forEach((btn) => {
-          btn.addEventListener("click", (e) => {
-            const id = e.currentTarget.getAttribute("data-id");
-            if (!id) return;
-            location.href = `./admin/edit.html?id=${encodeURIComponent(id)}`;
-          });
-        });
-      }
-
-      async function loadProducts() {
-        tbody.innerHTML =
-          '<tr><td class="empty" colspan="8">載入中…</td></tr>';
-
-        const { data, error } = await supabase
-          .from("products")
-          .select("*")
-          .order("id", { ascending: true });
-
-        if (error) {
-          console.error("載入商品失敗：", error);
-          tbody.innerHTML =
-            '<tr><td class="empty" colspan="8">載入失敗：' +
-            error.message +
-            "</td></tr>";
-          return;
-        }
-
-        renderRows(data);
-      }
-
-      document.addEventListener("DOMContentLoaded", loadProducts);
-    </script>
-  </body>
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/supabase.js?v=4"></script>
+  <script src="./js/index.js?v=4"></script>
+</body>
 </html>
