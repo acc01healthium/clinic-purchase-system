@@ -1,57 +1,110 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-<head>
-  <meta charset="UTF-8" />
-  <title>康醫採購管理系統｜後台列表</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>商品列表｜康醫採購管理系統</title>
 
-  <link rel="stylesheet" href="/clinic-purchase-system/admin/css/admin.css" />
+    <link rel="stylesheet" href="css/admin.css?v=2" />
 
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./js/supabase.js"></script>
-  <script defer src="./js/admin-index.js"></script>
-</head>
+    <!-- Supabase v2 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<body>
-  <header class="admin-header">
-    <div class="admin-header-inner">
-      <div>
-        <h1>康醫採購管理系統</h1>
-        <p class="admin-subtitle">商品管理 – 列表</p>
+    <!-- 共用 Supabase client -->
+    <script src="js/supabase.js?v=4"></script>
+
+    <!-- 商品列表邏輯 -->
+    <script defer src="js/index.js?v=3"></script>
+  </head>
+  <body>
+    <!-- 頂部列 -->
+    <header class="admin-header">
+      <div class="admin-header-inner">
+        <div>
+          <h1 class="admin-title">康醫採購管理系統｜後台</h1>
+          <p class="admin-subtitle">商品列表</p>
+        </div>
+        <div class="admin-header-actions">
+          <span id="currentUser" class="admin-user-email"></span>
+          <button
+            type="button"
+            class="btn-ghost"
+            onclick="location.href='index.html'"
+          >
+            商品列表
+          </button>
+          <button
+            type="button"
+            class="btn-ghost"
+            onclick="location.href='upload.html'"
+          >
+            匯入 CSV
+          </button>
+          <button
+            type="button"
+            class="btn-ghost"
+            onclick="location.href='../index.html'"
+          >
+            前台查看
+          </button>
+          <button type="button" id="logoutBtn" class="btn-outline">
+            登出
+          </button>
+        </div>
       </div>
-      <div class="admin-header-actions">
-        <button class="btn-secondary" onclick="location.href='upload.html'">
-          匯入 CSV
-        </button>
-        <button class="btn-primary" onclick="location.href='add.html'">
+    </header>
+
+    <!-- 內容 -->
+    <main class="admin-main">
+      <section class="toolbar">
+        <button
+          type="button"
+          class="btn-primary"
+          onclick="location.href='add.html'"
+        >
           新增商品
         </button>
-      </div>
-    </div>
-  </header>
+        <button
+          type="button"
+          class="btn-secondary"
+          onclick="location.href='upload.html'"
+        >
+          CSV 批次匯入
+        </button>
+      </section>
 
-  <main class="admin-main">
-    <section class="admin-table-section">
-      <table class="admin-table">
-        <thead>
-          <tr>
-            <th>名稱</th>
-            <th>類別</th>
-            <th>單位</th>
-            <th>規格 / 描述</th>
-            <th>進價</th>
-            <th>建議售價</th>
-            <th>價格更新時間</th>
-            <th>狀態</th>
-            <th>操作</th>
-          </tr>
-        </thead>
-        <tbody id="productTbody">
-          <tr><td colspan="9">載入中...</td></tr>
-        </tbody>
-      </table>
-    </section>
-  </main>
-</body>
+      <section class="card">
+        <div class="table-header-row">
+          <h2>商品列表</h2>
+          <span id="adminCount" class="table-count-label"></span>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>名稱</th>
+                <th>類別</th>
+                <th>規格 / 描述</th>
+                <th>單位</th>
+                <th>進價</th>
+                <th>建議售價</th>
+                <th>價格更新時間</th>
+                <th>狀態</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="productTableBody">
+              <!-- JS 會插入資料列 -->
+            </tbody>
+          </table>
+        </div>
+
+        <p id="adminStatus" class="status-message"></p>
+      </section>
+    </main>
+  </body>
 </html>
