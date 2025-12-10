@@ -1,5 +1,6 @@
-/* ========= 全局設定 ========= */
-
+/* =======================
+      全局設定
+======================= */
 :root {
   --primary: #27c3df; /* 主題藍綠 */
   --primary-dark: #1aa1ba;
@@ -22,16 +23,13 @@ body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
     sans-serif;
-  background: radial-gradient(
-    circle at top left,
-    #eaf9ff 0,
-    #f5f7fb 40%,
-    #ffffff 100%
-  );
+  background: radial-gradient(circle at top left, #eaf9ff 0, #f5f7fb 40%, #ffffff 100%);
   color: var(--text-main);
 }
 
-/* ========= Header ========= */
+/* =======================
+      Header
+======================= */
 
 .app-header {
   background: linear-gradient(
@@ -41,7 +39,7 @@ body {
     #1cd0f1 100%
   );
   color: #fff;
-  padding: 18px 16px;
+  padding: 22px 18px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
@@ -50,91 +48,91 @@ body {
   margin: 0 auto;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 16px;
 }
 
 .app-title-block {
   display: flex;
   flex-direction: column;
-  gap: 4px;
 }
 
 .app-title {
   margin: 0;
-  font-size: 1.6rem;
-  letter-spacing: 0.08em;
+  font-size: 1.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
 }
 
 .app-subtitle {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   opacity: 0.9;
 }
 
-/* ========= Main Layout ========= */
+/* =======================
+      Main Layout
+======================= */
 
 .app-main {
   max-width: 1120px;
-  margin: 24px auto 48px;
-  padding: 0 16px 32px;
+  margin: 28px auto 48px;
+  padding: 0 16px;
 }
 
-/* ========= 搜尋區 ========= */
+/* =======================
+      搜尋區
+======================= */
 
 .search-section {
-  background: #ffffff;
+  background: #fff;
   border-radius: 18px;
-  padding: 18px 16px 14px;
+  padding: 20px 16px 14px;
   box-shadow: var(--shadow-soft);
   border: 1px solid var(--border-soft);
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .search-label {
-  display: block;
-  font-size: 0.9rem;
-  color: var(--text-sub);
+  font-size: 0.92rem;
+  font-weight: 500;
   margin-bottom: 8px;
+  display: block;
+  color: var(--text-sub);
 }
 
 .search-input-wrapper {
   display: flex;
-  gap: 8px;
   align-items: center;
+  gap: 10px;
 }
 
 #searchInput {
   flex: 1;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-radius: 999px;
   border: 1px solid var(--border-soft);
-  font-size: 0.95rem;
-  outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
-  background: #fdfefe;
-}
-
-#searchInput::placeholder {
-  color: #a0a7b8;
+  background: #fbfcfe;
+  font-size: 1rem;
+  transition: 0.2s ease;
 }
 
 #searchInput:focus {
   border-color: var(--primary);
   box-shadow: 0 0 0 3px rgba(39, 195, 223, 0.2);
-  background: #ffffff;
+  outline: none;
+  background: #fff;
 }
 
 .btn-secondary {
-  padding: 9px 16px;
+  padding: 10px 18px;
   border-radius: 999px;
   border: 1px solid var(--primary);
-  background: #ffffff;
+  background: white;
   color: var(--primary-dark);
   font-size: 0.9rem;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
-  white-space: nowrap;
+  transition: 0.2s ease;
 }
 
 .btn-secondary:hover {
@@ -148,89 +146,151 @@ body {
   color: var(--text-sub);
 }
 
-/* ========= 狀態訊息 ========= */
+/* =======================
+      狀態訊息
+======================= */
 
 .status-message {
-  margin: 10px 2px 0;
+  margin-top: 10px;
   font-size: 0.9rem;
-  color: #b23b3b;
+  color: #c0392b;
 }
 
-/* ========= 商品卡片列表 ========= */
+/* =======================
+      商品卡片區
+======================= */
 
-.product-list,
-.product-card-grid {
-  margin-top: 16px;
+.product-list {
+  margin-top: 20px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 22px;
 }
 
-/* 單一卡片 */
+/* ----- 卡片 ----- */
 
 .product-card {
+  background: white;
   border-radius: var(--card-radius);
-  background: #ffffff;
   box-shadow: var(--shadow-soft);
-  border: 1px solid var(--border-soft);
   overflow: hidden;
+  border: 1px solid var(--border-soft);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
   display: flex;
   flex-direction: column;
-  min-height: 260px;
+  height: 330px; /* 固定高度，整齊排版 */
 }
 
-/* 卡片圖片區 */
+.product-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* ----- 圖片 ----- */
 
 .product-image-wrapper {
-  background: var(--primary-soft);
   position: relative;
-  padding-top: 62%; /* 16:10 大圖比例 */
+  background: var(--primary-soft);
+  height: 160px;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .product-image-wrapper img {
-  position: absolute;
-  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 
-/* 若沒有圖片 */
-
 .product-image-placeholder {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #8da3b8;
   font-size: 0.9rem;
+  color: #8da3b8;
 }
 
-/* 卡片文字內容 */
+/* ----- 文字區塊 ----- */
 
 .product-content {
-  padding: 12px 14px 14px;
+  padding: 12px 14px 16px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  flex: 1;
 }
 
 .product-name {
-  font-size: 1.02rem;
+  font-size: 1.05rem;
   font-weight: 600;
-  margin: 0 0 3px;
   color: var(--text-main);
+  margin: 0;
+  height: 42px;
+  overflow: hidden;
 }
 
 .product-spec {
   font-size: 0.9rem;
   color: var(--text-sub);
-  margin: 0 0 6px;
+  height: 36px;
+  overflow: hidden;
 }
 
 .product-meta-row {
   display: flex;
+  gap: 8px;
   flex-wrap: wrap;
- 
+  font-size: 0.82rem;
+  color: var(--text-sub);
+}
+
+.product-meta-tag {
+  background: var(--primary-soft);
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: var(--primary-dark);
+  font-weight: 500;
+}
+
+/* ----- 價格 & 時間 ----- */
+
+.product-price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.product-price-label {
+  font-size: 0.82rem;
+  color: var(--text-sub);
+}
+
+.product-price {
+  font-size: 1.1rem;
+  color: var(--primary-dark);
+  font-weight: 700;
+}
+
+.product-updated-at {
+  font-size: 0.78rem;
+  color: #7c8797;
+  margin-top: 6px;
+}
+
+/* =======================
+      RWD 手機版
+======================= */
+
+@media (max-width: 768px) {
+  .app-header-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .product-list {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+
+  .product-card {
+    height: 360px;
+  }
+}
