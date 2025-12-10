@@ -1,190 +1,177 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-<head>
-  <meta charset="UTF-8" />
-  <title>新增商品｜康醫採購管理系統</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>新增商品｜康醫採購管理系統</title>
 
-  <link rel="stylesheet" href="/clinic-purchase-system/admin/css/admin.css" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="./js/supabase.js"></script>
-</head>
+    <link rel="stylesheet" href="css/admin.css?v=2" />
 
-<body>
-  <header class="admin-header">
-    <div class="admin-header-inner">
-      <div>
-        <h1>新增商品</h1>
-        <p class="admin-subtitle">建立新的商品資料</p>
-      </div>
-      <button class="btn-secondary" onclick="location.href='index.html'">
-        返回列表
-      </button>
-    </div>
-  </header>
+    <!-- Supabase v2 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <main class="admin-main">
-    <form id="addForm" class="edit-form">
-      <div class="form-group">
-        <label>商品圖片</label>
-        <input type="file" id="imageFile" accept="image/*" />
-        <img id="previewImage" class="preview-image" src="" alt="" />
-      </div>
+    <!-- 共用 Supabase client -->
+    <script src="js/supabase.js?v=4"></script>
 
-      <div class="form-group">
-        <label>商品名稱（必填）</label>
-        <input type="text" id="name" required />
-      </div>
-
-      <div class="form-group">
-        <label>分類</label>
-        <input type="text" id="category" />
-      </div>
-
-      <div class="form-group">
-        <label>規格</label>
-        <input type="text" id="spec" />
-      </div>
-
-      <div class="form-group">
-        <label>單位</label>
-        <input type="text" id="unit" placeholder="例如：盒、箱、支…" />
-      </div>
-
-      <div class="form-group">
-        <label>描述（可長文，不限字數）</label>
-        <textarea id="description" rows="4" placeholder="補充說明、備註…"></textarea>
-      </div>
-
-      <div class="form-row-2">
-        <div class="form-group">
-          <label>進價（last_price）</label>
-          <input type="number" id="last_price" min="0" />
+    <!-- 新增商品邏輯 -->
+    <script defer src="js/add.js?v=2"></script>
+  </head>
+  <body>
+    <header class="admin-header">
+      <div class="admin-header-inner">
+        <div>
+          <h1 class="admin-title">康醫採購管理系統｜後台</h1>
+          <p class="admin-subtitle">新增商品</p>
         </div>
-
-        <div class="form-group">
-          <label>建議售價（suggested_price）</label>
-          <input type="number" id="suggested_price" min="0" />
-        </div>
+        <button
+          type="button"
+          class="btn-ghost"
+          onclick="location.href='index.html'"
+        >
+          返回商品列表
+        </button>
       </div>
+    </header>
 
-      <div class="form-group">
-        <label>是否啟用</label>
-        <select id="is_active">
-          <option value="true">啟用</option>
-          <option value="false">停用</option>
-        </select>
+    <main class="admin-main">
+      <section class="card">
+        <form id="addForm" class="product-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="name">商品名稱（必填）</label>
+              <input type="text" id="name" required />
+            </div>
+
+            <div class="form-group">
+              <label for="category">類別</label>
+              <input type="text" id="category" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="spec">規格</label>
+              <input type="text" id="spec" />
+            </div>
+
+            <div class="form-group">
+              <label for="unit">單位</label>
+              <input type="text" id="unit" placeholder="盒、包、瓶…" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="last_price">進價（必填）</label>
+              <input
+                type="number"
+                id="last_price"
+                min="0"
+                step="1"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="suggested_price">建議售價</label>
+              <input
+                type="number"
+                id="suggested_price"
+                min="0"
+                step="1"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="is_active">是否啟用</label>
+              <select id="is_active">
+                <option value="true" selected>啟用</option>
+                <option value="false">停用</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="description">
+              描述
+              <span class="char-counter">
+                <span id="descCount">0</span>/1000
+              </span>
+            </label>
+            <textarea
+              id="description"
+              rows="4"
+              maxlength="1000"
+              placeholder="可簡要說明用途、規格重點或注意事項"
+            ></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="imageFile">商品圖片</label>
+              <input
+                type="file"
+                id="imageFile"
+                accept="image/*"
+              />
+              <p class="hint-text">
+                建議上傳尺寸約 800×800px 以內的 jpg / png。
+              </p>
+            </div>
+
+            <div class="form-group">
+              <label>圖片預覽</label>
+              <div class="image-preview-wrapper">
+                <img
+                  id="previewImage"
+                  class="preview-image"
+                  src=""
+                  alt="預覽圖片"
+                />
+                <div
+                  id="previewPlaceholder"
+                  class="preview-placeholder"
+                >
+                  尚未選擇圖片
+                </div>
+              </div>
+              <input
+                type="text"
+                id="image_url"
+                readonly
+                class="image-url-input"
+                placeholder="上傳後自動帶入圖片網址"
+              />
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button
+              type="submit"
+              id="saveBtn"
+              class="btn-primary"
+            >
+              儲存新增
+            </button>
+            <button
+              type="button"
+              class="btn-secondary"
+              onclick="location.href='index.html'"
+            >
+              取消
+            </button>
+            <span id="formStatus" class="status-message"></span>
+          </div>
+        </form>
+      </section>
+
+      <div id="loadingMask" class="loading-mask" style="display: none;">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">儲存中，請稍候…</div>
       </div>
-
-      <div class="form-actions">
-        <button type="submit" class="btn-primary">新增商品</button>
-      </div>
-    </form>
-  </main>
-
-  <script>
-    const supabase = window.supabaseClient;
-
-    const addForm = document.getElementById("addForm");
-    const imageFileEl = document.getElementById("imageFile");
-    const previewEl = document.getElementById("previewImage");
-
-    imageFileEl.addEventListener("change", () => {
-      const file = imageFileEl.files[0];
-      if (file) previewEl.src = URL.createObjectURL(file);
-    });
-
-    async function uploadImage(file, productIdForName) {
-      if (!file) return null;
-
-      const safeName =
-        Date.now() + "_" + (file.name || "img").replace(/[^\w.-]/g, "_");
-      const filePath = `uploads/${productIdForName || "new"}_${safeName}`;
-
-      const { error } = await supabase.storage
-        .from("product-images")
-        .upload(filePath, file, {
-          cacheControl: "3600",
-          upsert: false,
-        });
-
-      if (error) {
-        alert("圖片上傳失敗：" + error.message);
-        console.error(error);
-        return null;
-      }
-
-      const { data } = supabase.storage
-        .from("product-images")
-        .getPublicUrl(filePath);
-
-      return data.publicUrl;
-    }
-
-    addForm.addEventListener("submit", async (e) => {
-      e.preventDefault();
-
-      const name = document.getElementById("name").value.trim();
-      const category = document.getElementById("category").value.trim();
-      const spec = document.getElementById("spec").value.trim();
-      const unit = document.getElementById("unit").value.trim();
-      const description = document
-        .getElementById("description")
-        .value.trim();
-      const last_price = document.getElementById("last_price").value;
-      const suggested_price =
-        document.getElementById("suggested_price").value;
-      const is_active =
-        document.getElementById("is_active").value === "true";
-
-      if (!name) {
-        alert("商品名稱為必填");
-        return;
-      }
-
-      // 先建立商品（先不含圖片）
-      const { data, error } = await supabase
-        .from("products")
-        .insert([
-          {
-            name,
-            category,
-            spec,
-            unit,
-            description,
-            last_price: last_price ? Number(last_price) : null,
-            suggested_price: suggested_price ? Number(suggested_price) : null,
-            is_active,
-            last_price_updated_at: last_price
-              ? new Date().toISOString()
-              : null,
-          },
-        ])
-        .select("id")
-        .single();
-
-      if (error) {
-        alert("新增商品失敗：" + error.message);
-        console.error(error);
-        return;
-      }
-
-      let finalImageUrl = null;
-
-      if (imageFileEl.files.length > 0) {
-        finalImageUrl = await uploadImage(imageFileEl.files[0], data.id);
-      }
-
-      if (finalImageUrl) {
-        await supabase
-          .from("products")
-          .update({ image_url: finalImageUrl })
-          .eq("id", data.id);
-      }
-
-      alert("新增成功！");
-      location.href = "index.html";
-    });
-  </script>
-</body>
+    </main>
+  </body>
 </html>
