@@ -1,31 +1,117 @@
 // /admin/js/edit.js
-
 const supabase = window.supabaseClient;
 
 // 取得 URL id
-const urlParams = new URLSearchParams(window.location.search);
-const productId = urlParams.get("id");
+const params = new URLSearchParams(window.location.search);
+const productId = params.get("id");
+
 if (!productId) {
   alert("找不到商品 ID");
   location.href = "index.html";
 }
 
-// DOM 元素
-const nameEl = document.getElementById("name");
-const categoryEl = document.getElementById("category");
-const specEl = document.getElementById("spec");
-const unitEl = document.getElementById("unit");
-const descEl = document.getElementById("description");
-const priceEl = document.getElementById("last_price");
-const activeEl = document.getElementById("is_active");
-const imgUrlEl = document.getElementById("image_url");
+// DOM
+const form = document.getElementById("editForm");
 const imgFileEl = document.getElementById("imageFile");
 const previewEl = document.getElementById("previewImage");
-const editForm = document.getElementById("editForm");
 const deleteBtn = document.getElementById("deleteBtn");
 const loadingMask = document.getElementById("loadingMask");
 
-let originalImageUrl = null;
+let currentImageUrl = null;
+
+// 圖片預覽
+imgFileEl.addEventListener("change", () => {
+  const file = imgFileEl.files[0];
+  if (file) {
+    previewEl.src = URL.createObjectURL(file);
+  } else if (currentImageUrl) {
+    previewEl.src = currentImageUrl;
+  } else {
+    previewEl.src = "";
+  }
+});
+
+// 與 add.js 共用的壓縮邏輯
+async function compressImage(file, maxWidth = 1200, quality = 0.8) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+
+      const scale = Math.min(1, maxWidth / img.width);
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) return reject(new Error("壓縮失敗"));
+          resolve(new File([blob], file.name, { type: "image/jpeg" }));
+        },
+        "image/jpeg",
+        quality
+      );
+    };
+
+    img.onerror = reject;
+    img.src = url;
+  });
+}
+
+async function uploadImageAndDeleteOld(file, oldUrl) {
+  if (!file) return oldUrl;
+
+  try {
+    file = await compressImage(file);
+  } catch (e) {
+    console.warn("圖片壓縮失敗，改用原檔", e);
+  }
+
+  const safeName =
+    Date.now() + "_" + file.name.replace(/[^\w.-]/g, "_").toLowerCase();
+  const filePath = `uploads/${safeName}`;
+
+  const { error } = await supabase.storage
+    .from("product-images")
+    .upload(filePath, file, {
+      cacheControl: "3600",
+      upsert: false,
+    });
+
+  if (error) {
+    console.error("圖片上傳失敗", error);
+    alert("圖片上傳失敗：" + error.message);
+    return oldUrl;
+  }
+
+  // 刪舊檔
+  if (oldUrl) {
+    const prefix = "/object/public/product-images/";
+    const idx = oldUrl.indexOf(prefix);
+    if (idx !== -1) {
+      const path = oldUrl.slice(idx + prefix.length);
+      if (path) {
+        const { error: delErr } = await supabase.storage
+          .from("product-images")
+          .remove([path]);
+        if (delErr) {
+          console.warn("刪除舊圖失敗", delErr);
+        }
+      }
+    }
+  }
+
+  const { data: publicData } = supabase.storage
+    .from("product-images")
+    .getPublicUrl(filePath);
+
+  return publicData.publicUrl;
+}
 
 // 載入商品資料
 async function loadProduct() {
@@ -36,183 +122,111 @@ async function loadProduct() {
     .single();
 
   if (error) {
-    alert("讀取資料失敗：" + error.message);
-    console.error(error);
+    console.error("讀取商品失敗", error);
+    alert("讀取商品失敗：" + error.message);
+    location.href = "index.html";
     return;
   }
 
-  nameEl.value = data.name || "";
-  categoryEl.value = data.category || "";
-  specEl.value = data.spec || "";
-  unitEl.value = data.unit || "";
-  descEl.value = data.description || "";
-  priceEl.value = data.last_price || "";
-  activeEl.value = data.is_active ? "true" : "false";
-  imgUrlEl.value = data.image_url || "";
-  originalImageUrl = data.image_url || null;
+  document.getElementById("name").value = data.name || "";
+  document.getElementById("category").value = data.category || "";
+  document.getElementById("spec").value = data.spec || "";
+  document.getElementById("unit").value = data.unit || "";
+  document.getElementById("last_price").value = data.last_price ?? "";
+  document.getElementById("description").value = data.description || "";
+  document.getElementById("is_active").value = data.is_active ? "true" : "false";
 
-  if (data.image_url) {
-    previewEl.src = data.image_url;
+  currentImageUrl = data.image_url || "";
+  if (currentImageUrl) {
+    previewEl.src = currentImageUrl;
+  } else {
+    previewEl.src = "";
   }
 }
 
-loadProduct();
-
-// 即時預覽
-imgFileEl.addEventListener("change", () => {
-  const file = imgFileEl.files[0];
-  if (file) previewEl.src = URL.createObjectURL(file);
-});
-
-/** 壓縮圖片 */
-function compressImage(file, maxWidth = 1000) {
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => {
-      const scale = Math.min(1, maxWidth / img.width);
-      if (scale === 1) {
-        resolve(file);
-        return;
-      }
-      const canvas = document.createElement("canvas");
-      canvas.width = img.width * scale;
-      canvas.height = img.height * scale;
-      const ctx = canvas.getContext("2d");
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      canvas.toBlob(
-        (blob) => {
-          const compressed = new File([blob], file.name, { type: blob.type });
-          resolve(compressed);
-        },
-        "image/jpeg",
-        0.85
-      );
-    };
-    img.src = URL.createObjectURL(file);
-  });
-}
-
-/** 從 public URL 解析出 storage path */
-function extractStoragePathFromUrl(url) {
-  if (!url) return null;
-  const marker = "/storage/v1/object/public/product-images/";
-  const idx = url.indexOf(marker);
-  if (idx === -1) return null;
-  return url.substring(idx + marker.length);
-}
-
-async function deleteOldImageIfNeeded() {
-  const path = extractStoragePathFromUrl(originalImageUrl);
-  if (!path) return;
-  await supabase.storage.from("product-images").remove([path]);
-}
-
-/** 上傳圖片 */
-async function uploadImage(file) {
-  if (!file) return null;
-
-  const safeName = Date.now() + "_" + file.name.replace(/[^\w.-]/g, "_");
-  const path = `uploads/${safeName}`;
-
-  const { error } = await supabase.storage
-    .from("product-images")
-    .upload(path, file, {
-      cacheControl: "3600",
-      upsert: false,
-    });
-
-  if (error) {
-    alert("圖片上傳失敗：" + error.message);
-    console.error(error);
-    return null;
-  }
-
-  const { data } = supabase.storage.from("product-images").getPublicUrl(path);
-  return data.publicUrl;
-}
-
-// 儲存更新
-editForm.addEventListener("submit", async (e) => {
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  if (!nameEl.value.trim()) {
-    alert("商品名稱為必填");
-    nameEl.focus();
+  const name = document.getElementById("name").value.trim();
+  const category = document.getElementById("category").value.trim();
+  const spec = document.getElementById("spec").value.trim();
+  const unit = document.getElementById("unit").value.trim();
+  const last_price = Number(document.getElementById("last_price").value || 0);
+  const description = document.getElementById("description").value.trim();
+  const is_active =
+    document.getElementById("is_active").value === "true" ? true : false;
+
+  if (!name) {
+    alert("請輸入商品名稱");
     return;
   }
-  if (!priceEl.value) {
-    alert("售價為必填");
-    priceEl.focus();
+  if (!last_price || last_price < 0) {
+    alert("請輸入合法售價");
     return;
   }
 
   loadingMask.style.display = "flex";
 
-  let finalImageUrl = imgUrlEl.value;
+  try {
+    let finalImageUrl = currentImageUrl;
 
-  // 若選擇新圖片 → 壓縮、刪舊圖、上傳新圖
-  if (imgFileEl.files.length > 0) {
-    const compressed = await compressImage(imgFileEl.files[0]);
-    // 刪除舊檔（若有）
-    if (originalImageUrl) {
-      await deleteOldImageIfNeeded();
+    if (imgFileEl.files.length > 0) {
+      finalImageUrl = await uploadImageAndDeleteOld(
+        imgFileEl.files[0],
+        currentImageUrl
+      );
     }
-    const uploadedUrl = await uploadImage(compressed);
-    if (uploadedUrl) {
-      finalImageUrl = uploadedUrl;
+
+    const { error } = await supabase
+      .from("products")
+      .update({
+        name,
+        category,
+        spec,
+        unit,
+        last_price,
+        description,
+        is_active,
+        image_url: finalImageUrl,
+        last_price_updated_at: new Date().toISOString(),
+      })
+      .eq("id", productId);
+
+    if (error) {
+      console.error("更新失敗", error);
+      alert("更新失敗：" + error.message);
+      return;
     }
+
+    alert("更新成功！");
+    location.href = "index.html";
+  } finally {
+    loadingMask.style.display = "none";
   }
-
-  const updates = {
-    name: nameEl.value.trim(),
-    category: categoryEl.value.trim(),
-    spec: specEl.value.trim(),
-    unit: unitEl.value.trim(),
-    description: descEl.value.trim(),
-    last_price: Number(priceEl.value),
-    is_active: activeEl.value === "true",
-    image_url: finalImageUrl,
-    last_price_updated_at: new Date().toISOString(),
-  };
-
-  const { error } = await supabase
-    .from("products")
-    .update(updates)
-    .eq("id", productId);
-
-  loadingMask.style.display = "none";
-
-  if (error) {
-    alert("更新失敗：" + error.message);
-    console.error(error);
-    return;
-  }
-
-  alert("更新成功！");
-  location.href = "index.html";
 });
 
-// 刪除商品
 deleteBtn.addEventListener("click", async () => {
-  if (!confirm("確定刪除？")) return;
+  if (!confirm("確定要刪除這個商品嗎？")) return;
 
   loadingMask.style.display = "flex";
 
-  // 刪圖
-  if (originalImageUrl) {
-    await deleteOldImageIfNeeded();
+  try {
+    const { error } = await supabase
+      .from("products")
+      .delete()
+      .eq("id", productId);
+
+    if (error) {
+      console.error("刪除失敗", error);
+      alert("刪除失敗：" + error.message);
+      return;
+    }
+
+    alert("刪除成功！");
+    location.href = "index.html";
+  } finally {
+    loadingMask.style.display = "none";
   }
-
-  const { error } = await supabase.from("products").delete().eq("id", productId);
-
-  loadingMask.style.display = "none";
-
-  if (error) {
-    alert("刪除失敗：" + error.message);
-    console.error(error);
-    return;
-  }
-
-  alert("刪除成功！");
-  location.href = "index.html";
 });
+
+loadProduct();
