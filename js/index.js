@@ -1,102 +1,98 @@
-// /js/index.js
-const supabase = window.supabaseClient;
-
-const searchInput = document.getElementById("searchInput");
-const clearBtn = document.getElementById("clearBtn");
-const productListEl = document.getElementById("productList");
-const emptyStateEl = document.getElementById("emptyState");
-
-let allProducts = [];
+// ===========================
+//  前台商品列表渲染 Final 版本
+// ===========================
 
 async function loadProducts() {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from("products")
-    .select(
-      "id, name, category, spec, unit, last_price, last_price_updated_at, image_url, is_active"
-    )
+    .select("*")
     .eq("is_active", true)
-    .order("id", { ascending: true });
+    .order("name", { ascending: true });
 
   if (error) {
-    console.error("載入商品失敗", error);
-    productListEl.innerHTML = `<p class="error-text">載入商品失敗：${error.message}</p>`;
+    console.error("載入產品錯誤:", error);
     return;
   }
 
-  allProducts = data || [];
-  renderProducts(allProducts);
+  renderProducts(data);
 }
 
-function renderProducts(list) {
-  productListEl.innerHTML = "";
+// ===========================
+//  渲染商品卡片（符合 style.css）
+// ===========================
+function renderProducts(products) {
+  const list = document.getElementById("productList");
+  const emptyState = document.getElementById("emptyState");
+  list.innerHTML = "";
 
-  if (!list.length) {
-    emptyStateEl.style.display = "block";
+  if (!products.length) {
+    emptyState.style.display = "block";
     return;
+  } else {
+    emptyState.style.display = "none";
   }
 
-  emptyStateEl.style.display = "none";
+  products.forEach((p) => {
+    const imgHTML = p.image_url
+      ? `<img src="${p.image_url}" alt="${p.name}" />`
+      : `<div class="product-image-placeholder">尚未上傳圖片</div>`;
 
-  list.forEach((p) => {
-    const card = document.createElement("article");
-    card.className = "product-card";
+    const card = `
+      <div class="product-card">
+        <div class="product-image-wrapper">
+            ${imgHTML}
+        </div>
 
-    const price = p.last_price != null ? `NT$ ${p.last_price}` : "—";
-    const updatedAt = p.last_price_updated_at
-      ? new Date(p.last_price_updated_at).toLocaleString("zh-TW")
-      : "—";
+        <div class="product-content">
+          <h3 class="product-name">${p.name}</h3>
 
-    card.innerHTML = `
-      <div class="product-image-wrap">
-        ${
-          p.image_url
-            ? `<img src="${p.image_url}" alt="${p.name}" />`
-            : `<div class="image-placeholder">尚未上傳圖片</div>`
-        }
-      </div>
-      <div class="product-card-body">
-        <h3 class="product-name">${p.name || "未命名商品"}</h3>
-        <p class="product-spec">${p.spec || ""}</p>
-        <p class="product-meta">
-          <span class="tag">類別：${p.category || "—"}</span>
-          <span class="tag">單位：${p.unit || "—"}</span>
-        </p>
-        <div class="product-footer">
-          <span class="product-price">${price}</span>
-          <span class="product-updated">價格更新時間：${updatedAt}</span>
+          <p class="product-spec">${p.spec ?? ""}</p>
+
+          <div class="product-meta-row">
+            <span class="product-meta-tag">${p.category || "未分類"}</span>
+            <span class="product-meta-tag">單位：${p.unit || "-"}</span>
+          </div>
+
+          <div class="product-price-row">
+            <span class="product-price-label">售價</span>
+            <span class="product-price">NT$ ${p.last_price ?? "-"}</span>
+          </div>
+
+          <div class="product-updated-at">
+            價格更新時間：${formatDatetime(p.last_price_updated_at)}
+          </div>
         </div>
       </div>
     `;
 
-    productListEl.appendChild(card);
+    list.insertAdjacentHTML("beforeend", card);
   });
 }
 
-function applySearch() {
-  const q = searchInput.value.trim().toLowerCase();
-  if (!q) {
-    renderProducts(allProducts);
-    return;
-  }
-
-  const filtered = allProducts.filter((p) => {
-    const text = `${p.name || ""} ${p.spec || ""} ${p.category || ""}`.toLowerCase();
-    return text.includes(q);
-  });
-
-  renderProducts(filtered);
+// 日期格式化
+function formatDatetime(dt) {
+  if (!dt) return "-";
+  return new Date(dt).toLocaleString("zh-TW", { hour12: false });
 }
 
-searchInput.addEventListener("input", () => {
-  // 即時過濾
-  applySearch();
+// ========= 搜尋功能 =========
+document.getElementById("searchInput").addEventListener("input", applySearch);
+document.getElementById("clearBtn").addEventListener("click", () => {
+  document.getElementById("searchInput").value = "";
+  loadProducts();
 });
 
-clearBtn.addEventListener("click", () => {
-  searchInput.value = "";
-  applySearch();
-});
+async function applySearch() {
+  const keyword = document.getElementById("searchInput").value.trim();
+  if (!keyword) return loadProducts();
 
-// 初始化
+  const { data, error } = await supabaseClient
+    .from("products")
+    .select("*")
+    .ilike("name", `%${keyword}%`);
+
+  renderProducts(data || []);
+}
+
+// 初始載入
 loadProducts();
-
