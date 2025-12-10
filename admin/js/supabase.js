@@ -7,5 +7,3 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 window.supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: { persistSession: false },
 });
-
-console.log("Supabase 初始化成功");
