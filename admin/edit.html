@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,14 +8,28 @@
 
   <link rel="stylesheet" href="../css/admin.css">
 
-  <!-- Supabase v2 -->
+  <!-- Supabase JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- 初始化 Supabase -->
   <script src="../js/supabase.js"></script>
+
+  <style>
+    #loadingMask {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 22px;
+      z-index: 999;
+    }
+  </style>
 </head>
 
 <body>
+
+<div id="loadingMask">儲存中，請稍候…</div>
 
 <h1>編輯商品</h1>
 <button onclick="location.href='index.html'">返回列表</button>
@@ -29,7 +44,7 @@
   </div>
 
   <div class="form-group">
-    <label>商品名稱</label>
+    <label>商品名稱（必填）</label>
     <input type="text" id="name" required>
   </div>
 
@@ -54,8 +69,8 @@
   </div>
 
   <div class="form-group">
-    <label>售價（last_price）</label>
-    <input type="number" id="last_price">
+    <label>售價 last_price（必填）</label>
+    <input type="number" id="last_price" required>
   </div>
 
   <div class="form-group">
@@ -78,28 +93,34 @@
 
 </form>
 
+
 <script>
-// 正確取得 supabase instance
 const supabase = window.supabaseClient;
 
-// 取得 URL ID
+// 取得 URL 商品 ID
 const productId = new URLSearchParams(window.location.search).get("id");
+
 if (!productId) {
   alert("找不到商品 ID");
   location.href = "index.html";
 }
 
-// DOM 元素
 const nameEl = document.getElementById("name");
-const categoryEl = document.getElementById("category");
+const catEl = document.getElementById("category");
 const specEl = document.getElementById("spec");
 const unitEl = document.getElementById("unit");
 const descEl = document.getElementById("description");
 const priceEl = document.getElementById("last_price");
 const activeEl = document.getElementById("is_active");
 const imgUrlEl = document.getElementById("image_url");
+
 const imgFileEl = document.getElementById("imageFile");
 const previewEl = document.getElementById("previewImage");
+
+const loadingMask = document.getElementById("loadingMask");
+
+let originalImagePath = null;
+
 
 // 載入商品資料
 async function loadProduct() {
@@ -115,43 +136,75 @@ async function loadProduct() {
   }
 
   nameEl.value = data.name || "";
-  categoryEl.value = data.category || "";
+  catEl.value = data.category || "";
   specEl.value = data.spec || "";
   unitEl.value = data.unit || "";
   descEl.value = data.description || "";
-  priceEl.value = data.last_price || "";
+  priceEl.value = data.last_price;
   activeEl.value = data.is_active ? "true" : "false";
+  imgUrlEl.value = data.image_url || "";
 
   if (data.image_url) {
-    imgUrlEl.value = data.image_url;
     previewEl.src = data.image_url;
+
+    // 記錄舊檔名（之後刪除要用）
+    const part = data.image_url.split("/").pop();
+    originalImagePath = "uploads/" + part;
   }
 }
 loadProduct();
 
-// 圖片即時預覽
+
+// 即時顯示圖片預覽
 imgFileEl.addEventListener("change", () => {
   const file = imgFileEl.files[0];
   if (file) previewEl.src = URL.createObjectURL(file);
 });
 
-// 安全檔名上傳
+
+// 壓縮圖片（避免太大）
+function compressImage(file) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const scale = 1280 / img.width;
+      const w = img.width > 1280 ? 1280 : img.width;
+      const h = img.width > 1280 ? img.height * scale : img.height;
+
+      canvas.width = w;
+      canvas.height = h;
+
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, w, h);
+
+      canvas.toBlob(
+        blob => resolve(blob),
+        "image/jpeg",
+        0.8
+      );
+    };
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+
+// 上傳圖片
 async function uploadImage(file) {
   if (!file) return null;
 
-  const safeName = Date.now() + "_" + file.name.replace(/[^\w.-]/g, "_");
-  const filePath = `uploads/${safeName}`;
+  // 壓縮圖片
+  const compressed = await compressImage(file);
 
-  const { data, error } = await supabase.storage
+  const safeName = Date.now() + "_" + file.name.replace(/[^\w.-]/g, "_");
+  const filePath = "uploads/" + safeName;
+
+  const { error } = await supabase.storage
     .from("product-images")
-    .upload(filePath, file, {
-      cacheControl: "3600",
-      upsert: false
-    });
+    .upload(filePath, compressed, { contentType: "image/jpeg" });
 
   if (error) {
     alert("圖片上傳失敗：" + error.message);
-    console.error(error);
     return null;
   }
 
@@ -159,31 +212,55 @@ async function uploadImage(file) {
     .from("product-images")
     .getPublicUrl(filePath);
 
-  return urlData.publicUrl;
+  return { url: urlData.publicUrl, path: filePath };
 }
 
-// 儲存更新
-document.getElementById("editForm").addEventListener("submit", async (e) => {
+
+// 刪除舊圖片
+async function deleteOldImage() {
+  if (!originalImagePath) return;
+
+  await supabase.storage
+    .from("product-images")
+    .remove([originalImagePath]);
+
+  console.log("已刪除舊圖片：" + originalImagePath);
+}
+
+
+// ⭐ 儲存更新
+document.getElementById("editForm").addEventListener("submit", async e => {
   e.preventDefault();
 
-  let finalImageUrl = imgUrlEl.value;
+  if (!nameEl.value.trim()) return alert("商品名稱必填");
+  if (!priceEl.value.trim()) return alert("價格必填");
 
-  // 有新圖片 → 上傳
+  loadingMask.style.display = "flex";
+
+  let finalUrl = imgUrlEl.value;
+  let newFilePath = null;
+
+  // 若選擇新圖片 → 上傳 + 刪除舊檔
   if (imgFileEl.files.length > 0) {
-    const uploadedUrl = await uploadImage(imgFileEl.files[0]);
-    if (uploadedUrl) finalImageUrl = uploadedUrl;
+    const uploaded = await uploadImage(imgFileEl.files[0]);
+    if (uploaded) {
+      finalUrl = uploaded.url;
+      newFilePath = uploaded.path;
+      await deleteOldImage();
+      originalImagePath = newFilePath; // 更新新的
+    }
   }
 
   const updates = {
-    name: nameEl.value,
-    category: categoryEl.value,
-    spec: specEl.value,
-    unit: unitEl.value,
-    description: descEl.value,
+    name: nameEl.value.trim(),
+    category: catEl.value.trim(),
+    spec: specEl.value.trim(),
+    unit: unitEl.value.trim(),
+    description: descEl.value.trim(),
     last_price: Number(priceEl.value),
     is_active: activeEl.value === "true",
-    image_url: finalImageUrl,
-    last_price_updated_at: new Date().toISOString(),
+    image_url: finalUrl,
+    last_price_updated_at: new Date().toISOString()
   };
 
   const { error } = await supabase
@@ -191,31 +268,31 @@ document.getElementById("editForm").addEventListener("submit", async (e) => {
     .update(updates)
     .eq("id", productId);
 
-  if (error) {
-    alert("更新失敗：" + error.message);
-    return;
-  }
+  loadingMask.style.display = "none";
+
+  if (error) return alert("更新失敗：" + error.message);
 
   alert("更新成功！");
   location.href = "index.html";
 });
 
+
 // 刪除商品
 document.getElementById("deleteBtn").addEventListener("click", async () => {
   if (!confirm("確定刪除？")) return;
+
+  await deleteOldImage();
 
   const { error } = await supabase
     .from("products")
     .delete()
     .eq("id", productId);
 
-  if (error) {
-    alert("刪除失敗：" + error.message);
-    return;
+  if (error) alert("刪除失敗：" + error.message);
+  else {
+    alert("刪除成功！");
+    location.href = "index.html";
   }
-
-  alert("刪除成功！");
-  location.href = "index.html";
 });
 </script>
 
