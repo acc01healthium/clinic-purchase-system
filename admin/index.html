@@ -1,3 +1,4 @@
+<!-- /admin/index.html -->
 <!DOCTYPE html>
 <html lang="zh-Hant">
   <head>
@@ -5,56 +6,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>康醫採購管理系統｜後台</title>
 
-    <!-- 後台樣式（你之前的 admin.css） -->
     <link rel="stylesheet" href="css/admin.css" />
 
-    <!-- Supabase v2 -->
+    <!-- Supabase v2 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <!-- 共用 Supabase client（注意路徑） -->
+    <!-- 共用 Supabase Client -->
     <script src="js/supabase.js?v=4"></script>
 
-    <!-- 後台列表邏輯 -->
-    <script defer src="js/index.js?v=3"></script>
+    <!-- 本頁邏輯 -->
+    <script defer src="js/index.js?v=2"></script>
   </head>
-
   <body>
     <header class="admin-header">
-      <div class="admin-header-left">
-        <div class="app-title">康醫採購管理系統｜後台</div>
-      </div>
-      <div class="admin-header-right">
-        <span class="user-email">acc01.healthium@gmail.com</span>
-        <button class="btn-outline" onclick="location.href='login.html'">
-          登出
-        </button>
+      <div class="admin-header-inner">
+        <div>
+          <h1 class="admin-title">康醫採購管理系統｜後台</h1>
+          <p class="admin-subtitle">商品列表</p>
+        </div>
+        <div class="admin-account">
+          <span class="admin-email">acc01.healthium@gmail.com</span>
+          <button class="btn-outline" id="logoutBtn">登出</button>
+        </div>
       </div>
     </header>
 
     <main class="admin-main">
-      <section class="page-header">
-        <h1>商品列表</h1>
-        <div class="page-header-actions">
-          <button
-            class="btn-primary"
-            type="button"
-            onclick="location.href='add.html'"
-          >
-            新增商品（預留）
-          </button>
-          <button
-            class="btn-secondary"
-            type="button"
-            onclick="location.href='upload.html'"
-          >
-            CSV 批次匯入
-          </button>
-        </div>
-      </section>
-
       <section class="card">
+        <div class="card-header">
+          <h2>商品列表</h2>
+          <div class="card-actions">
+            <button id="addBtn" class="btn-primary">新增商品（預留）</button>
+            <button id="csvBtn" class="btn-secondary">CSV 批次匯入</button>
+          </div>
+        </div>
+
         <div class="table-wrapper">
-          <table class="product-table">
+          <table class="data-table">
             <thead>
               <tr>
                 <th>名稱</th>
@@ -68,12 +55,12 @@
               </tr>
             </thead>
             <tbody id="productTbody">
-              <!-- JS 會插入資料列 -->
+              <!-- JS 動態產生 -->
             </tbody>
           </table>
 
-          <div id="tableEmpty" class="table-empty" style="display: none">
-            尚未建立商品
+          <div id="emptyHint" class="empty-hint" style="display:none;">
+            目前尚無商品資料
           </div>
         </div>
       </section>
