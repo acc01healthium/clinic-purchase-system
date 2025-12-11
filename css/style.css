@@ -245,3 +245,15 @@ body {
     padding: 16px;
   }
 }
+.product-meta-row {
+  margin-top: 4px;
+  margin-bottom: 6px;
+  display: flex;
+  flex-direction: column; /* ← 關鍵！改成垂直排列 */
+  gap: 2px;
+}
+
+.product-meta-line {
+  font-size: 14px;
+  color: #666;
+}
