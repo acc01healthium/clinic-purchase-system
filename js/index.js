@@ -68,23 +68,25 @@ function createProductCard(p) {
   specEl.className = "product-spec";
   specEl.textContent = p.spec || "";
 
-  // 類別 / 單位
-  const metaRow = document.createElement("div");
-  metaRow.className = "product-meta-row";
+ // 類別 / 單位（上下分開顯示）
+const metaRow = document.createElement("div");
+metaRow.className = "product-meta-row";
 
-  if (p.category) {
-    const tag = document.createElement("span");
-    tag.className = "product-meta-tag";
-    tag.textContent = p.category;
-    metaRow.appendChild(tag);
-  }
+// 類別
+if (p.category) {
+  const categoryDiv = document.createElement("div");
+  categoryDiv.className = "product-meta-line";
+  categoryDiv.textContent = p.category;
+  metaRow.appendChild(categoryDiv);
+}
 
-  if (p.unit) {
-    const tag = document.createElement("span");
-    tag.className = "product-meta-tag";
-    tag.textContent = `單位：${p.unit}`;
-    metaRow.appendChild(tag);
-  }
+// 單位
+if (p.unit) {
+  const unitDiv = document.createElement("div");
+  unitDiv.className = "product-meta-line";
+  unitDiv.textContent = `單位：${p.unit}`;
+  metaRow.appendChild(unitDiv);
+}
 
   // 價格區：進價 / 建議售價（對齊）
   const priceBlock = document.createElement("div");
