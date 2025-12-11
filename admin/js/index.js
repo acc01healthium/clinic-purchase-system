@@ -1,126 +1,135 @@
-// admin/js/index.js
+// js/index.js
 
 document.addEventListener("DOMContentLoaded", () => {
   const supabase = window.supabaseClient;
 
-  const tbody = document.getElementById("productTableBody");
-  const newBtn = document.getElementById("btnNew");
-  const csvBtn = document.getElementById("btnCsv");
-  const frontBtn = document.getElementById("btnFront");
-  const logoutBtn = document.getElementById("btnLogout");
-  const statusEl = document.getElementById("adminStatus");
+  const listEl = document.getElementById("productList");
+  const searchInput = document.getElementById("searchInput");
+  const clearBtn = document.getElementById("clearBtn");
+  const statusEl = document.getElementById("statusMessage");
+  const emptyEl = document.getElementById("emptyState");
 
-  // 事件：新增商品
-  if (newBtn) {
-    newBtn.addEventListener("click", () => {
-      location.href = "add.html";
-    });
-  }
+  let allProducts = [];
 
-  // 事件：CSV 匯入
-  if (csvBtn) {
-    csvBtn.addEventListener("click", () => {
-      location.href = "upload.html";
-    });
-  }
-
-  // 事件：前台查看（新開分頁）
-  if (frontBtn) {
-    frontBtn.addEventListener("click", () => {
-      window.open("../index.html", "_blank");
-    });
-  }
-
-  // 事件：登出（目前只有回登入頁）
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", () => {
-      location.href = "login.html";
-    });
-  }
-
-  // 載入商品列表
   async function loadProducts() {
-    if (!tbody) return;
-
-    tbody.innerHTML = `<tr><td colspan="9">載入中...</td></tr>`;
+    if (!listEl) return;
+    listEl.innerHTML = "<p>載入中...</p>";
 
     const { data, error } = await supabase
       .from("products")
       .select(
-        "id, name, category, spec, unit, last_price, suggest_price, last_price_updated_at, is_active, description"
+        "id, name, category, spec, unit, last_price, suggest_price, image_url, last_price_updated_at, description, is_active"
       )
+      .eq("is_active", true)
       .order("name", { ascending: true });
 
     if (error) {
-      console.error("載入商品失敗：", error);
-      tbody.innerHTML = `<tr><td colspan="9">讀取資料失敗：${error.message}</td></tr>`;
-      if (statusEl) statusEl.textContent = "讀取資料發生錯誤，請稍後再試。";
+      console.error("前台讀取失敗：", error);
+      if (listEl) listEl.innerHTML = "";
+      if (statusEl)
+        statusEl.textContent = "讀取資料發生錯誤，請稍後再試。";
       return;
     }
 
-    if (!data || data.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="9">目前尚無商品資料</td></tr>`;
-      if (statusEl) statusEl.textContent = "";
-      return;
-    }
-
+    allProducts = data || [];
     if (statusEl) statusEl.textContent = "";
+    renderList();
+  }
 
-    tbody.innerHTML = "";
-    for (const p of data) {
-      const tr = document.createElement("tr");
+  function renderList() {
+    if (!listEl) return;
+
+    const keyword = (searchInput?.value || "").trim().toLowerCase();
+
+    let filtered = allProducts;
+    if (keyword) {
+      filtered = allProducts.filter((p) => {
+        const text =
+          (p.name || "") +
+          " " +
+          (p.category || "") +
+          " " +
+          (p.spec || "") +
+          " " +
+          (p.description || "");
+        return text.toLowerCase().includes(keyword);
+      });
+    }
+
+    listEl.innerHTML = "";
+
+    if (!filtered.length) {
+      if (emptyEl) emptyEl.style.display = "";
+      return;
+    } else {
+      if (emptyEl) emptyEl.style.display = "none";
+    }
+
+    for (const p of filtered) {
+      const card = document.createElement("article");
+      card.className = "product-card";
 
       const updatedText = p.last_price_updated_at
         ? new Date(p.last_price_updated_at).toLocaleString("zh-TW")
         : "—";
 
-      tr.innerHTML = `
-        <td>${escapeHtml(p.name || "")}</td>
-        <td>${escapeHtml(p.category || "")}</td>
-        <td>${escapeHtml(p.spec || "")}${
-        p.description ? "<br><small>" + escapeHtml(p.description) + "</small>" : ""
-      }</td>
-        <td>${escapeHtml(p.unit || "")}</td>
-        <td>
-          <div class="price-row">
-            <span class="price-label">進價：</span>
-            <span class="price-value">${
-              p.last_price != null ? "NT$ " + p.last_price : "—"
-            }</span>
+      card.innerHTML = `
+        <div class="product-image-wrapper">
+          ${
+            p.image_url
+              ? `<img src="${p.image_url}" alt="${escapeHtml(p.name || "")}">`
+              : `<div class="product-image-placeholder">尚未上傳圖片</div>`
+          }
+        </div>
+        <div class="product-content">
+          <h3 class="product-name">${escapeHtml(p.name || "")}</h3>
+          <p class="product-spec">${escapeHtml(p.spec || "")}</p>
+          <div class="product-meta-row">
+            ${
+              p.category
+                ? `<span class="product-meta-tag">類別：${escapeHtml(
+                    p.category
+                  )}</span>`
+                : ""
+            }
+            ${
+              p.unit
+                ? `<span class="product-meta-tag">單位：${escapeHtml(
+                    p.unit
+                  )}</span>`
+                : ""
+            }
           </div>
-          <div class="price-row">
-            <span class="price-label">建議：</span>
-            <span class="price-value">${
-              p.suggest_price != null ? "NT$ " + p.suggest_price : "—"
-            }</span>
+
+          ${
+            p.description
+              ? `<p class="product-desc">${escapeHtml(p.description)}</p>`
+              : ""
+          }
+
+          <div class="product-price-block">
+            <div class="price-row">
+              <span class="price-label">進　　價：</span>
+              <span class="price-value">${
+                p.last_price != null ? "NT$ " + p.last_price : "—"
+              }</span>
+            </div>
+            <div class="price-row">
+              <span class="price-label">建議售價：</span>
+              <span class="price-value">${
+                p.suggest_price != null ? "NT$ " + p.suggest_price : "—"
+              }</span>
+            </div>
           </div>
-        </td>
-        <td>${updatedText}</td>
-        <td>
-          <span class="status-pill ${
-            p.is_active ? "status-on" : "status-off"
-          }">${p.is_active ? "啟用" : "停用"}</span>
-        </td>
-        <td>
-          <button class="btn-secondary btn-edit" data-id="${
-            p.id
-          }">編輯</button>
-        </td>
+
+          <p class="product-updated-at">價格更新時間：${updatedText}</p>
+        </div>
       `;
 
-      tbody.appendChild(tr);
+      listEl.appendChild(card);
     }
-
-    // 綁定編輯按鈕
-    tbody.querySelectorAll(".btn-edit").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const id = btn.getAttribute("data-id");
-        if (id) location.href = `edit.html?id=${encodeURIComponent(id)}`;
-      });
-    });
   }
 
-  // HTML escape 防呆
   function escapeHtml(str) {
     return String(str)
       .replace(/&/g, "&amp;")
@@ -128,6 +137,19 @@ document.addEventListener("DOMContentLoaded", () => {
       .replace(/>/g, "&gt;")
       .replace(/"/g, "&quot;")
       .replace(/'/g, "&#039;");
+  }
+
+  if (searchInput) {
+    searchInput.addEventListener("input", () => {
+      renderList();
+    });
+  }
+
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      if (searchInput) searchInput.value = "";
+      renderList();
+    });
   }
 
   loadProducts();
