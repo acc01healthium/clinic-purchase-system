@@ -1,25 +1,19 @@
 // /admin/js/index.js
-// 後台商品列表：載入 / 搜尋 / 編輯導頁
+// 後台商品列表初始化
 
-console.log("後台 商品列表初始化");
+console.log("後台商品列表初始化");
 
-// Supabase client
+// 取得 Supabase client（在 admin/js/supabase.js 建立的）
 const supabaseClient = window.supabaseClient;
-if (!supabaseClient) {
-  console.error("supabaseClient 不存在，請確認 admin/js/supabase.js 是否正確載入。");
-}
 
-// DOM
+// 安全取得 DOM 元素
 const tbody =
-  document.getElementById("productTbody") ||
+  document.getElementById("productTableBody") ||
   document.querySelector("tbody");
 
-const searchInput = document.getElementById("adminSearchInput");
-const searchHint = document.querySelector(".admin-search-hint");
+const statusEl = document.getElementById("statusMessage");
 
-let allProducts = [];
-
-// 金額格式
+// 將數字金額轉成 NT$ 格式
 function formatPrice(value) {
   if (value === null || value === undefined || value === "") return "—";
   const num = Number(value);
@@ -27,7 +21,7 @@ function formatPrice(value) {
   return `NT$ ${num}`;
 }
 
-// 時間格式
+// 將時間格式化
 function formatDateTime(value) {
   if (!value) return "—";
   const d = new Date(value);
@@ -40,22 +34,68 @@ function formatDateTime(value) {
   return `${y}/${m}/${day} ${hh}:${mm}`;
 }
 
-// 渲染表格
-function renderTable(list) {
-  if (!tbody) return;
-  tbody.innerHTML = "";
+// 文字簡化（避免列表太長）
+function shortenText(text, max = 18) {
+  if (!text) return "—";
+  if (text.length <= max) return text;
+  return text.substring(0, max) + "…";
+}
 
-  if (!list || list.length === 0) {
-    const tr = document.createElement("tr");
-    const td = document.createElement("td");
-    td.colSpan = 9;
-    td.textContent = "目前尚未有商品資料。";
-    tr.appendChild(td);
-    tbody.appendChild(tr);
+// 載入商品列表
+async function loadProducts(keyword = "") {
+  if (!supabaseClient) {
+    console.error("後台 supabaseClient 不存在！");
     return;
   }
 
-  list.forEach((p) => {
+  if (statusEl) statusEl.textContent = "載入中…";
+
+  let query = supabaseClient
+    .from("products")
+    .select(`
+      id,
+      name,
+      category,
+      spec,
+      unit,
+      description,
+      last_price,
+      suggested_price,
+      last_price_updated_at,
+      is_active,
+      image_url
+    `)
+    .order("name", { ascending: true });
+
+  // 若有搜尋
+  if (keyword.trim() !== "") {
+    query = query.or(`
+      name.ilike.%${keyword}%,
+      category.ilike.%${keyword}%,
+      spec.ilike.%${keyword}%,
+      description.ilike.%${keyword}%
+    `);
+  }
+
+  const { data, error } = await query;
+
+  if (error) {
+    console.error("後台載入商品錯誤：", error);
+    if (statusEl) statusEl.textContent = "讀取資料發生錯誤，請稍後再試。";
+    return;
+  }
+
+  if (!tbody) return;
+  tbody.innerHTML = "";
+
+  if (!data || data.length === 0) {
+    if (statusEl) statusEl.textContent = "目前尚未有商品資料。";
+    return;
+  }
+
+  if (statusEl) statusEl.textContent = "";
+
+  data.forEach((p) => {
     const tr = document.createElement("tr");
 
     const statusText = p.is_active ? "啟用" : "停用";
@@ -65,85 +105,29 @@ function renderTable(list) {
       <td>${p.category || "—"}</td>
       <td>${p.spec || "—"}</td>
       <td>${p.unit || "—"}</td>
-      <td>${p.description || "—"}</td>
+      <td>${shortenText(p.description)}</td>
       <td>${formatPrice(p.last_price)}</td>
       <td>${formatPrice(p.suggested_price)}</td>
       <td>${formatDateTime(p.last_price_updated_at)}</td>
       <td>${statusText}</td>
-      <td>
-        <button class="btn-edit" onclick="editProduct(${p.id})">編輯</button>
-      </td>
+      <td><button class="btn-edit" onclick="editProduct(${p.id})">編輯</button></td>
     `;
 
     tbody.appendChild(tr);
   });
 }
 
-// 載入商品
-async function loadProducts() {
-  if (!supabaseClient) return;
-
-  const { data, error } = await supabaseClient
-    .from("products")
-    .select(
-      `
-        id,
-        name,
-        category,
-        spec,
-        unit,
-        description,
-        last_price,
-        suggested_price,
-        last_price_updated_at,
-        is_active
-      `
-    )
-    .order("name", { ascending: true });
-
-  if (error) {
-    console.error("後台載入商品錯誤：", error);
-    renderTable([]);
-    return;
-  }
-
-  allProducts = data || [];
-  renderTable(allProducts);
-}
-
-// 搜尋過濾
-function applySearch() {
-  const q = (searchInput?.value || "").trim().toLowerCase();
-  if (!q) {
-    renderTable(allProducts);
-    return;
-  }
-
-  const filtered = allProducts.filter((p) => {
-    const fields = [
-      p.name,
-      p.category,
-      p.spec,
-      p.description,
-      p.unit,
-    ]
-      .map((v) => (v || "").toString().toLowerCase());
-    return fields.some((text) => text.includes(q));
-  });
-
-  renderTable(filtered);
-}
-
-// 編輯導航（給按鈕 onclick 用）
+// 點擊編輯
 window.editProduct = function (id) {
   if (!id) return;
-  window.location.href = `edit.html?id=${id}`;
+  location.href = `edit.html?id=${id}`;
 };
 
-// 搜尋輸入監聽
-if (searchInput) {
-  searchInput.addEventListener("input", () => {
-    applySearch();
+// 搜尋功能
+const adminSearchInput = document.getElementById("adminSearchInput");
+if (adminSearchInput) {
+  adminSearchInput.addEventListener("input", (e) => {
+    loadProducts(e.target.value);
   });
 }
 
@@ -151,7 +135,7 @@ if (searchInput) {
 const logoutBtn = document.getElementById("logoutBtn");
 if (logoutBtn) {
   logoutBtn.addEventListener("click", () => {
-    window.location.href = "login.html";
+    location.href = "login.html";
   });
 }
 
