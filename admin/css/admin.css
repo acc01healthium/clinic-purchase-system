@@ -1,21 +1,31 @@
-/* ------------------------------
-   基本設定
------------------------------- */
+/* -------------------------------------
+   全域基本設定
+------------------------------------- */
+:root {
+  --primary: #00aee0;
+  --primary-dark: #008bb7;
+  --primary-soft: #eaf9ff;
+  --bg-light: #eef5ff;
+  --border-soft: #d8e7f5;
+  --text-main: #333;
+  --text-sub: #666;
+}
+
 body {
   margin: 0;
   padding: 0;
   font-family: "Noto Sans TC", sans-serif;
-  background: #eef5ff;
-  color: #333;
+  background: var(--bg-light);
+  color: var(--text-main);
 }
 
 h1, h2, h3, h4 {
   margin: 0;
 }
 
-/* ------------------------------
+/* -------------------------------------
    Header
------------------------------- */
+------------------------------------- */
 .admin-header {
   background: linear-gradient(90deg, #00aee0, #14c2c5);
   padding: 20px 30px;
@@ -49,7 +59,7 @@ h1, h2, h3, h4 {
   padding: 8px 18px;
   border-radius: 30px;
   background: #ffffff;
-  color: #009fbd;
+  color: var(--primary-dark);
   font-size: 14px;
   font-weight: 600;
   border: none;
@@ -72,9 +82,9 @@ h1, h2, h3, h4 {
   background: #ffe5e5;
 }
 
-/* ------------------------------
-   Main & Cards
------------------------------- */
+/* -------------------------------------
+   Main Layout
+------------------------------------- */
 .admin-main {
   padding: 30px;
 }
@@ -84,21 +94,20 @@ h1, h2, h3, h4 {
   padding: 25px;
   border-radius: 16px;
   box-shadow: 0px 4px 14px rgba(0, 0, 0, 0.08);
-  margin-bottom: 25px;
+  margin-bottom: 28px;
 }
 
+/* -------------------------------------
+   按鈕區塊
+------------------------------------- */
 .card-header-row {
   display: flex;
   gap: 15px;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
-/* ------------------------------
-   主要按鈕 / 次按鈕
------------------------------- */
-
 .btn-primary {
-  background: #00aee0;
+  background: var(--primary);
   color: #fff;
   border-radius: 30px;
   padding: 10px 22px;
@@ -109,13 +118,13 @@ h1, h2, h3, h4 {
 }
 
 .btn-primary:hover {
-  background: #008bb7;
+  background: var(--primary-dark);
 }
 
 .btn-secondary {
   background: #ffffff;
-  border: 2px solid #00aee0;
-  color: #00aee0;
+  border: 2px solid var(--primary);
+  color: var(--primary-dark);
   border-radius: 30px;
   padding: 10px 22px;
   cursor: pointer;
@@ -127,9 +136,39 @@ h1, h2, h3, h4 {
   background: #e7faff;
 }
 
-/* ------------------------------
+/* -------------------------------------
+   後台搜尋列
+------------------------------------- */
+.admin-search-bar {
+  margin: 5px 0 18px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#adminSearchInput {
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  font-size: 0.95rem;
+  outline: none;
+  max-width: 360px;
+}
+
+#adminSearchInput:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0,174,224,0.2);
+  background: #fff;
+}
+
+.admin-search-hint {
+  font-size: 0.8rem;
+  color: #8fa3b8;
+}
+
+/* -------------------------------------
    表格樣式
------------------------------- */
+------------------------------------- */
 .product-table {
   width: 100%;
   border-collapse: separate;
@@ -146,7 +185,7 @@ h1, h2, h3, h4 {
 
 .product-table tbody tr {
   background: #ffffff;
-  border-radius: 8px;
+  border-radius: 10px;
   box-shadow: 0px 1px 6px rgba(0, 0, 0, 0.06);
 }
 
@@ -154,13 +193,13 @@ h1, h2, h3, h4 {
   padding: 14px 10px;
 }
 
-/* ------------------------------
-   編輯按鈕
------------------------------- */
+/* -------------------------------------
+   編輯按鈕（美美版）
+------------------------------------- */
 .btn-edit {
-  padding: 6px 14px;
+  padding: 6px 16px;
   border-radius: 20px;
-  background: #00aee0;
+  background: var(--primary);
   color: #fff;
   border: none;
   cursor: pointer;
@@ -169,90 +208,26 @@ h1, h2, h3, h4 {
 }
 
 .btn-edit:hover {
-  background: #008bb7;
+  background: var(--primary-dark);
 }
 
-/* ------------------------------
-   狀態文字
------------------------------- */
-.status-text {
-  font-size: 14px;
-  color: #666;
-  margin: 6px 0 10px 0;
-}
-
-/* ------------------------------
-   價格排版
------------------------------- */
-.price-block {
-  font-family: "Noto Sans Mono", monospace;
-}
-
-.price-line {
-  display: flex;
-  justify-content: flex-start;
-  gap: 6px;
-}
-
-.price-label {
-  width: 90px;
-  text-align: right;
-  color: #555;
-}
-
-.price-value {
-  font-weight: 600;
-  color: #333;
-}
-
-/* ------------------------------
-   後台搜尋列（修正版）
------------------------------- */
-.admin-search-bar {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin: 10px 0 18px 0;
-}
-
-#adminSearchInput {
-  padding: 10px 14px;
-  border-radius: 999px;
-  border: 1px solid #d4dee8;
-  font-size: 15px;
-  outline: none;
-  max-width: 360px;
-  background: white;
-}
-
-#adminSearchInput:focus {
-  border-color: #00aee0;
-  box-shadow: 0 0 0 2px rgba(0, 174, 224, 0.2);
-  background: #fff;
-}
-
-.admin-search-hint {
-  font-size: 13px;
-  color: #8a94a6;
-}
-
-/* ------------------------------
-   編輯商品頁面（修正版）
------------------------------- */
-
+/* -------------------------------------
+   編輯畫面表單
+------------------------------------- */
 .edit-card {
-  max-width: 900px;
+  max-width: 920px;
   margin: 0 auto;
 }
 
 .edit-form {
+  margin-top: 12px;
   display: flex;
   flex-direction: column;
   gap: 18px;
-  margin-top: 16px;
 }
 
-.edit-row {
+.edit-row,
+.edit-col {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -260,98 +235,136 @@ h1, h2, h3, h4 {
 
 .edit-row-2col {
   display: flex;
-  justify-content: space-between;
-  gap: 20px;
-}
-
-.edit-col {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  gap: 16px;
 }
 
 .edit-label {
   font-size: 0.9rem;
-  color: #444;
-  font-weight: 600;
+  color: var(--text-sub);
 }
 
 .edit-input,
-.edit-input-short,
 .edit-textarea,
+.edit-input-short,
 #isActive {
   font-family: inherit;
+  font-size: 0.95rem;
   padding: 10px 12px;
-  font-size: 15px;
-  border: 1px solid #d4dee8;
   border-radius: 10px;
+  border: 1px solid var(--border-soft);
   outline: none;
-  background: white;
-}
-
-.edit-input-short {
-  max-width: 180px;
 }
 
 .edit-input:focus,
 .edit-textarea:focus,
 #isActive:focus {
-  border-color: #00aee0;
-  box-shadow: 0 0 0 2px rgba(0, 174, 224, 0.18);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0,174,224,0.2);
+}
+
+.edit-input-short {
+  max-width: 160px;
 }
 
 .edit-textarea {
-  min-height: 80px;
   resize: vertical;
+  min-height: 90px;
 }
 
-/* 圖片區 */
+/* --- 上傳圖片區 --- */
 .edit-image-row {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .edit-image-hint {
   font-size: 0.85rem;
-  color: #888;
+  color: #8fa3b8;
 }
 
 .edit-image-preview img {
-  max-width: 220px;
+  max-width: 240px;
   border-radius: 12px;
-  border: 1px solid #d4dee8;
+  border: 1px solid var(--border-soft);
+  background: #f5f7fa;
 }
 
-/* 下方按鈕區 */
+/* --- 編輯頁按鈕 --- */
 .edit-actions {
-  margin-top: 16px;
+  margin-top: 8px;
   display: flex;
   justify-content: flex-end;
   gap: 12px;
 }
 
 .btn-danger-outline {
-  padding: 8px 18px;
-  border-radius: 30px;
-  border: 1px solid #f25b5b;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid #e25b5b;
   background: #fff;
   color: #e44141;
   cursor: pointer;
-  font-size: 15px;
+  font-size: 0.9rem;
 }
 
 .btn-danger-outline:hover {
   background: #ffe5e5;
 }
 
-/* ------------------------------
-   RWD
------------------------------- */
-@media (max-width: 768px) {
-  .edit-row-2col {
-    flex-direction: column;
-  }
+/* -------------------------------------
+   Login Page
+------------------------------------- */
+.login-body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: var(--bg-light);
+}
+
+.login-card {
+  background: white;
+  padding: 32px 36px;
+  border-radius: 16px;
+  width: 360px;
+  box-shadow: 0px 3px 10px rgba(0,0,0,0.1);
+}
+
+.login-title {
+  font-size: 22px;
+  margin-bottom: 16px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.login-input {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-soft);
+  outline: none;
+}
+
+.login-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0,174,224,0.2);
+}
+
+.btn-login {
+  margin-top: 8px;
+  padding: 12px;
+  background: var(--primary);
+  color: #fff;
+  font-size: 16px;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-login:hover {
+  background: var(--primary-dark);
 }
