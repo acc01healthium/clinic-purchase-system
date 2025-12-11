@@ -245,15 +245,30 @@ body {
     padding: 16px;
   }
 }
+/* ========= 類別 / 單位區塊 ========= */
 .product-meta-row {
-  margin-top: 4px;
+  margin-top: 6px;
   margin-bottom: 6px;
   display: flex;
-  flex-direction: column; /* ← 關鍵！改成垂直排列 */
-  gap: 2px;
+  flex-direction: column;
+  gap: 4px;
 }
 
+/* 類別標籤（美化） */
+.product-category-tag {
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1aa1ba;
+  background: #e6faff;
+  border: 1px solid #b3edf7;
+  border-radius: 12px;
+  width: fit-content;
+}
+
+/* 單位文字 */
 .product-meta-line {
   font-size: 14px;
-  color: #666;
+  color: #555;
 }
