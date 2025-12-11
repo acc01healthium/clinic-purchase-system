@@ -1,6 +1,13 @@
 /* ------------------------------
    基本設定
 ------------------------------ */
+:root {
+  --primary: #00aee0;
+  --primary-dark: #008bb7;
+  --primary-soft: #e5faff;
+  --border-soft: #d7e2ea;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -96,9 +103,8 @@ h1, h2, h3, h4 {
 /* ------------------------------
    主要按鈕 / 次按鈕
 ------------------------------ */
-
 .btn-primary {
-  background: #00aee0;
+  background: var(--primary);
   color: #fff;
   border-radius: 30px;
   padding: 10px 22px;
@@ -107,24 +113,22 @@ h1, h2, h3, h4 {
   font-size: 15px;
   transition: 0.2s;
 }
-
 .btn-primary:hover {
-  background: #008bb7;
+  background: var(--primary-dark);
 }
 
 .btn-secondary {
   background: #ffffff;
-  border: 2px solid #00aee0;
-  color: #00aee0;
+  border: 2px solid var(--primary);
+  color: var(--primary);
   border-radius: 30px;
   padding: 10px 22px;
   cursor: pointer;
   font-size: 15px;
   transition: 0.2s;
 }
-
 .btn-secondary:hover {
-  background: #e7faff;
+  background: var(--primary-soft);
 }
 
 /* ------------------------------
@@ -155,21 +159,22 @@ h1, h2, h3, h4 {
 }
 
 /* ------------------------------
-   編輯按鈕
+   表格「編輯」按鈕（美美版）
 ------------------------------ */
+.table-btn,
 .btn-edit {
   padding: 6px 14px;
-  border-radius: 20px;
-  background: #00aee0;
-  color: #fff;
-  border: none;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 1px solid var(--primary);
+  color: var(--primary-dark);
   cursor: pointer;
   font-size: 14px;
   transition: 0.2s;
 }
-
+.table-btn:hover,
 .btn-edit:hover {
-  background: #008bb7;
+  background: var(--primary-soft);
 }
 
 /* ------------------------------
@@ -182,7 +187,7 @@ h1, h2, h3, h4 {
 }
 
 /* ------------------------------
-   價格排版（對齊 NT$）
+   價格排版
 ------------------------------ */
 .price-block {
   font-family: "Noto Sans Mono", monospace;
@@ -195,7 +200,7 @@ h1, h2, h3, h4 {
 }
 
 .price-label {
-  width: 90px; /* 對齊「建議售價」與「進　價」 */
+  width: 90px;
   text-align: right;
   color: #555;
 }
@@ -206,35 +211,8 @@ h1, h2, h3, h4 {
 }
 
 /* ------------------------------
-   響應式
+   後台搜尋列
 ------------------------------ */
-@media (max-width: 768px) {
-  .admin-header-inner {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .admin-header-buttons {
-    flex-wrap: wrap;
-  }
-
-  .product-table thead {
-    display: none;
-  }
-
-  .product-table tbody tr {
-    display: block;
-    margin-bottom: 20px;
-    padding: 12px;
-  }
-
-  .product-table tbody tr td {
-    display: flex;
-    justify-content: space-between;
-  }
-}
-/* ========= 後台搜尋列 ========= */
 .admin-search-bar {
   margin-top: 16px;
   margin-bottom: 10px;
@@ -244,28 +222,26 @@ h1, h2, h3, h4 {
 }
 
 #adminSearchInput {
-  padding: 9px 12px;
+  padding: 10px 14px;
   border-radius: 999px;
   border: 1px solid var(--border-soft);
-  font-size: 0.95rem;
+  font-size: 15px;
   outline: none;
-  max-width: 340px;
+  max-width: 360px;
+  background: #fff;
+  transition: 0.25s;
 }
 
 #adminSearchInput:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(39, 195, 223, 0.14);
-  background: #fff;
+  box-shadow: 0 0 0 2px rgba(39,195,223,0.25);
 }
 
-.admin-search-hint {
-  font-size: 0.8rem;
-  color: #8a94a6;
-}
-
-/* ========= 編輯商品表單 ========= */
+/* ------------------------------
+   編輯商品表單（完整美美版）
+------------------------------ */
 .edit-card {
-  max-width: 920px;
+  max-width: 900px;
   margin: 0 auto;
 }
 
@@ -273,111 +249,111 @@ h1, h2, h3, h4 {
   margin-top: 12px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 20px;
 }
 
 .edit-row {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.edit-row-2col {
   flex-direction: row;
-  gap: 12px;
+  gap: 20px;
 }
 
 .edit-col {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
 }
 
 .edit-label {
-  font-size: 0.9rem;
-  color: #555;
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 6px;
 }
 
 .edit-input,
 .edit-textarea,
-.edit-input-file,
 .edit-input-short,
+.edit-input-file,
 #isActive {
-  font-family: inherit;
-  font-size: 0.95rem;
-  padding: 8px 10px;
-  border-radius: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
   border: 1px solid var(--border-soft);
+  background: white;
+  font-size: 15px;
   outline: none;
-}
-
-.edit-input-short {
-  max-width: 160px;
+  transition: 0.25s;
 }
 
 .edit-input:focus,
 .edit-textarea:focus,
 #isActive:focus {
   border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(39, 195, 223, 0.14);
-  background: #fff;
+  box-shadow: 0 0 0 2px rgba(39,195,223,0.25);
+}
+
+.edit-input-short {
+  max-width: 200px;
 }
 
 .edit-textarea {
   resize: vertical;
-  min-height: 70px;
+  min-height: 90px;
 }
 
+/* 圖片區塊 */
 .edit-image-row {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .edit-image-hint {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   color: #8a94a6;
 }
 
-.edit-image-preview {
-  margin-top: 8px;
-  min-height: 40px;
-}
-
 .edit-image-preview img {
-  max-width: 220px;
-  max-height: 220px;
+  width: 200px;
+  height: 200px;
   border-radius: 12px;
   border: 1px solid var(--border-soft);
   object-fit: contain;
   background: #f4f7fb;
 }
 
-.edit-image-placeholder {
-  font-size: 0.85rem;
-  color: #8a94a6;
-}
-
+/* 動作按鈕 */
 .edit-actions {
   margin-top: 10px;
   display: flex;
-  gap: 10px;
   justify-content: flex-end;
+  gap: 12px;
 }
 
-/* 刪除商品按鈕 */
 .btn-danger-outline {
-  padding: 8px 16px;
+  padding: 10px 18px;
   border-radius: 999px;
-  border: 1px solid #f25b5b;
+  border: 1px solid #ff4d4d;
   background: #fff;
   color: #e44141;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 14px;
+  transition: 0.25s;
+}
+.btn-danger-outline:hover {
+  background: #ffeaea;
 }
 
-.btn-danger-outline:hover {
-  background: #ffe5e5;
+/* ------------------------------
+   RWD
+------------------------------ */
+@media (max-width: 768px) {
+  .admin-header-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .edit-row {
+    flex-direction: column;
+    gap: 12px;
+  }
 }
