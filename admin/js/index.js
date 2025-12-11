@@ -1,20 +1,47 @@
-// /admin/js/index.js  後台「商品列表」Final 版
+// /admin/js/index.js
+// 後台商品列表初始化
 
 console.log("後台商品列表初始化");
 
-const tableBody = document.querySelector("#productTableBody");
-const statusText = document.querySelector("#adminStatusText");
-const logoutBtn = document.getElementById("logoutBtn");
+// 取得 Supabase client（在 admin/js/supabase.js 建立的）
+const supabaseClient = window.supabaseClient;
 
-// 載入列表
-async function loadAdminProducts() {
-  if (!window.supabaseClient) {
-    console.error("supabaseClient 未定義，請檢查 admin/js/supabase.js 是否正確載入。");
-    if (statusText) statusText.textContent = "系統初始化失敗，請稍後再試。";
+// 安全取得 DOM 元素（避免找不到就報錯）
+const tbody =
+  document.getElementById("productTableBody") ||
+  document.querySelector("tbody");
+
+const statusEl = document.getElementById("statusMessage");
+
+// 將數字金額轉成 NT$ 格式
+function formatPrice(value) {
+  if (value === null || value === undefined || value === "") return "—";
+  const num = Number(value);
+  if (Number.isNaN(num)) return "—";
+  return `NT$ ${num}`;
+}
+
+// 將時間格式化（若欄位不存在或為空就顯示 "—"）
+function formatDateTime(value) {
+  if (!value) return "—";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "—";
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  return `${y}/${m}/${day} ${hh}:${mm}`;
+}
+
+// 載入商品列表
+async function loadProducts() {
+  if (!supabaseClient) {
+    console.error("後台 supabaseClient 不存在，請確認 admin/js/supabase.js 是否正確載入。");
     return;
   }
 
-  if (statusText) statusText.textContent = "載入中...";
+  if (statusEl) statusEl.textContent = "載入中…";
 
   const { data, error } = await supabaseClient
     .from("products")
@@ -25,122 +52,85 @@ async function loadAdminProducts() {
       category,
       spec,
       unit,
-      description,
-      image_url,
       last_price,
-      suggested_pri,
-      is_active,
-      last_price_upd
+      suggested_price,
+      last_price_updated_at,
+      is_active
     `
     )
-    .order("id", { ascending: true });
+    .order("name", { ascending: true });
 
   if (error) {
-    console.error("後台讀取商品錯誤：", error);
-    if (statusText) statusText.textContent = "讀取資料發生錯誤，請稍後再試。";
+    console.error("後台載入商品錯誤：", error);
+    if (statusEl) statusEl.textContent = "讀取資料發生錯誤，請稍後再試。";
     return;
   }
 
-  renderAdminTable(data || []);
-  if (statusText) statusText.textContent = "";
-}
+  if (!tbody) return;
+  tbody.innerHTML = "";
 
-// 渲染表格
-function renderAdminTable(list) {
-  if (!tableBody) return;
-  tableBody.innerHTML = "";
-
-  if (list.length === 0) {
-    const tr = document.createElement("tr");
-    const td = document.createElement("td");
-    td.colSpan = 9;
-    td.textContent = "目前尚無商品資料。";
-    tr.appendChild(td);
-    tableBody.appendChild(tr);
+  if (!data || data.length === 0) {
+    if (statusEl) statusEl.textContent = "目前尚未有商品資料。";
     return;
   }
 
-  list.forEach((p) => {
+  if (statusEl) statusEl.textContent = "";
+
+  data.forEach((p) => {
     const tr = document.createElement("tr");
 
-    // 名稱
-    const nameTd = document.createElement("td");
-    nameTd.textContent = p.name || "";
-    tr.appendChild(nameTd);
+    // 狀態文字
+    const statusText = p.is_active ? "啟用" : "停用";
 
-    // 類別
-    const catTd = document.createElement("td");
-    catTd.textContent = p.category || "";
-    tr.appendChild(catTd);
+    // 價格顯示：進價 / 建議售價
+    const priceDisplay = `
+      <div class="price-block">
+        <div class="price-line">
+          <span class="price-label">進　　價：</span>
+          <span class="price-value">${formatPrice(p.last_price)}</span>
+        </div>
+        <div class="price-line">
+          <span class="price-label">建議售價：</span>
+          <span class="price-value">${formatPrice(p.suggested_price)}</span>
+        </div>
+      </div>
+    `;
 
-    // 規格／描述
-    const specTd = document.createElement("td");
-    let specText = p.spec || "";
-    if (p.description) specText += specText ? `｜${p.description}` : p.description;
-    specTd.textContent = specText;
-    tr.appendChild(specTd);
+    tr.innerHTML = `
+      <td>${p.name || ""}</td>
+      <td>${p.category || "—"}</td>
+      <td>${p.spec || "—"}</td>
+      <td>${p.unit || "—"}</td>
+      <td>${formatPrice(p.last_price)}</td>
+      <td>${formatPrice(p.suggested_price)}</td>
+      <td>${formatDateTime(p.last_price_updated_at)}</td>
+      <td>${statusText}</td>
+      <td>
+        <button class="table-btn" onclick="editProduct(${p.id})">編輯</button>
+      </td>
+    `;
 
-    // 單位
-    const unitTd = document.createElement("td");
-    unitTd.textContent = p.unit || "";
-    tr.appendChild(unitTd);
-
-    // 進價
-    const buyTd = document.createElement("td");
-    buyTd.textContent =
-      p.last_price != null ? `NT$ ${Number(p.last_price).toFixed(0)}` : "—";
-    tr.appendChild(buyTd);
-
-    // 建議售價
-    const sugTd = document.createElement("td");
-    sugTd.textContent =
-      p.suggested_pri != null
-        ? `NT$ ${Number(p.suggested_pri).toFixed(0)}`
-        : "—";
-    tr.appendChild(sugTd);
-
-    // 價格更新時間
-    const timeTd = document.createElement("td");
-    if (p.last_price_upd) {
-      const dt = new Date(p.last_price_upd);
-      timeTd.textContent = dt.toLocaleString("zh-TW");
-    } else {
-      timeTd.textContent = "—";
-    }
-    tr.appendChild(timeTd);
-
-    // 狀態
-    const statusTd = document.createElement("td");
-    const enabled = p.is_active === true || p.is_active === "true";
-    statusTd.textContent = enabled ? "啟用" : "停用";
-    statusTd.className = enabled ? "tag-success" : "tag-muted";
-    tr.appendChild(statusTd);
-
-    // 操作
-    const actionTd = document.createElement("td");
-    const editBtn = document.createElement("button");
-    editBtn.className = "btn-table";
-    editBtn.textContent = "編輯";
-    editBtn.addEventListener("click", () => {
-      location.href = `edit.html?id=${encodeURIComponent(p.id)}`;
-    });
-    actionTd.appendChild(editBtn);
-    tr.appendChild(actionTd);
-
-    tableBody.appendChild(tr);
+    tbody.appendChild(tr);
   });
 }
 
-// 登出（單純回 login 頁即可）
-function setupLogout() {
-  if (!logoutBtn) return;
+// 按下「編輯」按鈕
+window.editProduct = function (id) {
+  if (!id) return;
+  location.href = `edit.html?id=${id}`;
+};
+
+// 登出按鈕（如果有登入機制就補上 signOut，現在先單純回到 login）
+const logoutBtn = document.getElementById("logoutBtn");
+if (logoutBtn) {
   logoutBtn.addEventListener("click", () => {
-    // 這裡如果未使用 Supabase Auth，就直接回登入頁
+    // 若之後有 Supabase Auth，可在這裡呼叫 signOut()
+    // await supabaseClient.auth.signOut();
     location.href = "login.html";
   });
 }
 
+// 初始化
 document.addEventListener("DOMContentLoaded", () => {
-  setupLogout();
-  loadAdminProducts();
+  loadProducts();
 });
