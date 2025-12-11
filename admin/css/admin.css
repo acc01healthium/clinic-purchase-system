@@ -234,3 +234,150 @@ h1, h2, h3, h4 {
     justify-content: space-between;
   }
 }
+/* ========= 後台搜尋列 ========= */
+.admin-search-bar {
+  margin-top: 16px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#adminSearchInput {
+  padding: 9px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  font-size: 0.95rem;
+  outline: none;
+  max-width: 340px;
+}
+
+#adminSearchInput:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(39, 195, 223, 0.14);
+  background: #fff;
+}
+
+.admin-search-hint {
+  font-size: 0.8rem;
+  color: #8a94a6;
+}
+
+/* ========= 編輯商品表單 ========= */
+.edit-card {
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.edit-form {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.edit-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.edit-row-2col {
+  flex-direction: row;
+  gap: 12px;
+}
+
+.edit-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.edit-label {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.edit-input,
+.edit-textarea,
+.edit-input-file,
+.edit-input-short,
+#isActive {
+  font-family: inherit;
+  font-size: 0.95rem;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-soft);
+  outline: none;
+}
+
+.edit-input-short {
+  max-width: 160px;
+}
+
+.edit-input:focus,
+.edit-textarea:focus,
+#isActive:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(39, 195, 223, 0.14);
+  background: #fff;
+}
+
+.edit-textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+.edit-image-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.edit-image-hint {
+  font-size: 0.8rem;
+  color: #8a94a6;
+}
+
+.edit-image-preview {
+  margin-top: 8px;
+  min-height: 40px;
+}
+
+.edit-image-preview img {
+  max-width: 220px;
+  max-height: 220px;
+  border-radius: 12px;
+  border: 1px solid var(--border-soft);
+  object-fit: contain;
+  background: #f4f7fb;
+}
+
+.edit-image-placeholder {
+  font-size: 0.85rem;
+  color: #8a94a6;
+}
+
+.edit-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* 刪除商品按鈕 */
+.btn-danger-outline {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid #f25b5b;
+  background: #fff;
+  color: #e44141;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.btn-danger-outline:hover {
+  background: #ffe5e5;
+}
