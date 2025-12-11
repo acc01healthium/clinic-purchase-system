@@ -1,184 +1,86 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0"
-    />
-    <title>編輯商品｜康醫採購管理系統</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>編輯商品｜康醫採購管理系統</title>
 
-    <link rel="stylesheet" href="css/admin.css?v=2" />
+  <link rel="stylesheet" href="css/admin.css?v=1" />
 
-    <!-- Supabase v2 -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Supabase SDK v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- 共用 Supabase client -->
-    <script src="js/supabase.js?v=4"></script>
+  <!-- 後台 Supabase client -->
+  <script src="js/supabase.js?v=1"></script>
 
-    <!-- 編輯商品邏輯 -->
-    <script defer src="js/edit.js?v=2"></script>
-  </head>
-  <body>
-    <header class="admin-header">
-      <div class="admin-header-inner">
-        <div>
-          <h1 class="admin-title">康醫採購管理系統｜後台</h1>
-          <p class="admin-subtitle">編輯商品</p>
-        </div>
-        <button
-          type="button"
-          class="btn-ghost"
-          onclick="location.href='index.html'"
-        >
-          返回商品列表
-        </button>
+  <!-- 編輯頁 JS -->
+  <script defer src="js/edit.js?v=1"></script>
+</head>
+
+<body>
+  <header class="admin-header">
+    <div class="admin-header-inner">
+      <div>
+        <h1 class="admin-title">康醫採購管理系統｜後台</h1>
+        <p class="admin-subtitle">編輯商品</p>
       </div>
-    </header>
 
-    <main class="admin-main">
-      <section class="card">
-        <form id="editForm" class="product-form">
-          <input type="hidden" id="productId" />
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="name">商品名稱（必填）</label>
-              <input type="text" id="name" required />
-            </div>
-
-            <div class="form-group">
-              <label for="category">類別</label>
-              <input type="text" id="category" />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="spec">規格</label>
-              <input type="text" id="spec" />
-            </div>
-
-            <div class="form-group">
-              <label for="unit">單位</label>
-              <input type="text" id="unit" />
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="last_price">進價（必填）</label>
-              <input
-                type="number"
-                id="last_price"
-                min="0"
-                step="1"
-                required
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="suggested_price">建議售價</label>
-              <input
-                type="number"
-                id="suggested_price"
-                min="0"
-                step="1"
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="is_active">是否啟用</label>
-              <select id="is_active">
-                <option value="true">啟用</option>
-                <option value="false">停用</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label for="description">
-              描述
-              <span class="char-counter">
-                <span id="descCount">0</span>/1000
-              </span>
-            </label>
-            <textarea
-              id="description"
-              rows="4"
-              maxlength="1000"
-            ></textarea>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label for="imageFile">商品圖片</label>
-              <input
-                type="file"
-                id="imageFile"
-                accept="image/*"
-              />
-              <p class="hint-text">
-                若不更換圖片可留白；上傳後會覆蓋原圖片。
-              </p>
-            </div>
-
-            <div class="form-group">
-              <label>圖片預覽</label>
-              <div class="image-preview-wrapper">
-                <img
-                  id="previewImage"
-                  class="preview-image"
-                  src=""
-                  alt="預覽圖片"
-                />
-                <div
-                  id="previewPlaceholder"
-                  class="preview-placeholder"
-                >
-                  尚未選擇圖片
-                </div>
-              </div>
-              <input
-                type="text"
-                id="image_url"
-                readonly
-                class="image-url-input"
-              />
-            </div>
-          </div>
-
-          <div class="form-actions">
-            <button
-              type="submit"
-              id="saveBtn"
-              class="btn-primary"
-            >
-              儲存修改
-            </button>
-            <button
-              type="button"
-              id="deleteBtn"
-              class="btn-danger"
-            >
-              刪除商品
-            </button>
-            <button
-              type="button"
-              class="btn-secondary"
-              onclick="location.href='index.html'"
-            >
-              取消
-            </button>
-            <span id="formStatus" class="status-message"></span>
-          </div>
-        </form>
-      </section>
-
-      <div id="loadingMask" class="loading-mask" style="display: none;">
-        <div class="loading-spinner"></div>
-        <div class="loading-text">儲存中，請稍候…</div>
+      <div class="admin-header-buttons">
+        <a href="index.html" class="admin-btn">商品列表</a>
+        <a href="csv.html" class="admin-btn">匯入 CSV</a>
+        <a href="../index.html" class="admin-btn" target="_blank">前台查看</a>
+        <button id="logoutBtn" class="admin-btn admin-btn-danger">登出</button>
       </div>
-    </main>
-  </body>
+    </div>
+  </header>
+
+  <main class="admin-main">
+    <section class="card">
+      <h2>編輯商品</h2>
+
+      <div id="statusMessage" class="status-message"></div>
+
+      <form id="editForm" class="form-layout">
+        
+        <label>商品名稱
+          <input type="text" id="name" required />
+        </label>
+
+        <label>類別
+          <input type="text" id="category" />
+        </label>
+
+        <label>規格 / 描述
+          <input type="text" id="spec" />
+        </label>
+
+        <label>單位
+          <input type="text" id="unit" />
+        </label>
+
+        <label>進價
+          <input type="number" id="last_price" step="1" />
+        </label>
+
+        <label>建議售價
+          <input type="number" id="suggested_price" step="1" />
+        </label>
+
+        <label>圖片網址（image_url）
+          <input type="text" id="image_url" />
+        </label>
+
+        <label>狀態
+          <select id="is_active">
+            <option value="true">啟用</option>
+            <option value="false">停用</option>
+          </select>
+        </label>
+
+        <button type="submit" class="btn-primary form-submit-btn">儲存變更</button>
+      </form>
+    </section>
+  </main>
+
+</body>
 </html>
