@@ -1,177 +1,165 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0"
-    />
-    <title>新增商品｜康醫採購管理系統</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>新增商品｜康醫採購管理系統｜後台</title>
 
-    <link rel="stylesheet" href="css/admin.css?v=2" />
+  <!-- 後台樣式 -->
+  <link rel="stylesheet" href="css/admin.css?v=1" />
 
-    <!-- Supabase v2 -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Supabase SDK v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- 共用 Supabase client -->
-    <script src="js/supabase.js?v=4"></script>
+  <!-- 後台 Supabase client（已在 admin/js/supabase.js 設定好 URL / KEY） -->
+  <script src="js/supabase.js?v=1"></script>
 
-    <!-- 新增商品邏輯 -->
-    <script defer src="js/add.js?v=2"></script>
-  </head>
-  <body>
-    <header class="admin-header">
-      <div class="admin-header-inner">
-        <div>
-          <h1 class="admin-title">康醫採購管理系統｜後台</h1>
-          <p class="admin-subtitle">新增商品</p>
-        </div>
-        <button
-          type="button"
-          class="btn-ghost"
-          onclick="location.href='index.html'"
-        >
-          返回商品列表
+  <!-- 本頁新增商品邏輯 -->
+  <script defer src="js/add.js?v=1"></script>
+</head>
+
+<body>
+  <header class="admin-header">
+    <div class="admin-header-inner">
+      <div>
+        <h1 class="admin-title">康醫採購管理系統｜後台</h1>
+        <p class="admin-subtitle">新增商品</p>
+      </div>
+
+      <div class="admin-header-buttons">
+        <a href="index.html" class="admin-btn">商品列表</a>
+        <a href="csv.html" class="admin-btn">匯入 CSV</a>
+        <a href="../index.html" class="admin-btn" target="_blank">前台查看</a>
+        <button id="logoutBtn" class="admin-btn admin-btn-danger">登出</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="admin-main">
+    <section class="card">
+      <div class="card-header-row">
+        <button type="button" class="btn-secondary" onclick="location.href='index.html'">
+          ← 返回商品列表
         </button>
       </div>
-    </header>
 
-    <main class="admin-main">
-      <section class="card">
-        <form id="addForm" class="product-form">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="name">商品名稱（必填）</label>
-              <input type="text" id="name" required />
-            </div>
+      <h2>新增商品</h2>
 
-            <div class="form-group">
-              <label for="category">類別</label>
-              <input type="text" id="category" />
-            </div>
-          </div>
+      <form id="productForm" style="margin-top: 16px;">
+        <!-- 商品名稱 -->
+        <div class="form-row">
+          <label for="nameInput">商品名稱（必填）</label><br />
+          <input
+            id="nameInput"
+            type="text"
+            placeholder="例如：BD-24G留置針"
+            required
+            style="width: 100%; padding: 8px;"
+          />
+        </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="spec">規格</label>
-              <input type="text" id="spec" />
-            </div>
+        <!-- 類別 / 規格 / 單位 -->
+        <div class="form-row" style="margin-top: 12px;">
+          <label for="categoryInput">類別</label><br />
+          <input
+            id="categoryInput"
+            type="text"
+            placeholder="例如：醫療耗材"
+            style="width: 100%; padding: 8px;"
+          />
+        </div>
 
-            <div class="form-group">
-              <label for="unit">單位</label>
-              <input type="text" id="unit" placeholder="盒、包、瓶…" />
-            </div>
-          </div>
+        <div class="form-row" style="margin-top: 12px;">
+          <label for="specInput">規格</label><br />
+          <input
+            id="specInput"
+            type="text"
+            placeholder="例如：50支"
+            style="width: 100%; padding: 8px;"
+          />
+        </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="last_price">進價（必填）</label>
-              <input
-                type="number"
-                id="last_price"
-                min="0"
-                step="1"
-                required
-              />
-            </div>
+        <div class="form-row" style="margin-top: 12px;">
+          <label for="unitInput">單位</label><br />
+          <input
+            id="unitInput"
+            type="text"
+            placeholder="例如：盒、瓶、包…"
+            style="width: 100%; padding: 8px;"
+          />
+        </div>
 
-            <div class="form-group">
-              <label for="suggested_price">建議售價</label>
-              <input
-                type="number"
-                id="suggested_price"
-                min="0"
-                step="1"
-              />
-            </div>
+        <!-- 價格 -->
+        <div class="form-row" style="margin-top: 16px;">
+          <label for="lastPriceInput">進價（必填，數字）</label><br />
+          <input
+            id="lastPriceInput"
+            type="number"
+            min="0"
+            step="1"
+            placeholder="例如：250"
+            required
+            style="width: 100%; padding: 8px;"
+          />
+        </div>
 
-            <div class="form-group">
-              <label for="is_active">是否啟用</label>
-              <select id="is_active">
-                <option value="true" selected>啟用</option>
-                <option value="false">停用</option>
-              </select>
-            </div>
-          </div>
+        <div class="form-row" style="margin-top: 12px;">
+          <label for="suggestedPriceInput">建議售價（選填，數字）</label><br />
+          <input
+            id="suggestedPriceInput"
+            type="number"
+            min="0"
+            step="1"
+            placeholder="例如：300"
+            style="width: 100%; padding: 8px;"
+          />
+        </div>
 
-          <div class="form-group">
-            <label for="description">
-              描述
-              <span class="char-counter">
-                <span id="descCount">0</span>/1000
-              </span>
-            </label>
-            <textarea
-              id="description"
-              rows="4"
-              maxlength="1000"
-              placeholder="可簡要說明用途、規格重點或注意事項"
-            ></textarea>
-          </div>
+        <!-- 是否啟用 -->
+        <div class="form-row" style="margin-top: 16px;">
+          <label for="isActiveSelect">是否啟用</label><br />
+          <select id="isActiveSelect" style="width: 100%; padding: 8px;">
+            <option value="1" selected>啟用</option>
+            <option value="0">停用</option>
+          </select>
+        </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label for="imageFile">商品圖片</label>
-              <input
-                type="file"
-                id="imageFile"
-                accept="image/*"
-              />
-              <p class="hint-text">
-                建議上傳尺寸約 800×800px 以內的 jpg / png。
-              </p>
-            </div>
+        <!-- 描述 -->
+        <div class="form-row" style="margin-top: 16px;">
+          <label for="descriptionInput">描述（選填）</label><br />
+          <textarea
+            id="descriptionInput"
+            rows="4"
+            placeholder="補充說明、注意事項等"
+            style="width: 100%; padding: 8px; resize: vertical;"
+          ></textarea>
+        </div>
 
-            <div class="form-group">
-              <label>圖片預覽</label>
-              <div class="image-preview-wrapper">
-                <img
-                  id="previewImage"
-                  class="preview-image"
-                  src=""
-                  alt="預覽圖片"
-                />
-                <div
-                  id="previewPlaceholder"
-                  class="preview-placeholder"
-                >
-                  尚未選擇圖片
-                </div>
-              </div>
-              <input
-                type="text"
-                id="image_url"
-                readonly
-                class="image-url-input"
-                placeholder="上傳後自動帶入圖片網址"
-              />
-            </div>
-          </div>
+        <!-- 商品圖片 -->
+        <div class="form-row" style="margin-top: 16px;">
+          <label for="imageFile">商品圖片（選填）</label><br />
+          <input
+            id="imageFile"
+            type="file"
+            accept="image/*"
+            style="margin-top: 4px;"
+          />
+          <p style="font-size: 12px; color: #666; margin-top: 4px;">
+            若有上傳圖片，系統會自動存到儲存空間並記錄連結。
+          </p>
+        </div>
 
-          <div class="form-actions">
-            <button
-              type="submit"
-              id="saveBtn"
-              class="btn-primary"
-            >
-              儲存新增
-            </button>
-            <button
-              type="button"
-              class="btn-secondary"
-              onclick="location.href='index.html'"
-            >
-              取消
-            </button>
-            <span id="formStatus" class="status-message"></span>
-          </div>
-        </form>
-      </section>
+        <!-- 狀態 & 按鈕 -->
+        <p id="statusMessage" class="status-text"></p>
 
-      <div id="loadingMask" class="loading-mask" style="display: none;">
-        <div class="loading-spinner"></div>
-        <div class="loading-text">儲存中，請稍候…</div>
-      </div>
-    </main>
-  </body>
+        <div style="margin-top: 20px; display: flex; gap: 12px;">
+          <button type="submit" id="saveBtn" class="btn-primary">儲存新增</button>
+          <button type="button" class="btn-secondary" onclick="location.href='index.html'">
+            取消
+          </button>
+        </div>
+      </form>
+    </section>
+  </main>
+</body>
 </html>
