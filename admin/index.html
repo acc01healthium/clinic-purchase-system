@@ -39,41 +39,48 @@
     </div>
   </header>
 
-  <!-- Main -->
-  <main class="admin-main">
-    <section class="card">
-      
-      <!-- 上方操作按鈕 -->
-      <div class="card-header-row">
-        <button onclick="location.href='add.html'" class="btn-primary">新增商品</button>
-        <button onclick="location.href='upload.html'" class="btn-secondary">CSV 批次匯入</button>
-      </div>
+ <main class="admin-main">
+  <section class="card">
+    <div class="card-header-row">
+      <button onclick="location.href='add.html'" class="btn-primary">新增商品</button>
+      <button onclick="location.href='upload.html'" class="btn-secondary">CSV 批次匯入</button>
+    </div>
 
-      <h2>商品列表</h2>
+    <!-- 🔍 後台搜尋列 -->
+    <div class="admin-search-bar">
+      <input
+        id="adminSearchInput"
+        type="text"
+        placeholder="搜尋商品名稱、類別、規格或描述…"
+      />
+      <span class="admin-search-hint">支援名稱、類別、規格、描述等關鍵字模糊查詢</span>
+    </div>
 
-      <div id="statusMessage" class="status-text"></div>
+    <h2>商品列表</h2>
 
-      <table class="product-table">
-        <thead>
-          <tr>
-            <th>名稱</th>
-            <th>類別</th>
-            <th>規格</th>
-            <th>單位</th>
-            <th>描述</th>            
-            <th>進價</th>
-            <th>建議售價</th>
-            <th>價格更新時間</th>
-            <th>狀態</th>
-            <th>操作</th>
-          </tr>
-        </thead>
+    <table class="product-table">
+      <thead>
+        <tr>
+          <th>名稱</th>
+          <th>類別</th>
+          <th>規格</th>
+          <th>單位</th>
+          <th>描述</th>
+          <th>進價</th>
+          <th>建議售價</th>
+          <th>價格更新時間</th>
+          <th>狀態</th>
+          <th>操作</th>
+        </tr>
+      </thead>
+      <tbody id="productTableBody">
+        <!-- JS 會插入商品 -->
+      </tbody>
+    </table>
 
-        <tbody id="productTableBody">
-          <!-- JS 會插入商品 -->
-        </tbody>
-      </table>
-    </section>
-  </main>
+    <!-- 載入狀態 / 空資料提示 -->
+    <p id="statusMessage" class="admin-status-message"></p>
+  </section>
+</main>
 </body>
 </html>
