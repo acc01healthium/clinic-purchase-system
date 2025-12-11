@@ -68,19 +68,19 @@ function createProductCard(p) {
   specEl.className = "product-spec";
   specEl.textContent = p.spec || "";
 
- // 類別 / 單位（上下分開顯示）
+// 類別 / 單位
 const metaRow = document.createElement("div");
 metaRow.className = "product-meta-row";
 
-// 類別
+// 類別（美化標籤）
 if (p.category) {
   const categoryDiv = document.createElement("div");
-  categoryDiv.className = "product-meta-line";
+  categoryDiv.className = "product-category-tag";
   categoryDiv.textContent = p.category;
   metaRow.appendChild(categoryDiv);
 }
 
-// 單位
+// 單位（一般文字）
 if (p.unit) {
   const unitDiv = document.createElement("div");
   unitDiv.className = "product-meta-line";
