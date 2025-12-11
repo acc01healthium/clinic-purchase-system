@@ -3,17 +3,14 @@
 
 console.log("後台商品列表初始化");
 
-// 取得 Supabase client（在 admin/js/supabase.js 建立的）
+// Supabase client（由 admin/js/supabase.js 建立）
 const supabaseClient = window.supabaseClient;
 
-// 安全取得 DOM 元素（避免找不到就報錯）
-const tbody =
-  document.getElementById("productTableBody") ||
-  document.querySelector("tbody");
-
+// 取得 DOM
+const tbody = document.getElementById("productTableBody");
 const statusEl = document.getElementById("statusMessage");
 
-// 將數字金額轉成 NT$ 格式
+// 金額格式化
 function formatPrice(value) {
   if (value === null || value === undefined || value === "") return "—";
   const num = Number(value);
@@ -21,23 +18,25 @@ function formatPrice(value) {
   return `NT$ ${num}`;
 }
 
-// 將時間格式化（若欄位不存在或為空就顯示 "—"）
+// 時間格式化
 function formatDateTime(value) {
   if (!value) return "—";
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return "—";
+
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
   const hh = String(d.getHours()).padStart(2, "0");
   const mm = String(d.getMinutes()).padStart(2, "0");
+
   return `${y}/${m}/${day} ${hh}:${mm}`;
 }
 
 // 載入商品列表
 async function loadProducts() {
   if (!supabaseClient) {
-    console.error("後台 supabaseClient 不存在，請確認 admin/js/supabase.js 是否正確載入。");
+    console.error("supabaseClient 不存在，請確認 admin/js/supabase.js 是否正確載入");
     return;
   }
 
@@ -45,8 +44,7 @@ async function loadProducts() {
 
   const { data, error } = await supabaseClient
     .from("products")
-    .select(
-      `
+    .select(`
       id,
       name,
       category,
@@ -56,8 +54,7 @@ async function loadProducts() {
       suggested_price,
       last_price_updated_at,
       is_active
-    `
-    )
+    `)
     .order("name", { ascending: true });
 
   if (error) {
@@ -66,7 +63,6 @@ async function loadProducts() {
     return;
   }
 
-  if (!tbody) return;
   tbody.innerHTML = "";
 
   if (!data || data.length === 0) {
@@ -79,22 +75,7 @@ async function loadProducts() {
   data.forEach((p) => {
     const tr = document.createElement("tr");
 
-    // 狀態文字
     const statusText = p.is_active ? "啟用" : "停用";
-
-    // 價格顯示：進價 / 建議售價
-    const priceDisplay = `
-      <div class="price-block">
-        <div class="price-line">
-          <span class="price-label">進　　價：</span>
-          <span class="price-value">${formatPrice(p.last_price)}</span>
-        </div>
-        <div class="price-line">
-          <span class="price-label">建議售價：</span>
-          <span class="price-value">${formatPrice(p.suggested_price)}</span>
-        </div>
-      </div>
-    `;
 
     tr.innerHTML = `
       <td>${p.name || ""}</td>
@@ -106,7 +87,7 @@ async function loadProducts() {
       <td>${formatDateTime(p.last_price_updated_at)}</td>
       <td>${statusText}</td>
       <td>
-        <button class="table-btn" onclick="editProduct(${p.id})">編輯</button>
+        <button class="btn-edit" onclick="editProduct(${p.id})">編輯</button>
       </td>
     `;
 
@@ -114,18 +95,16 @@ async function loadProducts() {
   });
 }
 
-// 按下「編輯」按鈕
+// 編輯
 window.editProduct = function (id) {
   if (!id) return;
   location.href = `edit.html?id=${id}`;
 };
 
-// 登出按鈕（如果有登入機制就補上 signOut，現在先單純回到 login）
+// 登出
 const logoutBtn = document.getElementById("logoutBtn");
 if (logoutBtn) {
   logoutBtn.addEventListener("click", () => {
-    // 若之後有 Supabase Auth，可在這裡呼叫 signOut()
-    // await supabaseClient.auth.signOut();
     location.href = "login.html";
   });
 }
