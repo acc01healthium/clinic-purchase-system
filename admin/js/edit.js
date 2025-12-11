@@ -256,31 +256,35 @@ async function handleSubmit(e) {
   }
 }
 
-// 刪除商品
-async function handleDelete() {
-  const name = nameInput.value || "";
-  const confirmDelete = confirm(
-    `⚠️ 你確定要刪除商品「${name}」嗎？\n刪除後無法復原！`
-  );
-  if (!confirmDelete) return;
+// =========================
+// 🔥 刪除商品功能（完整版）
+// =========================
+document.getElementById("deleteBtn").addEventListener("click", async () => {
+  const confirmed = confirm("確定要刪除此商品嗎？此操作無法復原！");
+  if (!confirmed) return;
 
-  if (statusEl) statusEl.textContent = "刪除中…";
+  const productId = getQueryParam("id");
+  if (!productId) {
+    alert("找不到商品編號，無法刪除。");
+    return;
+  }
 
-  const { error } = await supabaseClient
+  // 🔥 呼叫 Supabase 刪除
+  const { error } = await supabase
     .from("products")
     .delete()
     .eq("id", productId);
 
   if (error) {
-    console.error("刪除失敗", error);
-    if (statusEl) statusEl.textContent = "刪除失敗，請稍後再試。";
-    alert("刪除失敗，請稍後再試。");
+    console.error("刪除失敗：", error);
+    alert("刪除失敗，請稍後再試！");
     return;
   }
 
-  alert("商品已刪除。");
-  location.href = "index.html";
-}
+  alert("商品已成功刪除！");
+  window.location.href = "/clinic-purchase-system/admin/index.html";
+});
+
 
 // 取消：回列表
 function handleCancel() {
