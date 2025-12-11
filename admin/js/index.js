@@ -42,9 +42,9 @@ async function loadProducts() {
 
   if (statusEl) statusEl.textContent = "載入中…";
 
-  const { data, error } = await supabaseClient
-    .from("products")
-    .select(`
+ const { data, error } = await supabaseClient
+  .from("products")
+  .select(`
       id,
       name,
       category,
@@ -53,9 +53,11 @@ async function loadProducts() {
       last_price,
       suggested_price,
       last_price_updated_at,
-      is_active
-    `)
-    .order("name", { ascending: true });
+      is_active,
+      description
+  `)
+  .order("name", { ascending: true });
+
 
   if (error) {
     console.error("後台載入商品錯誤：", error);
