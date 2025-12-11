@@ -3,40 +3,37 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>康醫採購管理系統｜後台登入</title>
+  <title>後台登入｜康醫採購管理系統</title>
 
-  <link rel="stylesheet" href="css/admin.css?v=3" />
-
+  <link rel="stylesheet" href="css/admin.css?v=2" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase.js?v=3"></script>
+  <script src="js/supabase.js?v=2"></script>
+
 </head>
 
-<body style="display:flex; justify-content:center; align-items:center; height:100vh;">
+<body class="login-body">
 
-  <div class="card" style="max-width:420px; width:90%; padding:30px;">
-    <h2 style="margin-bottom:20px;">後台登入</h2>
+  <div class="login-card">
+    <h2 class="login-title">後台登入</h2>
 
-    <label style="font-size:14px;">帳號（Email）</label>
-    <input id="loginEmail" type="email" class="edit-input" placeholder="example@gmail.com">
+    <div class="login-form">
+      <label>帳號（Email）</label>
+      <input id="loginEmail" type="email" placeholder="example@gmail.com" class="login-input" />
 
-    <label style="font-size:14px; margin-top:10px;">密碼</label>
-    <input id="loginPassword" type="password" class="edit-input">
+      <label>密碼</label>
+      <input id="loginPassword" type="password" class="login-input" />
 
-    <button id="loginBtn" class="btn-primary" style="margin-top:18px; width:100%;">登入</button>
-
-    <div id="loginStatus" style="color:#d9534f; margin-top:8px; font-size:14px;"></div>
+      <button class="btn-login" id="loginBtn">登入</button>
+    </div>
   </div>
 
 <script>
 document.getElementById("loginBtn").addEventListener("click", async () => {
-  const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value.trim();
-  const statusEl = document.getElementById("loginStatus");
-
-  statusEl.textContent = "";
+  const email = loginEmail.value.trim();
+  const password = loginPassword.value.trim();
 
   if (!email || !password) {
-    statusEl.textContent = "請輸入帳號與密碼";
+    alert("請輸入帳號與密碼");
     return;
   }
 
@@ -46,7 +43,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   });
 
   if (error) {
-    statusEl.textContent = "登入失敗：" + error.message;
+    alert("登入失敗：" + error.message);
     return;
   }
 
