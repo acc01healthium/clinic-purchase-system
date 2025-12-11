@@ -1,26 +1,177 @@
-// /js/index.js  前台「商品查詢」邏輯 Final 版
+// /js/index.js
+// 前台商品查詢初始化
 
 console.log("前台商品查詢初始化");
 
-// DOM
+// 取得 Supabase client（在 /js/supabase.js 建立的）
+const supabaseClient = window.supabaseClient;
+
+// DOM 元素
 const productListEl = document.getElementById("productList");
 const searchInputEl = document.getElementById("searchInput");
 const clearBtnEl = document.getElementById("clearBtn");
 const statusEl = document.getElementById("statusMessage");
-const categoryContainer = document.getElementById("categoryFilters");
 
 let allProducts = [];
-let currentCategory = "ALL";
+let currentCategory = ""; // 空字串 = 全部
 
-// 讀取商品
-async function loadProducts() {
-  if (!window.supabaseClient) {
-    console.error("supabaseClient 未定義，請檢查 supabase.js 是否正確載入。");
-    if (statusEl) statusEl.textContent = "系統初始化失敗，請稍後再試。";
+// 金額格式
+function formatPrice(value) {
+  if (value === null || value === undefined || value === "") return "—";
+  const num = Number(value);
+  if (Number.isNaN(num)) return "—";
+  return `NT$ ${num}`;
+}
+
+// 時間格式（若未來卡片要用得到）
+function formatDateTime(value) {
+  if (!value) return "";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "";
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  return `${y}/${m}/${day} ${hh}:${mm}`;
+}
+
+// 建立商品卡片 DOM
+function createProductCard(p) {
+  const card = document.createElement("article");
+  card.className = "product-card";
+
+  const imgWrapper = document.createElement("div");
+  imgWrapper.className = "product-image-wrapper";
+
+  if (p.image_url) {
+    const img = document.createElement("img");
+    img.src = p.image_url;
+    img.alt = p.name || "商品圖片";
+    img.loading = "lazy";
+    imgWrapper.appendChild(img);
+  } else {
+    const placeholder = document.createElement("div");
+    placeholder.className = "product-image-placeholder";
+    placeholder.textContent = "尚未上傳圖片";
+    imgWrapper.appendChild(placeholder);
+  }
+
+  const content = document.createElement("div");
+  content.className = "product-content";
+
+  const nameEl = document.createElement("h3");
+  nameEl.className = "product-name";
+  nameEl.textContent = p.name || "";
+
+  const specEl = document.createElement("p");
+  specEl.className = "product-spec";
+  specEl.textContent = p.spec || "";
+
+  // 類別 / 單位
+  const metaRow = document.createElement("div");
+  metaRow.className = "product-meta-row";
+
+  if (p.category) {
+    const tag = document.createElement("span");
+    tag.className = "product-meta-tag";
+    tag.textContent = p.category;
+    metaRow.appendChild(tag);
+  }
+
+  if (p.unit) {
+    const tag = document.createElement("span");
+    tag.className = "product-meta-tag";
+    tag.textContent = `單位：${p.unit}`;
+    metaRow.appendChild(tag);
+  }
+
+  // 價格區：進價 / 建議售價（對齊）
+  const priceBlock = document.createElement("div");
+  priceBlock.className = "product-price-block";
+
+  const line1 = document.createElement("div");
+  line1.className = "price-line";
+  line1.innerHTML = `
+    <span class="price-label">進　　價：</span>
+    <span class="price-value">${formatPrice(p.last_price)}</span>
+  `;
+
+  const line2 = document.createElement("div");
+  line2.className = "price-line";
+  line2.innerHTML = `
+    <span class="price-label">建議售價：</span>
+    <span class="price-value">${formatPrice(p.suggested_price)}</span>
+  `;
+
+  priceBlock.appendChild(line1);
+  priceBlock.appendChild(line2);
+
+  // 若需要顯示價格更新時間，可在卡片下方加一行
+  if (p.last_price_updated_at) {
+    const timeEl = document.createElement("p");
+    timeEl.className = "product-updated-at";
+    timeEl.textContent = `價格更新時間：${formatDateTime(
+      p.last_price_updated_at
+    )}`;
+    content.appendChild(timeEl);
+  }
+
+  content.prepend(priceBlock);
+  content.prepend(metaRow);
+  content.prepend(specEl);
+  content.prepend(nameEl);
+
+  card.appendChild(imgWrapper);
+  card.appendChild(content);
+
+  return card;
+}
+
+// 將目前 allProducts + 篩選條件，渲染到畫面上
+function renderProducts() {
+  if (!productListEl) return;
+
+  const keyword = (searchInputEl?.value || "").trim();
+
+  let filtered = allProducts.filter((p) => p.is_active);
+
+  if (currentCategory) {
+    filtered = filtered.filter((p) => p.category === currentCategory);
+  }
+
+  if (keyword) {
+    const kw = keyword.toLowerCase();
+    filtered = filtered.filter((p) => {
+      const text =
+        `${p.name || ""} ${p.category || ""} ${p.spec || ""}`.toLowerCase();
+      return text.includes(kw);
+    });
+  }
+
+  productListEl.innerHTML = "";
+
+  if (!filtered.length) {
+    if (statusEl) statusEl.textContent = "目前沒有符合條件的商品";
     return;
   }
 
-  if (statusEl) statusEl.textContent = "載入中...";
+  if (statusEl) statusEl.textContent = "";
+
+  filtered.forEach((p) => {
+    productListEl.appendChild(createProductCard(p));
+  });
+}
+
+// 載入商品（一次打後端）
+async function loadProducts() {
+  if (!supabaseClient) {
+    console.error("前台 supabaseClient 不存在，請確認 /js/supabase.js 是否正確載入。");
+    if (statusEl) statusEl.textContent = "系統設定錯誤，請聯絡管理者。";
+    return;
+  }
+
+  if (statusEl) statusEl.textContent = "載入中…";
 
   const { data, error } = await supabaseClient
     .from("products")
@@ -31,214 +182,49 @@ async function loadProducts() {
       category,
       spec,
       unit,
-      description,
-      image_url,
       last_price,
-      suggested_pri,
-      is_active,
-      last_price_upd
+      suggested_price,
+      last_price_updated_at,
+      image_url,
+      is_active
     `
     )
-    .order("category", { ascending: true })
     .order("name", { ascending: true });
 
   if (error) {
-    console.error("前台讀取商品錯誤：", error);
+    console.error("前台載入商品錯誤：", error);
     if (statusEl) statusEl.textContent = "讀取資料發生錯誤，請稍後再試。";
     return;
   }
 
-  allProducts = (data || []).filter((p) => p.is_active === true || p.is_active === "true");
-
-  buildCategoryFilters();
+  allProducts = data || [];
   renderProducts();
-  if (statusEl) statusEl.textContent = "";
 }
 
-// 建立分類按鈕
-function buildCategoryFilters() {
-  if (!categoryContainer) return;
-
-  categoryContainer.innerHTML = "";
-
-  const categories = Array.from(
-    new Set(allProducts.map((p) => (p.category || "").trim()).filter((c) => c !== ""))
-  );
-
-  // 加入「全部商品」
-  const allBtn = document.createElement("button");
-  allBtn.className = "filter-pill" + (currentCategory === "ALL" ? " active" : "");
-  allBtn.textContent = "全部商品";
-  allBtn.addEventListener("click", () => {
-    currentCategory = "ALL";
+// 搜尋框 & 清除按鈕事件
+if (searchInputEl) {
+  searchInputEl.addEventListener("input", () => {
     renderProducts();
-    buildCategoryFilters();
-  });
-  categoryContainer.appendChild(allBtn);
-
-  categories.forEach((cat) => {
-    const btn = document.createElement("button");
-    btn.className =
-      "filter-pill" + (currentCategory === cat ? " active" : "");
-    btn.textContent = cat;
-    btn.addEventListener("click", () => {
-      currentCategory = cat;
-      renderProducts();
-      buildCategoryFilters();
-    });
-    categoryContainer.appendChild(btn);
   });
 }
 
-// 渲染商品卡片
-function renderProducts() {
-  if (!productListEl) return;
-
-  const keyword = (searchInputEl?.value || "").trim().toLowerCase();
-
-  let list = [...allProducts];
-
-  if (currentCategory !== "ALL") {
-    list = list.filter((p) => (p.category || "") === currentCategory);
-  }
-
-  if (keyword) {
-    list = list.filter((p) => {
-      const text = `${p.name || ""} ${p.category || ""} ${p.spec || ""} ${p.description || ""}`.toLowerCase();
-      return text.includes(keyword);
-    });
-  }
-
-  productListEl.innerHTML = "";
-
-  if (list.length === 0) {
-    productListEl.innerHTML = `<div class="empty-state">目前沒有符合條件的商品</div>`;
-    return;
-  }
-
-  list.forEach((p) => {
-    const card = document.createElement("article");
-    card.className = "product-card";
-
-    // 圖片區
-    const imgWrap = document.createElement("div");
-    imgWrap.className = "product-image-wrapper";
-
-    if (p.image_url) {
-      const img = document.createElement("img");
-      img.src = p.image_url;
-      img.alt = p.name || "商品圖片";
-      imgWrap.appendChild(img);
-    } else {
-      const ph = document.createElement("div");
-      ph.className = "product-image-placeholder";
-      ph.textContent = "尚未上傳圖片";
-      imgWrap.appendChild(ph);
-    }
-
-    // 文字內容
-    const content = document.createElement("div");
-    content.className = "product-content";
-
-    const nameEl = document.createElement("h3");
-    nameEl.className = "product-name";
-    nameEl.textContent = p.name || "未命名商品";
-
-    const specEl = document.createElement("p");
-    specEl.className = "product-spec";
-    specEl.textContent = p.spec || "";
-
-    const metaRow = document.createElement("div");
-    metaRow.className = "product-meta-row";
-
-    if (p.category) {
-      const tag = document.createElement("span");
-      tag.className = "product-meta-tag";
-      tag.textContent = p.category;
-      metaRow.appendChild(tag);
-    }
-
-    if (p.unit) {
-      const tag = document.createElement("span");
-      tag.className = "product-meta-tag";
-      tag.textContent = `單位：${p.unit}`;
-      metaRow.appendChild(tag);
-    }
-
-    const priceRow = document.createElement("div");
-    priceRow.className = "product-price-row";
-    const leftCol = document.createElement("div");
-    const rightCol = document.createElement("div");
-
-    leftCol.className = "price-label-col";
-    rightCol.className = "price-value-col";
-
-    // 價格排版：兩行對齊
-    const buyLabel = document.createElement("div");
-    buyLabel.textContent = "進       價：";
-    const sugLabel = document.createElement("div");
-    sugLabel.textContent = "建議售價：";
-
-    const buyVal = document.createElement("div");
-    buyVal.textContent =
-      p.last_price != null ? `NT$ ${Number(p.last_price).toFixed(0)}` : "—";
-
-    const sugVal = document.createElement("div");
-    sugVal.textContent =
-      p.suggested_pri != null
-        ? `NT$ ${Number(p.suggested_pri).toFixed(0)}`
-        : "—";
-
-    leftCol.appendChild(buyLabel);
-    leftCol.appendChild(sugLabel);
-    rightCol.appendChild(buyVal);
-    rightCol.appendChild(sugVal);
-
-    priceRow.appendChild(leftCol);
-    priceRow.appendChild(rightCol);
-
-    const timeEl = document.createElement("p");
-    timeEl.className = "product-updated-at";
-    if (p.last_price_upd) {
-      const dt = new Date(p.last_price_upd);
-      timeEl.textContent = `價格更新時間：${dt.toLocaleString("zh-TW")}`;
-    } else {
-      timeEl.textContent = "價格更新時間：—";
-    }
-
-    if (p.description) {
-      const descEl = document.createElement("p");
-      descEl.className = "product-desc";
-      descEl.textContent = p.description;
-      content.appendChild(descEl);
-    }
-
-    content.appendChild(nameEl);
-    if (p.spec) content.appendChild(specEl);
-    content.appendChild(metaRow);
-    content.appendChild(priceRow);
-    content.appendChild(timeEl);
-
-    card.appendChild(imgWrap);
-    card.appendChild(content);
-
-    productListEl.appendChild(card);
+if (clearBtnEl) {
+  clearBtnEl.addEventListener("click", () => {
+    if (searchInputEl) searchInputEl.value = "";
+    renderProducts();
   });
 }
 
-// 事件綁定
+// 如果有「全部商品」或分類按鈕，這裡可以擴充
+const allBtn = document.getElementById("allProductsBtn");
+if (allBtn) {
+  allBtn.addEventListener("click", () => {
+    currentCategory = "";
+    renderProducts();
+  });
+}
+
+// 初始化
 document.addEventListener("DOMContentLoaded", () => {
-  if (searchInputEl) {
-    searchInputEl.addEventListener("input", () => {
-      renderProducts();
-    });
-  }
-  if (clearBtnEl) {
-    clearBtnEl.addEventListener("click", () => {
-      searchInputEl.value = "";
-      renderProducts();
-    });
-  }
-
   loadProducts();
 });
