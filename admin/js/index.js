@@ -79,19 +79,19 @@ async function loadProducts() {
 
     const statusText = p.is_active ? "啟用" : "停用";
 
-    tr.innerHTML = `
-      <td>${p.name || ""}</td>
-      <td>${p.category || "—"}</td>
-      <td>${p.spec || "—"}</td>
-      <td>${p.unit || "—"}</td>
-      <td>${formatPrice(p.last_price)}</td>
-      <td>${formatPrice(p.suggested_price)}</td>
-      <td>${formatDateTime(p.last_price_updated_at)}</td>
-      <td>${statusText}</td>
-      <td>
-        <button class="btn-edit" onclick="editProduct(${p.id})">編輯</button>
-      </td>
-    `;
+   tr.innerHTML = `
+  <td>${p.name || ""}</td>
+  <td>${p.category || "—"}</td>
+  <td>${p.spec || "—"}</td>
+  <td>${p.unit || "—"}</td>
+  <td>${formatPrice(p.last_price)}</td>
+  <td>${formatPrice(p.suggested_price)}</td>
+  <td>${formatDateTime(p.last_price_updated_at)}</td>
+  <td>${statusText}</td>
+  <td>
+    <button class="table-btn" onclick="editProduct(${p.id})">編輯</button>
+  </td>
+`;
 
     tbody.appendChild(tr);
   });
