@@ -1,156 +1,74 @@
-// js/index.js
+/* ================================
+   後台列表頁 admin-index.js（Final）
+   ================================ */
 
-document.addEventListener("DOMContentLoaded", () => {
-  const supabase = window.supabaseClient;
+// 初始化 Supabase（使用 admin 專用 supabase.js）
+const sb = supabaseClient;
 
-  const listEl = document.getElementById("productList");
-  const searchInput = document.getElementById("searchInput");
-  const clearBtn = document.getElementById("clearBtn");
-  const statusEl = document.getElementById("statusMessage");
-  const emptyEl = document.getElementById("emptyState");
+// DOM
+const tableBody = document.querySelector("#productTableBody");
 
-  let allProducts = [];
+// 初始化
+document.addEventListener("DOMContentLoaded", loadProducts);
 
-  async function loadProducts() {
-    if (!listEl) return;
-    listEl.innerHTML = "<p>載入中...</p>";
-
-    const { data, error } = await supabase
+// 讀取商品列表
+async function loadProducts() {
+  try {
+    const { data, error } = await sb
       .from("products")
-      .select(
-        "id, name, category, spec, unit, last_price, suggest_price, image_url, last_price_updated_at, description, is_active"
-      )
-      .eq("is_active", true)
-      .order("name", { ascending: true });
+      .select("*")
+      .order("created_at", { ascending: false });
 
-    if (error) {
-      console.error("前台讀取失敗：", error);
-      if (listEl) listEl.innerHTML = "";
-      if (statusEl)
-        statusEl.textContent = "讀取資料發生錯誤，請稍後再試。";
-      return;
-    }
+    if (error) throw error;
 
-    allProducts = data || [];
-    if (statusEl) statusEl.textContent = "";
-    renderList();
+    renderTable(data);
+  } catch (err) {
+    console.error("讀取商品發生錯誤：", err);
+    tableBody.innerHTML = `<tr><td colspan="10">資料載入失敗，請稍後再試。</td></tr>`;
+  }
+}
+
+// 渲染表格
+function renderTable(list) {
+  if (!list || list.length === 0) {
+    tableBody.innerHTML = `<tr><td colspan="10">尚無資料</td></tr>`;
+    return;
   }
 
-  function renderList() {
-    if (!listEl) return;
+  let html = "";
 
-    const keyword = (searchInput?.value || "").trim().toLowerCase();
+  list.forEach((item) => {
+    const statusBadge = item.is_active
+      ? `<span class="badge badge-success">啟用</span>`
+      : `<span class="badge badge-danger">停用</span>`;
 
-    let filtered = allProducts;
-    if (keyword) {
-      filtered = allProducts.filter((p) => {
-        const text =
-          (p.name || "") +
-          " " +
-          (p.category || "") +
-          " " +
-          (p.spec || "") +
-          " " +
-          (p.description || "");
-        return text.toLowerCase().includes(keyword);
-      });
-    }
+    const priceTime = item.last_price_time
+      ? new Date(item.last_price_time).toLocaleString("zh-TW")
+      : "—";
 
-    listEl.innerHTML = "";
+    html += `
+      <tr>
+        <td>${item.name}</td>
+        <td>${item.category || "—"}</td>
+        <td>${item.spec || "—"}</td>
+        <td>${item.unit || "—"}</td>
+        <td>NT$ ${item.last_price ?? "—"}</td>
+        <td>NT$ ${item.suggest_price ?? "—"}</td>
+        <td>${priceTime}</td>
+        <td>${statusBadge}</td>
+        <td>
+          <button class="table-action-btn" onclick="editProduct('${item.id}')">
+            編輯
+          </button>
+        </td>
+      </tr>
+    `;
+  });
 
-    if (!filtered.length) {
-      if (emptyEl) emptyEl.style.display = "";
-      return;
-    } else {
-      if (emptyEl) emptyEl.style.display = "none";
-    }
+  tableBody.innerHTML = html;
+}
 
-    for (const p of filtered) {
-      const card = document.createElement("article");
-      card.className = "product-card";
-
-      const updatedText = p.last_price_updated_at
-        ? new Date(p.last_price_updated_at).toLocaleString("zh-TW")
-        : "—";
-
-      card.innerHTML = `
-        <div class="product-image-wrapper">
-          ${
-            p.image_url
-              ? `<img src="${p.image_url}" alt="${escapeHtml(p.name || "")}">`
-              : `<div class="product-image-placeholder">尚未上傳圖片</div>`
-          }
-        </div>
-        <div class="product-content">
-          <h3 class="product-name">${escapeHtml(p.name || "")}</h3>
-          <p class="product-spec">${escapeHtml(p.spec || "")}</p>
-          <div class="product-meta-row">
-            ${
-              p.category
-                ? `<span class="product-meta-tag">類別：${escapeHtml(
-                    p.category
-                  )}</span>`
-                : ""
-            }
-            ${
-              p.unit
-                ? `<span class="product-meta-tag">單位：${escapeHtml(
-                    p.unit
-                  )}</span>`
-                : ""
-            }
-          </div>
-
-          ${
-            p.description
-              ? `<p class="product-desc">${escapeHtml(p.description)}</p>`
-              : ""
-          }
-
-          <div class="product-price-block">
-            <div class="price-row">
-              <span class="price-label">進　　價：</span>
-              <span class="price-value">${
-                p.last_price != null ? "NT$ " + p.last_price : "—"
-              }</span>
-            </div>
-            <div class="price-row">
-              <span class="price-label">建議售價：</span>
-              <span class="price-value">${
-                p.suggest_price != null ? "NT$ " + p.suggest_price : "—"
-              }</span>
-            </div>
-          </div>
-
-          <p class="product-updated-at">價格更新時間：${updatedText}</p>
-        </div>
-      `;
-
-      listEl.appendChild(card);
-    }
-  }
-
-  function escapeHtml(str) {
-    return String(str)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
-
-  if (searchInput) {
-    searchInput.addEventListener("input", () => {
-      renderList();
-    });
-  }
-
-  if (clearBtn) {
-    clearBtn.addEventListener("click", () => {
-      if (searchInput) searchInput.value = "";
-      renderList();
-    });
-  }
-
-  loadProducts();
-});
+// 前往編輯頁
+function editProduct(id) {
+  location.href = `edit.html?id=${id}`;
+}
