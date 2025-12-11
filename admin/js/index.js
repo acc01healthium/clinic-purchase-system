@@ -79,11 +79,12 @@ async function loadProducts() {
 
     const statusText = p.is_active ? "啟用" : "停用";
 
-   tr.innerHTML = `
+  tr.innerHTML = `
   <td>${p.name || ""}</td>
   <td>${p.category || "—"}</td>
   <td>${p.spec || "—"}</td>
   <td>${p.unit || "—"}</td>
+  <td>${p.description || "—"}</td>
   <td>${formatPrice(p.last_price)}</td>
   <td>${formatPrice(p.suggested_price)}</td>
   <td>${formatDateTime(p.last_price_updated_at)}</td>
