@@ -3,25 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>編輯商品｜康醫採購管理系統</title>
+  <title>編輯商品｜康醫採購管理系統｜後台</title>
 
-  <link rel="stylesheet" href="css/admin.css" />
+  <!-- 後台樣式 -->
+  <link rel="stylesheet" href="css/admin.css?v=2" />
 
-  <!-- Supabase SDK -->
+  <!-- Supabase v2 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- Supabase client -->
-  <script src="js/supabase.js"></script>
+  <!-- 後台 Supabase client -->
+  <script src="js/supabase.js?v=1"></script>
 
   <!-- 編輯商品邏輯 -->
-  <script defer src="js/edit.js"></script>
+  <script defer src="js/edit.js?v=2"></script>
 </head>
-
 <body>
   <header class="admin-header">
     <div class="admin-header-inner">
-      <h1 class="admin-title">康醫採購管理系統｜後台</h1>
-
+      <div>
+        <h1 class="admin-title">康醫採購管理系統｜後台</h1>
+        <p class="admin-subtitle">編輯商品</p>
+      </div>
       <div class="admin-header-buttons">
         <a href="index.html" class="admin-btn">商品列表</a>
         <a href="csv.html" class="admin-btn">匯入 CSV</a>
@@ -32,68 +34,111 @@
   </header>
 
   <main class="admin-main">
-    <section class="card">
+    <section class="card edit-card">
       <h2>編輯商品</h2>
 
-      <form id="editForm" class="form-grid">
-        
-        <div class="form-row">
-          <label>商品名稱</label>
-          <input type="text" id="name" required />
+      <form id="editForm" class="edit-form">
+        <!-- 第一排：名稱 -->
+        <div class="edit-row">
+          <label class="edit-label" for="name">商品名稱</label>
+          <input id="name" class="edit-input" type="text" required />
         </div>
 
-        <div class="form-row">
-          <label>類別</label>
-          <input type="text" id="category" required />
+        <!-- 第二排：類別 + 規格 -->
+        <div class="edit-row edit-row-2col">
+          <div class="edit-col">
+            <label class="edit-label" for="category">類別</label>
+            <input id="category" class="edit-input" type="text" />
+          </div>
+          <div class="edit-col">
+            <label class="edit-label" for="spec">規格 / 描述（規格）</label>
+            <input id="spec" class="edit-input" type="text" />
+          </div>
         </div>
 
-        <div class="form-row">
-          <label>規格 / 描述（規格）</label>
-          <input type="text" id="spec" />
+        <!-- 第三排：單位 -->
+        <div class="edit-row">
+          <label class="edit-label" for="unit">單位</label>
+          <input id="unit" class="edit-input edit-input-short" type="text" />
         </div>
 
-        <div class="form-row">
-          <label>單位</label>
-          <input type="text" id="unit" />
+        <!-- 第四排：大量採購備註 -->
+        <div class="edit-row">
+          <label class="edit-label" for="description">
+            大量採購備註（description）
+          </label>
+          <textarea
+            id="description"
+            class="edit-textarea"
+            rows="3"
+            placeholder="如大量採購價格可議，或特殊備註"
+          ></textarea>
         </div>
 
-        <div class="form-row">
-          <label>大量採購備註（description）</label>
-          <textarea id="description" placeholder="如大量採購價格可議、或特殊備註"></textarea>
+        <!-- 第五排：價格 -->
+        <div class="edit-row edit-row-2col">
+          <div class="edit-col">
+            <label class="edit-label" for="lastPrice">進價</label>
+            <input id="lastPrice" class="edit-input" type="number" step="0.01" />
+          </div>
+          <div class="edit-col">
+            <label class="edit-label" for="suggestedPrice">建議售價</label>
+            <input
+              id="suggestedPrice"
+              class="edit-input"
+              type="number"
+              step="0.01"
+            />
+          </div>
         </div>
 
-        <div class="form-row">
-          <label>進價</label>
-          <input type="number" id="last_price" step="1" />
-        </div>
-
-        <div class="form-row">
-          <label>建議售價</label>
-          <input type="number" id="suggested_price" step="1" />
-        </div>
-
-        <div class="form-row">
-          <label>狀態</label>
-          <select id="is_active">
-            <option value="true">啟用</option>
-            <option value="false">停用</option>
+        <!-- 第六排：狀態 -->
+        <div class="edit-row">
+          <label class="edit-label" for="isActive">狀態</label>
+          <select id="isActive" class="edit-input edit-input-short">
+            <option value="1">啟用</option>
+            <option value="0">停用</option>
           </select>
         </div>
 
-        <div class="form-row">
-          <label>上傳商品圖片</label>
-          <input type="file" id="imageUpload" accept="image/*" />
-          <small>選擇圖片後會自動上傳至系統</small>
+        <!-- 第七排：圖片上傳 -->
+        <div class="edit-row">
+          <label class="edit-label" for="imageFile">上傳商品圖片</label>
+          <div class="edit-image-row">
+            <input
+              id="imageFile"
+              type="file"
+              accept="image/*"
+              class="edit-input-file"
+            />
+            <span class="edit-image-hint">
+              選擇圖片後會自動壓縮並上傳至系統（最長邊約 1280px）
+            </span>
+          </div>
+
+          <div id="imagePreview" class="edit-image-preview"></div>
         </div>
 
-        <!-- 隱藏 image_url 欄位 -->
-        <input type="hidden" id="image_url" />
+        <!-- 按鈕列 -->
+        <div class="edit-actions">
+          <button type="button" id="cancelBtn" class="btn-secondary">
+            取消
+          </button>
+          <button
+            type="button"
+            id="deleteBtn"
+            class="btn-danger-outline"
+          >
+            刪除商品
+          </button>
+          <button type="submit" class="btn-primary">
+            儲存變更
+          </button>
+        </div>
 
-        <button type="submit" class="btn-primary large">儲存變更</button>
-
+        <p id="editStatus" class="admin-status-message"></p>
       </form>
     </section>
   </main>
-
 </body>
 </html>
