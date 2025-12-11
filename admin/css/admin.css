@@ -197,9 +197,9 @@ h1, h2, h3, h4 {
    編輯按鈕（美美版）
 ------------------------------------- */
 .btn-edit {
-  padding: 6px 16px;
+  padding: 6px 14px;
   border-radius: 20px;
-  background: var(--primary);
+  background: #00aee0;
   color: #fff;
   border: none;
   cursor: pointer;
@@ -208,7 +208,7 @@ h1, h2, h3, h4 {
 }
 
 .btn-edit:hover {
-  background: var(--primary-dark);
+  background: #008bb7;
 }
 
 /* -------------------------------------
