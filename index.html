@@ -1,68 +1,69 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0"
-    />
-    <title>康醫採購查詢系統</title>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>康醫採購查詢系統｜商品列表</title>
 
-    <!-- 前台樣式 -->
-    <link rel="stylesheet" href="css/style.css?v=2" />
+  <!-- 前台樣式 -->
+  <link rel="stylesheet" href="css/style.css?v=1" />
 
-    <!-- Supabase v2 -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Supabase v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- 共用 Supabase client（沿用 admin/js/supabase.js） -->
-    <script src="admin/js/supabase.js?v=4"></script>
+  <!-- 前台專用 Supabase client（放置正確路徑） -->
+  <script src="js/supabase.js?v=1"></script>
 
-    <!-- 前台邏輯 -->
-    <script defer src="js/index.js?v=999"></script>
-  </head>
+  <!-- 前台商品邏輯 -->
+  <script defer src="js/index.js?v=1"></script>
+</head>
 
-  <body>
-    <!-- 頂部主視覺 -->
-    <header class="app-header">
-      <div class="app-header-inner">
-        <div class="app-title-block">
-          <h1 class="app-title">康醫採購查詢系統</h1>
-          <p class="app-subtitle">商品列表</p>
-        </div>
+<body>
+  <!-- Header -->
+  <header class="app-header">
+    <div class="app-header-inner">
+      <div class="app-title-block">
+        <h1 class="app-title">康醫採購查詢系統</h1>
+        <p class="app-subtitle">商品列表</p>
       </div>
-    </header>
+    </div>
+  </header>
 
-    <!-- 內容區 -->
-    <main class="app-main">
-      <!-- 搜尋區 -->
-      <section class="search-section">
-        <label for="searchInput" class="search-label">
-          搜尋商品名稱、規格或分類
-        </label>
-        <div class="search-input-wrapper">
-          <input
-            id="searchInput"
-            type="text"
-            placeholder="例如：口罩、手套、點滴架…"
-          />
-          <button id="clearBtn" class="btn-secondary" type="button">
-            清除
-          </button>
-        </div>
-        <p class="search-hint">支援商品名稱、類別、規格等關鍵字模糊查詢</p>
-        <div id="frontStatus" class="status-message"></div>
-      </section>
+  <!-- Main -->
+  <main class="app-main">
 
-      <!-- 商品卡片 -->
-      <section>
-        <div id="productList" class="product-list">
-          <!-- JS 會動態插入卡片 -->
-        </div>
+    <!-- 分類列表 -->
+    <section id="categorySection" class="category-section">
+      <div class="category-scroll">
+        <button class="category-btn active" data-category="all">全部商品</button>
+        <!-- JS 動態插入分類 -->
+      </div>
+    </section>
 
-        <div id="emptyState" class="empty-state" style="display: none;">
-          目前沒有符合條件的商品
-        </div>
-      </section>
-    </main>
-  </body>
+    <!-- 搜尋區 -->
+    <section class="search-section">
+      <label class="search-label">搜尋商品名稱、規格或分類</label>
+
+      <div class="search-input-wrapper">
+        <input 
+          id="searchInput"
+          type="text"
+          placeholder="例如：口罩、手套、針、滅菌棉片..."
+        />
+        <button id="clearBtn" class="btn-secondary">清除</button>
+      </div>
+
+      <p class="search-hint">支援商品名稱、類別、規格等關鍵字模糊查詢</p>
+    </section>
+
+    <!-- 商品卡片列表 -->
+    <section class="products-section">
+      <div id="productList" class="product-list"></div>
+
+      <div id="emptyState" class="empty-state" style="display:none;">
+        無符合條件的商品
+      </div>
+    </section>
+  </main>
+</body>
 </html>
