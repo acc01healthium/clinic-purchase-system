@@ -8,41 +8,50 @@
   <!-- 後台樣式 -->
   <link rel="stylesheet" href="css/admin.css?v=1" />
 
- <!-- Supabase SDK v2 -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Supabase SDK v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<!-- 後台 Supabase client -->
-<script src="js/supabase.js?v=1"></script>
+  <!-- 後台 Supabase client -->
+  <script src="js/supabase.js?v=1"></script>
 
-<!-- 後台商品列表邏輯 -->
-<script defer src="js/index.js?v=1"></script>
-
+  <!-- 後台商品列表邏輯 -->
+  <script defer src="js/index.js?v=1"></script>
 </head>
 
-
 <body>
+  <!-- Header -->
   <header class="admin-header">
     <div class="admin-header-inner">
       <div>
         <h1 class="admin-title">康醫採購管理系統｜後台</h1>
-        <p class="admin-subtitle"></p>
-     <div class="admin-header-buttons">
-  <a href="index.html" class="admin-btn">商品列表</a>
-  <a href="csv.html" class="admin-btn">匯入 CSV</a>
-  <a href="../index.html" class="admin-btn" target="_blank">前台查看</a>
-  <button id="logoutBtn" class="admin-btn admin-btn-danger">登出</button>
-</div>
+        <p class="admin-subtitle">商品列表</p>
+      </div>
 
+      <!-- 上方按鈕 -->
+      <div class="admin-header-buttons">
+        <a href="index.html" class="admin-btn">商品列表</a>
+        <a href="csv.html" class="admin-btn">匯入 CSV</a>
+        <a href="../index.html" class="admin-btn" target="_blank">前台查看</a>
+        <button id="logoutBtn" class="admin-btn admin-btn-danger">
+          登出
+        </button>
+      </div>
+    </div>
   </header>
 
+  <!-- Main -->
   <main class="admin-main">
     <section class="card">
+      
+      <!-- 上方操作按鈕 -->
       <div class="card-header-row">
         <button onclick="location.href='add.html'" class="btn-primary">新增商品</button>
         <button onclick="location.href='upload.html'" class="btn-secondary">CSV 批次匯入</button>
       </div>
 
       <h2>商品列表</h2>
+
+      <div id="statusMessage" class="status-text"></div>
 
       <table class="product-table">
         <thead>
@@ -58,7 +67,8 @@
             <th>操作</th>
           </tr>
         </thead>
-        <tbody id="productTbody">
+
+        <tbody id="productTableBody">
           <!-- JS 會插入商品 -->
         </tbody>
       </table>
