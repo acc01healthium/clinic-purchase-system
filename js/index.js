@@ -1,11 +1,11 @@
 // /js/index.js
-// 前台商品查詢（穩定完整版）
+// 前台商品查詢（止血穩定版）
 
-console.log("前台商品查詢初始化（穩定版）");
+console.log("前台商品查詢初始化（止血穩定版）");
 
 const supabaseClient = window.supabaseClient;
 
-/* ========= DOM ========= */
+/* ========= DOM（全部允許為 null） ========= */
 const gridEl = document.getElementById("grid");
 const searchInput = document.getElementById("searchInput");
 const clearBtn = document.getElementById("clearBtn");
@@ -47,7 +47,6 @@ function createCard(p) {
   const card = document.createElement("article");
   card.className = "card";
 
-  /* image */
   const imgWrap = document.createElement("div");
   imgWrap.className = "card-img";
 
@@ -58,9 +57,9 @@ function createCard(p) {
     img.loading = "lazy";
     imgWrap.appendChild(img);
   }
+
   card.appendChild(imgWrap);
 
-  /* body */
   const body = document.createElement("div");
   body.className = "card-body";
 
@@ -83,7 +82,6 @@ function createCard(p) {
     </div>
   `;
 
-  /* description */
   if (p.description) {
     const desc = document.createElement("div");
     desc.className = "desc clamp";
@@ -110,7 +108,6 @@ function createCard(p) {
 
   card.appendChild(body);
 
-  /* footer */
   const footer = document.createElement("div");
   footer.className = "card-footer";
   footer.textContent = p.last_price_updated_at
@@ -125,12 +122,12 @@ function createCard(p) {
 /* ========= Render ========= */
 function render() {
   if (!gridEl) {
-    console.error("❌ 找不到 #grid 容器");
+    console.error("❌ 找不到 #grid，停止 render");
     return;
   }
 
-  const kw = searchInput.value.trim().toLowerCase();
-  const cat = categorySelect.value;
+  const kw = searchInput?.value.trim().toLowerCase() || "";
+  const cat = categorySelect?.value || "";
 
   filteredProducts = allProducts.filter((p) => {
     if (!p.is_active) return false;
@@ -141,8 +138,8 @@ function render() {
     );
   });
 
-  /* sort */
-  switch (sortSelect.value) {
+  /* 排序 */
+  switch (sortSelect?.value) {
     case "updated_asc":
       filteredProducts.sort(
         (a, b) =>
@@ -177,22 +174,23 @@ function render() {
   gridEl.innerHTML = "";
 
   if (!pageItems.length) {
-    emptyState.style.display = "block";
-    metaText.textContent = "找不到符合條件的商品";
+    if (emptyState) emptyState.style.display = "block";
+    if (metaText) metaText.textContent = "找不到符合條件的商品";
   } else {
-    emptyState.style.display = "none";
+    if (emptyState) emptyState.style.display = "none";
     pageItems.forEach((p) => gridEl.appendChild(createCard(p)));
-    metaText.textContent = `共 ${total} 筆商品`;
+    if (metaText) metaText.textContent = `共 ${total} 筆商品`;
   }
 
-  pageIndicator.textContent = `第 ${currentPage} / ${totalPages} 頁`;
-  prevBtn.disabled = currentPage === 1;
-  nextBtn.disabled = currentPage === totalPages;
+  if (pageIndicator)
+    pageIndicator.textContent = `第 ${currentPage} / ${totalPages} 頁`;
+  if (prevBtn) prevBtn.disabled = currentPage === 1;
+  if (nextBtn) nextBtn.disabled = currentPage === totalPages;
 }
 
 /* ========= Load ========= */
 async function loadAll() {
-  metaText.textContent = "載入中…";
+  if (metaText) metaText.textContent = "載入中…";
 
   const [{ data: cats }, { data: prods }] = await Promise.all([
     supabaseClient.from("categories").select("category").order("category"),
@@ -207,67 +205,68 @@ async function loadAll() {
   categories = cats || [];
   allProducts = prods || [];
 
-  /* categories */
-  categorySelect.innerHTML = `<option value="">全部分類</option>`;
-  categories.forEach((c) => {
-    const opt = document.createElement("option");
-    opt.value = c.category;
-    opt.textContent = c.category;
-    categorySelect.appendChild(opt);
-  });
+  if (categorySelect) {
+    categorySelect.innerHTML = `<option value="">全部分類</option>`;
+    categories.forEach((c) => {
+      const opt = document.createElement("option");
+      opt.value = c.category;
+      opt.textContent = c.category;
+      categorySelect.appendChild(opt);
+    });
+  }
 
   render();
 }
 
-/* ========= Events ========= */
-searchInput.oninput = () => {
+/* ========= Events（全部防呆） ========= */
+searchInput && (searchInput.oninput = () => {
   currentPage = 1;
   render();
-};
+});
 
-clearBtn.onclick = () => {
+clearBtn && (clearBtn.onclick = () => {
   searchInput.value = "";
-  categorySelect.value = "";
+  categorySelect && (categorySelect.value = "");
   currentPage = 1;
   render();
-};
+});
 
-categorySelect.onchange = () => {
+categorySelect && (categorySelect.onchange = () => {
   currentPage = 1;
   render();
-};
+});
 
-sortSelect.onchange = render;
+sortSelect && (sortSelect.onchange = render);
 
-pageSizeSelect.onchange = () => {
+pageSizeSelect && (pageSizeSelect.onchange = () => {
   pageSize = Number(pageSizeSelect.value);
   currentPage = 1;
   render();
-};
+});
 
-prevBtn.onclick = () => {
+prevBtn && (prevBtn.onclick = () => {
   currentPage--;
   render();
-};
+});
 
-nextBtn.onclick = () => {
+nextBtn && (nextBtn.onclick = () => {
   currentPage++;
   render();
-};
+});
 
-allBtn.onclick = () => {
-  categorySelect.value = "";
-  searchInput.value = "";
+allBtn && (allBtn.onclick = () => {
+  categorySelect && (categorySelect.value = "");
+  searchInput && (searchInput.value = "");
   currentPage = 1;
   render();
-};
+});
 
-emptyResetBtn.onclick = () => {
-  categorySelect.value = "";
-  searchInput.value = "";
+emptyResetBtn && (emptyResetBtn.onclick = () => {
+  categorySelect && (categorySelect.value = "");
+  searchInput && (searchInput.value = "");
   currentPage = 1;
   render();
-};
+});
 
 /* ========= Init ========= */
 document.addEventListener("DOMContentLoaded", loadAll);
