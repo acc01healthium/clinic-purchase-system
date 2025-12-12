@@ -407,3 +407,105 @@ body{
   overflow: hidden;
   position: relative;
 }
+
+/* =========================
+   JS product-card 對齊樣式
+========================= */
+
+.product-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 420px;
+}
+
+.product-image-wrapper {
+  height: 210px;
+  background: rgba(0,174,224,.10);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* ✅ 關鍵：圖片不再爆 */
+}
+
+.product-image-placeholder {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.product-content {
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.product-name {
+  font-size: 18px;
+  font-weight: 900;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.product-spec {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 0;
+}
+
+.product-meta-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.product-category-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #067aa0;
+  background: rgba(0,174,224,.10);
+  border: 1px solid rgba(0,174,224,.18);
+  padding: 6px 10px;
+  border-radius: 999px;
+}
+
+.product-meta-line {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.product-price-block {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.product-updated-at {
+  margin-top: auto;
+  font-size: 12px;
+  color: #8a94a6;
+}
+
+/* description */
+.product-description {
+  background: rgba(2,132,199,0.05);
+  border: 1px solid rgba(2,132,199,0.12);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
