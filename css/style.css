@@ -280,21 +280,21 @@ body{
 }
 
 /* ✅ 圖片區：置中、等比例、不超框 */
-.card-img{
-  background: rgba(0,174,224,.10);
-  height: 210px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;              /* ✅ 防止超出 */
-  padding: 10px;                /* ✅ 給 contain 一點留白 */
+/* 圖片容器固定高度 */
+.card-img {
+  height: 200px;
+  background: rgba(0,174,224,.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
-.card-img img{
-  width: 100%;
-  height: 100%;
-  object-fit: contain;          /* ✅ 由 cover 改 contain：不裁切、不爆版 */
-  object-position: center;
+/* 圖片等比例置中 */
+.card-img img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;   /* 關鍵：不裁切、不變形 */
 }
 
 .card-body{
