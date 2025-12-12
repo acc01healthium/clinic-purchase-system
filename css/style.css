@@ -605,3 +605,22 @@ body{
   line-height: 1.5;
   white-space: pre-wrap;
 }
+
+/* 手機版卡片優化 */
+@media (max-width: 640px) {
+  .card {
+    min-height: auto;
+  }
+
+  .card-img {
+    height: 160px;
+  }
+
+  .card-title {
+    font-size: 16px;
+  }
+
+  .price {
+    font-size: 13px;
+  }
+}
