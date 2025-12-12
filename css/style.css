@@ -222,22 +222,24 @@ body{
 /* =========================
    Price 表格化（固定對齊）
 ========================= */
+/* =========================
+   Price 表格化（穩定不跑版）
+========================= */
 .price {
   display: grid;
-  grid-template-columns: 88px 42px 1fr;
+  grid-template-columns: 96px 1fr;
   row-gap: 6px;
   font-size: 14px;
-  align-items: baseline;
 }
 
 .price-line {
-  display: contents; /* 讓內部 span 直接進 grid */
+  display: contents;
 }
 
 .price-label {
-  text-align: justify;
-  text-align-last: justify; /* 讓「進　　價」撐齊 */
   color: var(--muted);
+  text-align: justify;
+  text-align-last: justify;
 }
 
 .price-value {
@@ -245,14 +247,6 @@ body{
   text-align: right;
   white-space: nowrap;
 }
-
-/* NT$ 欄位 */
-.price-value::before {
-  content: "NT$ ";
-  font-weight: 700;
-  color: var(--muted);
-}
-
 
 /* =========================
    Description（關鍵）
@@ -314,20 +308,30 @@ body{
 }
 
 /* =========================
-   Filter 標題置中美化
+   Filters（電商感排列）
 ========================= */
+.filters {
+  display: flex;
+  gap: 20px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
 .filter-item {
-  align-items: center;          /* 整組置中 */
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
 }
 
 .filter-label {
-  text-align: center;           /* 文字置中 */
-  width: 100%;
+  font-size: 13px;
   font-weight: 700;
+  color: var(--muted);
   letter-spacing: .5px;
 }
 
 .filter-item .select {
-  width: 100%;
-  max-width: 220px;             /* 避免過寬 */
+  min-width: 160px;
+  max-width: 200px;
 }
