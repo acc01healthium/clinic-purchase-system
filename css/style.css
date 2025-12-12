@@ -251,6 +251,9 @@ body{
 /* =========================
    Description（關鍵）
 ========================= */
+/* =========================
+   Description（精準鎖 2 行）
+========================= */
 .desc{
   background:rgba(2,132,199,.05);
   border:1px solid rgba(2,132,199,.15);
@@ -258,14 +261,14 @@ body{
   padding:10px;
   font-size:13px;
   line-height:1.6;
-  white-space:pre-line; /* ✅ 分段 */
+  white-space:pre-line;
+  overflow:hidden;
 }
 
-/* 只顯示兩行 */
+/* ✅ 精準鎖兩行（不露第三行） */
 .desc.clamp{
-  display:-webkit-box;
-  -webkit-line-clamp:2;
-  -webkit-box-orient:vertical;
+  display:block;                 /* 不用 flex / box */
+  max-height:calc(1.6em * 2);    /* line-height × 行數 */
   overflow:hidden;
 }
 
