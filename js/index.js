@@ -39,7 +39,7 @@ const fmtDate = (v) => {
 };
 
 /* ========= Card ========= */
-function createProductCard(p) {
+function createCard(p) {
   const card = document.createElement("article");
   card.className = "card";
 
