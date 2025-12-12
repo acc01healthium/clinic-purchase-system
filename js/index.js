@@ -126,6 +126,33 @@ function render() {
       .includes(kw);
   });
 
+  // 排序
+switch (sortSelect.value) {
+  case "updated_desc":
+    filtered.sort(
+      (a, b) =>
+        new Date(b.last_price_updated_at || 0) -
+        new Date(a.last_price_updated_at || 0)
+    );
+    break;
+
+  case "updated_asc":
+    filtered.sort(
+      (a, b) =>
+        new Date(a.last_price_updated_at || 0) -
+        new Date(b.last_price_updated_at || 0)
+    );
+    break;
+
+  case "name_asc":
+    filtered.sort((a, b) => (a.name || "").localeCompare(b.name || ""));
+    break;
+
+  case "name_desc":
+    filtered.sort((a, b) => (b.name || "").localeCompare(a.name || ""));
+    break;
+}
+
   const total = filtered.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   currentPage = Math.min(currentPage, totalPages);
@@ -155,18 +182,28 @@ function render() {
 async function loadAll() {
   statusMessage.textContent = "載入中…";
 
-  const [{ data: cats }, { data: prods }] = await Promise.all([
-    supabaseClient.from("categories").select("category"),
-    supabaseClient.from("products").select("*").eq("is_active", true),
-  ]);
+  const [{ data: catData, error: catErr }, { data: prodData, error: prodErr }] =
+    await Promise.all([
+      supabaseClient.from("categories").select("name").order("name"),
+      supabaseClient.from("products").select("*").eq("is_active", true),
+    ]);
 
-  allProducts = prods || [];
+  if (catErr) {
+    console.error("❌ 載入分類失敗", catErr);
+  }
 
+  if (prodErr) {
+    console.error("❌ 載入商品失敗", prodErr);
+  }
+
+  allProducts = prodData || [];
+
+  // 分類下拉
   categorySelect.innerHTML = `<option value="">全部分類</option>`;
-  (cats || []).forEach((c) => {
+  (catData || []).forEach((c) => {
     const opt = document.createElement("option");
-    opt.value = c.category;
-    opt.textContent = c.category;
+    opt.value = c.name;
+    opt.textContent = c.name;
     categorySelect.appendChild(opt);
   });
 
