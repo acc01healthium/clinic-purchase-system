@@ -115,8 +115,11 @@
     <section id="previewSection" class="card" style="display:none;">
       <h2>匯入預覽與設定</h2>
       <p style="font-size:0.9rem; color:#666; margin-bottom:8px;">
-        下方顯示將要匯入的商品，若系統偵測到相同 <strong>商品名稱 + 規格</strong>，會標示為「可能重複」，可個別選擇「更新 / 新增 / 略過」。
-      </p>
+  系統會自動依 <strong>商品名稱 + 規格</strong> 判斷匯入方式：<br />
+  ・已存在的商品 → 自動更新<br />
+  ・不存在的商品 → 自動新增<br />
+  使用者僅需確認預覽內容是否正確即可。
+</p>
 
       <div style="overflow-x:auto; margin-top:10px;">
         <table class="product-table">
