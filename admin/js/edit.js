@@ -223,25 +223,28 @@ form.addEventListener("submit", async (e) => {
 });
 
 // -----------------------------
-// 刪除商品（完全正確可運作版）
-// ---------------------------
-document.getElementById("deleteBtn").addEventListener("click", async () => {
-  if (!confirm("確定要刪除此商品嗎？此動作無法復原！")) return;
-
-  if (!productId) {
-    alert("商品 ID 無效");
+// 刪除商品
+deleteBtn.addEventListener("click", async () => {
+  if (!confirm("確定要刪除這個商品嗎？刪除後無法復原！")) {
     return;
   }
 
-  // 呼叫 Supabase 刪除
+  const idParam = new URLSearchParams(window.location.search).get("id");
+  const productId = Number(idParam);
+
+  if (!productId || Number.isNaN(productId)) {
+    alert("錯誤：讀取商品 ID 失敗，無法刪除！");
+    return;
+  }
+
   const { error } = await supabaseClient
     .from("products")
-    .delete()
+    .delete({ returning: "minimal" })  // 🔥重要：避免 RLS 阻擋
     .eq("id", productId);
 
   if (error) {
-    console.error("刪除商品錯誤：", error);
-    alert("刪除失敗，請稍後再試");
+    console.error("刪除錯誤：", error);
+    alert("刪除失敗：" + error.message);
     return;
   }
 
