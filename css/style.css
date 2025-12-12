@@ -7,14 +7,11 @@
   --text:#1f2937;
   --muted:#6b7280;
   --border:rgba(2,132,199,.22);
-
   --primary:#00aee0;
   --primary-2:#14c2c5;
   --primary-dark:#008bb7;
-
   --shadow:0 10px 28px rgba(0,0,0,.08);
   --shadow-soft:0 2px 10px rgba(0,0,0,.06);
-
   --radius:18px;
   --radius-sm:12px;
 }
@@ -44,7 +41,7 @@ body{
   align-items:center;
 }
 .site-title{margin:0;font-size:28px;font-weight:800}
-.site-subtitle{margin:6px 0 0;font-size:14px;opacity:.9}
+.site-subtitle{margin-top:6px;font-size:14px;opacity:.9}
 
 /* =========================
    Layout
@@ -56,10 +53,10 @@ body{
 }
 
 /* =========================
-   Panel
+   Panel / Filters
 ========================= */
 .panel{
-  background:var(--card);
+  background:#fff;
   border-radius:var(--radius);
   box-shadow:var(--shadow);
   padding:18px;
@@ -73,43 +70,13 @@ body{
   padding:12px 14px;
   border-radius:999px;
   border:1px solid var(--border);
-  font-size:15px;
 }
 .filters{
+  margin-top:12px;
   display:flex;
   gap:12px;
   flex-wrap:wrap;
-  margin-top:12px;
 }
-
-/* =========================
-   Buttons / Select
-========================= */
-.btn{
-  border:none;
-  border-radius:999px;
-  padding:10px 18px;
-  font-weight:700;
-  cursor:pointer;
-}
-.btn-secondary{
-  background:#fff;
-  color:var(--primary);
-  border:2px solid rgba(0,174,224,.6);
-}
-.btn-secondary:hover{background:rgba(0,174,224,.08)}
-
-.pill{
-  border-radius:999px;
-  padding:10px 16px;
-  font-weight:800;
-  border:0;
-}
-.pill-primary{
-  background:#fff;
-  color:#008bb7;
-}
-
 .select{
   padding:10px 14px;
   border-radius:999px;
@@ -117,10 +84,10 @@ body{
 }
 
 /* =========================
-   Toolbar（修正頁碼位置）
+   Toolbar / Pager（固定位置）
 ========================= */
 .toolbar{
-  margin-top:16px;
+  margin:16px 0;
   display:flex;
   justify-content:space-between;
   align-items:center;
@@ -131,9 +98,9 @@ body{
   gap:10px;
 }
 .page-indicator{
-  padding:10px 14px;
-  border-radius:999px;
   background:#fff;
+  border-radius:999px;
+  padding:10px 14px;
   box-shadow:var(--shadow-soft);
   font-weight:700;
 }
@@ -142,7 +109,6 @@ body{
    Grid
 ========================= */
 .grid{
-  margin-top:18px;
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:16px;
@@ -155,18 +121,18 @@ body{
 }
 
 /* =========================
-   Card
+   Product Card（唯一版本）
 ========================= */
 .product-card{
-  background:var(--card);
+  background:#fff;
   border-radius:var(--radius);
   box-shadow:var(--shadow-soft);
+  overflow:hidden;
   display:flex;
   flex-direction:column;
-  overflow:hidden;
 }
 
-/* 圖片區（不超版） */
+/* 圖片 */
 .product-image-wrapper{
   height:200px;
   background:rgba(0,174,224,.08);
@@ -188,25 +154,29 @@ body{
   gap:10px;
 }
 .product-name{
-  margin:0;
   font-size:18px;
   font-weight:900;
+  margin:0;
 }
 .product-meta-row{
   display:flex;
   gap:8px;
-  flex-wrap:wrap;
+  align-items:center;
 }
 .product-category-tag{
+  background:rgba(0,174,224,.1);
+  border:1px solid rgba(0,174,224,.18);
   padding:6px 10px;
   border-radius:999px;
-  background:rgba(0,174,224,.1);
   font-size:12px;
   font-weight:800;
 }
+.product-price-block{
+  font-size:14px;
+}
 
 /* =========================
-   Description（唯一版本）
+   Description（唯一兩行版本）
 ========================= */
 .desc{
   background:rgba(2,132,199,.05);
@@ -217,8 +187,6 @@ body{
   line-height:1.5;
   white-space:pre-wrap;
 }
-
-/* ✅ 嚴格兩行，不露第三行 */
 .desc.clamp{
   display:-webkit-box;
   -webkit-box-orient:vertical;
@@ -227,95 +195,9 @@ body{
   max-height:3em; /* 1.5 * 2 */
 }
 
-.desc-actions{
-  display:flex;
-  justify-content:flex-end;
-  margin-top:6px;
-}
-.link-btn{
-  border:none;
-  background:none;
-  color:#008bb7;
-  font-weight:800;
-  cursor:pointer;
-}
-
 /* =========================
-   Footer
+   Mobile 微調
 ========================= */
-.product-updated-at{
-  margin-top:auto;
-  font-size:12px;
-  color:#8a94a6;
-}
-/* ===== FIX PACK (貼在 style.css 最底部) ===== */
-
-/* 1) 強制容器不要被縮小 */
-.container, .site-header-inner{
-  width: min(1200px, 100%);
-  margin-left: auto;
-  margin-right: auto;
-}
-
-/* 2) grid 強制回到 3 欄 */
-.grid{
-  display: grid !important;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
-  gap: 16px !important;
-}
-@media (max-width: 980px){
-  .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
-}
-@media (max-width: 640px){
-  .grid{ grid-template-columns: 1fr !important; }
-}
-
-/* 3) 卡片回復漂亮排版 */
-.product-card{
-  background: var(--card, #fff) !important;
-  border-radius: 18px !important;
-  overflow: hidden !important;
-  box-shadow: 0 2px 10px rgba(0,0,0,.06) !important;
-  display: flex !important;
-  flex-direction: column !important;
-}
-
-/* 4) 圖片：置中 + 等比例 + 不超版 */
-.product-image-wrapper{
-  height: 200px !important;
-  background: rgba(0,174,224,.08) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  overflow: hidden !important;
-}
-.product-image-wrapper img{
-  max-width: 100% !important;
-  max-height: 100% !important;
-  width: auto !important;
-  height: auto !important;
-  object-fit: contain !important;
-}
-
-/* 5) pager 不要亂飛 */
-.toolbar{
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  gap: 12px !important;
-}
-.pager{
-  display: flex !important;
-  align-items: center !important;
-  gap: 10px !important;
-}
-
-/* 6) desc：只顯示兩行、完全不露第三行 */
-.desc.clamp{
-  display: -webkit-box !important;
-  -webkit-box-orient: vertical !important;
-  -webkit-line-clamp: 2 !important;
-  overflow: hidden !important;
-  line-height: 1.5 !important;
-  max-height: 3em !important; /* 1.5 * 2 行 */
+@media(max-width:640px){
+  .product-image-wrapper{height:160px}
 }
