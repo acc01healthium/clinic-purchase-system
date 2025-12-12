@@ -3,67 +3,107 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>康醫採購查詢系統｜商品列表</title>
+  <title>康醫採購查詢系統</title>
 
-  <!-- 前台樣式 -->
   <link rel="stylesheet" href="css/style.css?v=1" />
 
   <!-- Supabase SDK v2 -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<!-- 前台 Supabase client -->
-<script src="js/supabase.js?v=1"></script>
+  <!-- 共用 Supabase client（沿用你現有的 js/supabase.js） -->
+  <script src="js/supabase.js?v=1"></script>
 
-<!-- 前台商品列表邏輯 -->
-<script defer src="js/index.js?v=1"></script>
-
+  <!-- 前台邏輯 -->
+  <script defer src="js/index.js?v=1"></script>
 </head>
 
 <body>
   <!-- Header -->
-  <header class="app-header">
-    <div class="app-header-inner">
-      <div class="app-title-block">
-        <h1 class="app-title">康醫採購查詢系統</h1>
-        <p class="app-subtitle">商品列表</p>
+  <header class="site-header">
+    <div class="site-header-inner">
+      <div class="site-title-wrap">
+        <h1 class="site-title">康醫採購查詢系統</h1>
+        <p class="site-subtitle">商品列表</p>
+      </div>
+
+      <div class="site-header-actions">
+        <button id="allBtn" class="pill pill-primary" type="button">全部商品</button>
       </div>
     </div>
   </header>
 
-  <!-- Main -->
-  <main class="app-main">
+  <main class="container">
+    <!-- 搜尋 + 控制列 -->
+    <section class="panel">
+      <div class="panel-row panel-row-top">
+        <div class="search-box">
+          <label class="sr-only" for="searchInput">搜尋</label>
+          <input
+            id="searchInput"
+            type="text"
+            placeholder="搜尋商品名稱、規格或分類"
+            autocomplete="off"
+          />
+          <button id="clearBtn" class="btn btn-secondary" type="button">清除</button>
+        </div>
+      </div>
 
-    <!-- 分類列表 -->
-    <section id="categorySection" class="category-section">
-      <div class="category-scroll">
-        <button class="category-btn active" data-category="all">全部商品</button>
-        <!-- JS 動態插入分類 -->
+      <div class="panel-row panel-row-bottom">
+        <div class="filters">
+          <div class="filter-item">
+            <label class="filter-label" for="categorySelect">分類</label>
+            <select id="categorySelect" class="select">
+              <option value="">全部分類</option>
+            </select>
+          </div>
+
+          <div class="filter-item">
+            <label class="filter-label" for="sortSelect">排序</label>
+            <select id="sortSelect" class="select">
+              <option value="updated_desc">更新時間：新 → 舊</option>
+              <option value="updated_asc">更新時間：舊 → 新</option>
+              <option value="price_asc">進價：低 → 高</option>
+              <option value="price_desc">進價：高 → 低</option>
+              <option value="name_asc">名稱：A → Z</option>
+              <option value="name_desc">名稱：Z → A</option>
+            </select>
+          </div>
+
+          <div class="filter-item">
+            <label class="filter-label" for="pageSizeSelect">每頁</label>
+            <select id="pageSizeSelect" class="select">
+              <option value="10" selected>10</option>
+              <option value="20">20</option>
+              <option value="50">50</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="hint">
+          支援商品名稱、類別、規格等關鍵字模糊查詢
+        </div>
       </div>
     </section>
 
-    <!-- 搜尋區 -->
-    <section class="search-section">
-      <label class="search-label">搜尋商品名稱、規格或分類</label>
+    <!-- 結果資訊列 + 分頁器 -->
+    <section class="toolbar">
+      <div class="meta" id="metaText">載入中…</div>
 
-      <div class="search-input-wrapper">
-        <input 
-          id="searchInput"
-          type="text"
-          placeholder="例如：口罩、手套、針、滅菌棉片..."
-        />
-        <button id="clearBtn" class="btn-secondary">清除</button>
+      <div class="pager">
+        <button id="prevPageBtn" class="btn btn-secondary" type="button">上一頁</button>
+        <div class="page-indicator" id="pageIndicator">第 1 / 1 頁</div>
+        <button id="nextPageBtn" class="btn btn-secondary" type="button">下一頁</button>
       </div>
-
-      <p class="search-hint">支援商品名稱、類別、規格等關鍵字模糊查詢</p>
     </section>
 
-    <!-- 商品卡片列表 -->
-    <section class="products-section">
-      <div id="productList" class="product-list"></div>
+    <!-- 商品卡片 -->
+    <section id="grid" class="grid"></section>
 
-      <div id="emptyState" class="empty-state" style="display:none;">
-        無符合條件的商品
-      </div>
+    <!-- 空狀態 -->
+    <section id="emptyState" class="empty" style="display:none;">
+      <div class="empty-title">找不到符合條件的商品</div>
+      <div class="empty-desc">請嘗試調整搜尋關鍵字或分類篩選。</div>
+      <button id="emptyResetBtn" class="btn btn-primary" type="button">清除條件</button>
     </section>
   </main>
 </body>
