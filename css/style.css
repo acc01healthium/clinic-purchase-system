@@ -220,45 +220,42 @@ body{
 }
 
 /* =========================
-   Price 表格化（穩定＋NT$）
+   Price（穩定電商表格版）
 ========================= */
 .price{
-  display:grid;
-  grid-template-columns: 88px 40px 1fr;
-  row-gap:6px;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
   font-size:14px;
-  align-items:baseline;
 }
 
 .price-line{
-  display:contents;
+  display:grid;
+  grid-template-columns: 88px 48px 1fr; /* 標籤 | NT$ | 數字 */
+  align-items:baseline;
 }
 
 .price-label{
+  color:var(--muted);
   text-align:justify;
   text-align-last:justify;
-  color:var(--muted);
+  white-space:nowrap;
 }
 
-/* NT$ 固定欄 */
-.price-currency{
-  color:var(--muted);
-  font-weight:700;
-  text-align:right;
-}
-
-.price-value::before{
-  content:"NT$";
-  margin-right:4px;
-  color:var(--muted);
-  font-weight:700;
-}
-
-/* 金額欄（右對齊＋不跑位） */
 .price-value{
   font-weight:900;
   text-align:right;
   white-space:nowrap;
+  position:relative;
+}
+
+/* NT$ 固定欄位（不影響 grid） */
+.price-value::before{
+  content:"NT$";
+  position:absolute;
+  left:-42px;
+  color:var(--muted);
+  font-weight:700;
 }
 
 /* =========================
@@ -281,7 +278,7 @@ body{
 /* ✅ 精準鎖兩行（不露第三行） */
 .desc.clamp{
   display:block;                 /* 不用 flex / box */
-  max-height:calc(1.6em * 2 + 4px);   /* ← 關鍵：補安全值 */
+  max-height:calc(1.6em * 2 + 8px);   /* ← 關鍵：補安全值 */
   overflow:hidden;
 }
 
