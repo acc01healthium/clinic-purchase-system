@@ -235,6 +235,15 @@ body{
   align-items:baseline;
 }
 
+.price-line::after{
+  content:"NT$";
+  grid-column:2;
+  grid-row:1;
+  color:var(--muted);
+  font-weight:700;
+  text-align:right;
+}
+
 .price-label{
   color:var(--muted);
   text-align:justify;
