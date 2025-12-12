@@ -1,5 +1,5 @@
 /* =========================
-   前台漂亮版（統一視覺）
+   前台漂亮版（統一視覺｜最終穩定）
 ========================= */
 
 :root{
@@ -21,6 +21,7 @@
 }
 
 *{ box-sizing: border-box; }
+
 body{
   margin:0;
   font-family: "Noto Sans TC", system-ui, -apple-system, Segoe UI, Arial, sans-serif;
@@ -31,18 +32,21 @@ body{
 .sr-only{
   position:absolute;
   width:1px;height:1px;
-  padding:0;margin:-1px;
-  overflow:hidden;clip:rect(0,0,0,0);
-  white-space:nowrap;border:0;
+  overflow:hidden;
+  clip:rect(0,0,0,0);
 }
 
-/* Header */
+/* =========================
+   Header
+========================= */
+
 .site-header{
   background: linear-gradient(90deg, var(--primary), var(--primary-2));
   color:#fff;
   padding: 22px 26px;
   box-shadow: 0 2px 10px rgba(0,0,0,.12);
 }
+
 .site-header-inner{
   max-width: 1200px;
   margin: 0 auto;
@@ -51,218 +55,141 @@ body{
   justify-content:space-between;
   gap: 16px;
 }
+
 .site-title{
   margin:0;
   font-size: 28px;
   font-weight: 800;
-  letter-spacing: .5px;
-}
-.site-subtitle{
-  margin:6px 0 0 0;
-  opacity:.9;
-  font-size: 14px;
-}
-.site-header-actions{
-  display:flex;
-  gap: 10px;
 }
 
-/* Layout */
+.site-subtitle{
+  margin-top:6px;
+  font-size: 14px;
+  opacity:.9;
+}
+
+/* =========================
+   Layout
+========================= */
+
 .container{
   max-width: 1200px;
   margin: 22px auto 56px;
   padding: 0 18px;
 }
 
-/* Panel */
+/* =========================
+   Panel / Search
+========================= */
+
 .panel{
   background: var(--card);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 18px;
 }
+
 .panel-row{
   display:flex;
   flex-direction:column;
   gap: 12px;
 }
-.panel-row-top{
-  padding-bottom: 10px;
-}
-.panel-row-bottom{
-  border-top: 1px solid rgba(0,0,0,0.06);
-  padding-top: 12px;
-}
 
 .search-box{
   display:flex;
   gap: 10px;
-  align-items:center;
-  flex-wrap: wrap;
 }
+
 #searchInput{
-  flex: 1;
-  min-width: 260px;
+  flex:1;
   padding: 12px 14px;
   border-radius: 999px;
   border: 1px solid var(--border);
-  outline: none;
   font-size: 15px;
-  background: #fff;
-}
-#searchInput:focus{
-  border-color: rgba(0, 174, 224, .7);
-  box-shadow: 0 0 0 3px rgba(0, 174, 224, 0.16);
 }
 
 .filters{
   display:flex;
   gap: 12px;
   flex-wrap: wrap;
-  align-items: end;
 }
+
 .filter-item{
   display:flex;
   flex-direction:column;
   gap: 6px;
 }
-.filter-label{
-  font-size: 13px;
-  color: var(--muted);
-}
 
 .select{
-  appearance: none;
-  padding: 10px 38px 10px 14px;
+  padding: 10px 36px 10px 14px;
   border-radius: 999px;
   border: 1px solid var(--border);
-  outline:none;
-  background:
-    linear-gradient(#fff,#fff) padding-box,
-    linear-gradient(90deg, rgba(0,174,224,.35), rgba(20,194,197,.35)) border-box;
+  background:#fff;
   font-size: 14px;
-  cursor: pointer;
-  position: relative;
-}
-.select:focus{
-  box-shadow: 0 0 0 3px rgba(0, 174, 224, 0.16);
-  border-color: rgba(0,174,224,.75);
-}
-.select{
-  background-image:
-    linear-gradient(#fff,#fff),
-    linear-gradient(90deg, rgba(0,174,224,.35), rgba(20,194,197,.35)),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2300aee0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position:
-    0 0,
-    0 0,
-    right 14px center;
-  background-size:
-    auto,
-    auto,
-    14px 14px;
 }
 
-.hint{
-  font-size: 13px;
-  color: #8a94a6;
-}
+/* =========================
+   Buttons
+========================= */
 
-/* Buttons */
 .btn{
-  border:none;
-  cursor:pointer;
   border-radius: 999px;
   padding: 10px 18px;
   font-weight: 700;
-  font-size: 14px;
-  transition: .15s;
-  text-decoration:none;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  gap: 8px;
-  user-select:none;
+  border:none;
+  cursor:pointer;
 }
-.btn-primary{
-  background: var(--primary);
-  color:#fff;
-}
-.btn-primary:hover{ background: var(--primary-dark); }
+
 .btn-secondary{
   background:#fff;
   color: var(--primary);
   border: 2px solid rgba(0,174,224,.65);
 }
-.btn-secondary:hover{
-  background: rgba(0,174,224,.08);
-}
-.btn:disabled{
-  opacity: .55;
-  cursor:not-allowed;
-}
 
-.pill{
-  border-radius: 999px;
-  padding: 10px 16px;
-  font-weight: 800;
-  cursor:pointer;
-  border: 0;
-}
-.pill-primary{
-  background: rgba(255,255,255,0.92);
-  color: #008bb7;
-}
-.pill-primary:hover{
-  background: rgba(255,255,255,1);
-}
+/* =========================
+   Toolbar / Pager
+========================= */
 
-/* Toolbar */
 .toolbar{
   margin-top: 14px;
   display:flex;
   justify-content:space-between;
   align-items:center;
   gap: 12px;
-  flex-wrap: wrap;
-}
-.meta{
-  color: var(--muted);
-  font-size: 14px;
-}
-.pager{
-  display:flex;
-  align-items:center;
-  gap: 10px;
-}
-.page-indicator{
-  background: #fff;
-  border: 1px solid rgba(0,0,0,0.06);
-  border-radius: 999px;
-  padding: 10px 14px;
-  box-shadow: var(--shadow-soft);
-  font-weight: 700;
-  color: #334155;
 }
 
-/* Grid */
-.grid{
-  margin-top: 14px;
-  display:grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+.meta{
+  color: var(--muted);
 }
-@media (max-width: 980px){
-  .grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-@media (max-width: 640px){
-  .grid{ grid-template-columns: 1fr; }
-  .site-header-inner{ flex-direction: column; align-items:flex-start; }
+
+.page-indicator{
+  background:#fff;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-weight: 700;
 }
 
 /* =========================
-   Card（修正：圖片置中不超版面 + mobile 高度微調 + description 展開收合）
+   Grid
+========================= */
+
+.grid{
+  margin-top: 14px;
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 980px){
+  .grid{ grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 640px){
+  .grid{ grid-template-columns: 1fr; }
+}
+
+/* =========================
+   Card（穩定版）
 ========================= */
 
 .card{
@@ -272,33 +199,25 @@ body{
   overflow:hidden;
   display:flex;
   flex-direction:column;
-  min-height: 420px;
 }
 
-@media (max-width: 640px){
-  .card{ min-height: 380px; }
-}
-
-/* ✅ 圖片區：置中、等比例、不超框 */
-/* 圖片容器固定高度 */
-.card-img {
+/* 圖片：不爆版、置中 */
+.card-img{
   height: 200px;
   background: rgba(0,174,224,.08);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
-/* 圖片等比例置中 */
-.card-img img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;   /* 關鍵：不裁切、不變形 */
+.card-img img{
+  max-width:100%;
+  max-height:100%;
+  object-fit: contain;
 }
 
 .card-body{
-  padding: 14px 14px 12px;
+  padding: 14px;
   display:flex;
   flex-direction:column;
   gap: 10px;
@@ -307,283 +226,15 @@ body{
 .card-title{
   font-size: 18px;
   font-weight: 900;
-  margin:0;
-  line-height: 1.25;
-}
-
-.card-sub{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap: 10px;
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.tag{
-  display:inline-flex;
-  align-items:center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 800;
-  color: #067aa0;
-  background: rgba(0,174,224,.10);
-  border: 1px solid rgba(0,174,224,.18);
-  padding: 6px 10px;
-  border-radius: 999px;
-}
-
-.price{
-  margin-top: 2px;
-  display:flex;
-  flex-direction:column;
-  gap: 4px;
-  font-size: 14px;
-}
-.price-line{
-  display:flex;
-  gap: 8px;
-  align-items:baseline;
-}
-.price-label{
-  color: #6b7280;
-  min-width: 76px;
-}
-.price-value{
-  font-weight: 900;
-  color: #0f172a;
-}
-
-.card-footer{
-  margin-top: auto;
-  padding: 12px 14px 14px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap: 10px;
-  color: #8a94a6;
-  font-size: 12px;
-}
-
-/* ✅ Description：支援 \n、預設 2 行、可「查看更多/收合」 */
-.desc{
-  background: rgba(2,132,199,0.05);
-  border: 1px solid rgba(2,132,199,0.12);
-  border-radius: var(--radius-sm);
-  padding: 10px 10px;
-  color: #334155;
-  font-size: 13px;
-  line-height: 1.5;
-  white-space: pre-wrap;
-}
-.desc-actions{
-  display:flex;
-  justify-content:flex-end;
-  margin-top: 6px;
-}
-
-.link-btn{
-  border:none;
-  background: transparent;
-  color: #008bb7;
-  font-weight: 900;
-  cursor:pointer;
-  padding: 0;
-}
-.link-btn:hover{ text-decoration: underline; }
-
-.tag{
-  display:inline-flex;
-  align-items:center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 800;
-  color: #067aa0;
-  background: rgba(0,174,224,.10);
-  border: 1px solid rgba(0,174,224,.18);
-  padding: 6px 10px;
-  border-radius: 999px;
-}
-
-.price{
-  margin-top: 2px;
-  display:flex;
-  flex-direction:column;
-  gap: 4px;
-  font-size: 14px;
-}
-.price-line{
-  display:flex;
-  gap: 8px;
-  align-items:baseline;
-}
-.price-label{
-  color: #6b7280;
-  min-width: 76px;
-}
-.price-value{
-  font-weight: 900;
-  color: #0f172a;
-}
-
-.card-footer{
-  margin-top: auto;
-  padding: 12px 14px 14px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap: 10px;
-  color: #8a94a6;
-  font-size: 12px;
-}
-
-/* Description preview + expand */
-.desc{
-  background: rgba(2,132,199,0.05);
-  border: 1px solid rgba(2,132,199,0.12);
-  border-radius: var(--radius-sm);
-  padding: 10px 10px;
-  color: #334155;
-  font-size: 13px;
-  line-height: 1.5;
-  white-space: pre-wrap; /* ✅ 支援 \n 斷行 */
-}
-.desc-actions{
-  display:flex;
-  justify-content:flex-end;
-  margin-top: 6px;
-}
-.link-btn{
-  border:none;
-  background: transparent;
-  color: #008bb7;
-  font-weight: 900;
-  cursor:pointer;
-  padding: 0;
-}
-.link-btn:hover{ text-decoration: underline; }
-
-/* Empty */
-.empty{
-  margin-top: 16px;
-  background: #fff;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 22px;
-  text-align:center;
-}
-.empty-title{
-  font-size: 18px;
-  font-weight: 900;
-}
-.empty-desc{
-  margin-top: 6px;
-  color: var(--muted);
-}
-
-.product-description {
-  margin-top: 8px;
-  font-size: 0.9rem;
-  color: #555;
-  line-height: 1.5;
-  max-height: 4.5em;        /* 約 3 行 */
-  overflow: hidden;
-  position: relative;
 }
 
 /* =========================
-   JS product-card 對齊樣式
+   ✅ Description（唯一版本）
+   - 顯示兩行
+   - 不露第三行
 ========================= */
 
-.product-card {
-  background: var(--card);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-soft);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  min-height: 420px;
-}
-
-.product-image-wrapper {
-  height: 210px;
-  background: rgba(0,174,224,.10);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.product-image-wrapper img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover; /* ✅ 關鍵：圖片不再爆 */
-}
-
-.product-image-placeholder {
-  color: var(--muted);
-  font-size: 14px;
-}
-
-.product-content {
-  padding: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.product-name {
-  font-size: 18px;
-  font-weight: 900;
-  margin: 0;
-  line-height: 1.25;
-}
-
-.product-spec {
-  font-size: 14px;
-  color: var(--muted);
-  margin: 0;
-}
-
-.product-meta-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.product-category-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  font-weight: 800;
-  color: #067aa0;
-  background: rgba(0,174,224,.10);
-  border: 1px solid rgba(0,174,224,.18);
-  padding: 6px 10px;
-  border-radius: 999px;
-}
-
-.product-meta-line {
-  font-size: 13px;
-  color: var(--muted);
-}
-
-.product-price-block {
-  margin-top: 4px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.product-updated-at {
-  margin-top: auto;
-  font-size: 12px;
-  color: #8a94a6;
-}
-
-/* description */
-.product-description {
+.desc{
   background: rgba(2,132,199,0.05);
   border: 1px solid rgba(2,132,199,0.12);
   border-radius: var(--radius-sm);
@@ -593,32 +244,47 @@ body{
   white-space: pre-wrap;
 }
 
-/* 手機版卡片優化 */
-@media (max-width: 640px) {
-  .card {
-    min-height: auto;
-  }
-
-  .card-img {
-    height: 160px;
-  }
-
-  .card-title {
-    font-size: 16px;
-  }
-
-  .price {
-    font-size: 13px;
-  }
-}
-
-/* description：只顯示兩行，完全不露第三行 */
-.desc.clamp {
+/* 收合 */
+.desc.clamp{
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-
-  line-height: 1.5;
-  max-height: calc(1.5em * 2); /* 強制兩行高度 */
+  max-height: calc(1.5em * 2 + 20px);
   overflow: hidden;
+}
+
+.desc-actions{
+  text-align:right;
+}
+
+.link-btn{
+  background:none;
+  border:none;
+  color: var(--primary-dark);
+  font-weight: 800;
+  cursor:pointer;
+}
+
+/* =========================
+   Footer / Meta
+========================= */
+
+.card-footer{
+  margin-top:auto;
+  padding: 12px 14px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* =========================
+   Empty state
+========================= */
+
+.empty{
+  margin-top: 16px;
+  background:#fff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px;
+  text-align:center;
 }
