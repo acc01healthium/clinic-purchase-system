@@ -245,3 +245,55 @@ body{
   padding:22px;
   text-align:center;
 }
+
+/* =========================
+   Filters 左上美化
+========================= */
+.filters{
+  display:flex;
+  gap:18px;
+  flex-wrap:wrap;
+  align-items:flex-end;
+}
+
+.filter-item{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+.filter-label{
+  font-size:13px;
+  font-weight:800;
+  color:#374151;
+}
+
+.select{
+  appearance:none;
+  padding:8px 14px;
+  border-radius:999px;
+  border:1px solid rgba(0,174,224,.45);
+  font-weight:700;
+  background:#fff;
+  cursor:pointer;
+}
+
+.select:hover{
+  border-color:#00aee0;
+}
+
+/* =========================
+   卡片 footer 固定在底部
+========================= */
+.card-body{
+  display:flex;
+  flex-direction:column;
+}
+
+.card-footer{
+  margin-top:auto;
+  padding-top:10px;
+  font-size:12px;
+  color:#8a94a6;
+  border-top:1px dashed rgba(0,0,0,.08);
+}
