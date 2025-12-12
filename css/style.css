@@ -220,7 +220,7 @@ body{
 }
 
 /* =========================
-   Price（穩定電商表格版）
+   Price（最終穩定版）
 ========================= */
 .price{
   display:flex;
@@ -231,7 +231,7 @@ body{
 
 .price-line{
   display:grid;
-  grid-template-columns: 88px 48px 1fr; /* 標籤 | NT$ | 數字 */
+  grid-template-columns: 88px 40px 1fr; /* 標籤 | NT$ | 金額 */
   align-items:baseline;
 }
 
@@ -242,20 +242,17 @@ body{
   white-space:nowrap;
 }
 
+.price-currency{
+  color:var(--muted);
+  font-weight:700;
+  text-align:right;
+  white-space:nowrap;
+}
+
 .price-value{
   font-weight:900;
   text-align:right;
   white-space:nowrap;
-  position:relative;
-}
-
-/* NT$ 固定欄位（不影響 grid） */
-.price-value::before{
-  content:"NT$";
-  position:absolute;
-  left:-42px;
-  color:var(--muted);
-  font-weight:700;
 }
 
 /* =========================
