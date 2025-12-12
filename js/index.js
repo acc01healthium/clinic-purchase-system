@@ -39,70 +39,93 @@ const fmtDate = (v) => {
 };
 
 /* ========= Card ========= */
-function createCard(p) {
+function createProductCard(p) {
   const card = document.createElement("article");
   card.className = "card";
 
-  card.innerHTML = `
-    <div class="card-img">
-      ${
-        p.image_url
-          ? `<img src="${p.image_url}" alt="${p.name}" loading="lazy">`
-          : ""
-      }
+  /* 圖片區 */
+  const imgWrap = document.createElement("div");
+  imgWrap.className = "card-img";
+
+  if (p.image_url) {
+    const img = document.createElement("img");
+    img.src = p.image_url;
+    img.alt = p.name || "商品圖片";
+    img.loading = "lazy";
+    imgWrap.appendChild(img);
+  } else {
+    imgWrap.innerHTML = `<div class="product-image-placeholder">尚未上傳圖片</div>`;
+  }
+
+  /* 內容區 */
+  const body = document.createElement("div");
+  body.className = "card-body";
+
+  const title = document.createElement("h3");
+  title.className = "card-title";
+  title.textContent = p.name || "";
+
+  const sub = document.createElement("div");
+  sub.className = "card-sub";
+  sub.innerHTML = `
+    <span>${p.spec || ""}</span>
+    ${p.category ? `<span class="tag">${p.category}</span>` : ""}
+  `;
+
+  const price = document.createElement("div");
+  price.className = "price";
+  price.innerHTML = `
+    <div class="price-line">
+      <span class="price-label">進　價：</span>
+      <span class="price-value">${p.last_price ? `NT$ ${p.last_price}` : "—"}</span>
     </div>
-
-    <div class="card-body">
-      <h3 class="card-title">${p.name}</h3>
-
-      <div class="card-sub">
-        <span>${p.spec || ""}</span>
-        <span class="tag">${p.category || ""}</span>
-      </div>
-
-      <div class="price">
-        <div class="price-line">
-          <span class="price-label">進價</span>
-          <span class="price-value">${fmtPrice(p.last_price)}</span>
-        </div>
-        <div class="price-line">
-          <span class="price-label">建議售價</span>
-          <span class="price-value">${fmtPrice(p.suggested_price)}</span>
-        </div>
-      </div>
-
-      ${
-        p.description
-          ? `
-        <div class="desc clamp">${p.description}</div>
-        <div class="desc-actions">
-          <button class="link-btn">查看更多</button>
-        </div>
-      `
-          : ""
-      }
-    </div>
-
-    <div class="card-footer">
-      ${
-        p.last_price_updated_at
-          ? `價格更新時間：${fmtDate(p.last_price_updated_at)}`
-          : ""
-      }
+    <div class="price-line">
+      <span class="price-label">建議價：</span>
+      <span class="price-value">${p.suggested_price ? `NT$ ${p.suggested_price}` : "—"}</span>
     </div>
   `;
 
-  const btn = card.querySelector(".link-btn");
-  const desc = card.querySelector(".desc");
+  body.appendChild(title);
+  body.appendChild(sub);
+  body.appendChild(price);
 
-  if (btn && desc) {
-    btn.onclick = () => {
+  /* 🔽 A️⃣ Description（可展開） */
+  if (p.description) {
+    const descWrap = document.createElement("div");
+
+    const desc = document.createElement("div");
+    desc.className = "desc clamp";
+    desc.textContent = p.description;
+
+    const actions = document.createElement("div");
+    actions.className = "desc-actions";
+
+    const toggleBtn = document.createElement("button");
+    toggleBtn.className = "link-btn";
+    toggleBtn.textContent = "查看更多";
+
+    toggleBtn.addEventListener("click", () => {
+      const expanded = !desc.classList.contains("clamp");
       desc.classList.toggle("clamp");
-      btn.textContent = desc.classList.contains("clamp")
-        ? "查看更多"
-        : "收合";
-    };
+      toggleBtn.textContent = expanded ? "查看更多" : "收合";
+    });
+
+    actions.appendChild(toggleBtn);
+    descWrap.appendChild(desc);
+    descWrap.appendChild(actions);
+    body.appendChild(descWrap);
   }
+
+  /* footer */
+  const footer = document.createElement("div");
+  footer.className = "card-footer";
+  footer.textContent = p.last_price_updated_at
+    ? `價格更新時間：${new Date(p.last_price_updated_at).toLocaleString()}`
+    : "";
+
+  card.appendChild(imgWrap);
+  card.appendChild(body);
+  card.appendChild(footer);
 
   return card;
 }
