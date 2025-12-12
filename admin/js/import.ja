@@ -1,0 +1,54 @@
+/*
+  /admin/js/import.js
+  CSV 大量匯入（每 50 筆一批）
+*/
+
+const supabaseClient = window.supabaseClient;
+const fileInput = document.getElementById("csvFile");
+const importBtn = document.getElementById("importBtn");
+const logBox = document.getElementById("importLog");
+
+importBtn.addEventListener("click", () => {
+  if (!fileInput.files.length) {
+    alert("請先選擇 CSV 檔案！");
+    return;
+  }
+
+  Papa.parse(fileInput.files[0], {
+    header: true,
+    skipEmptyLines: true,
+    complete: function (result) {
+      processCSV(result.data);
+    }
+  });
+});
+
+async function processCSV(rows) {
+
+  logBox.innerHTML = `📦 共 ${rows.length} 筆資料，開始匯入…<br>`;
+
+  const batchSize = 50;
+  for (let i = 0; i < rows.length; i += batchSize) {
+    const batch = rows.slice(i, i + batchSize).map(r => ({
+      name: r.name,
+      category: r.category || null,
+      spec: r.spec || null,
+      unit: r.unit || null,
+      description: r.description || null,
+      last_price: r.last_price ? Number(r.last_price) : null,
+      suggested_price: r.suggested_price ? Number(r.suggested_price) : null,
+      is_active: true,
+    }));
+
+    const { error } = await supabaseClient.from("products").insert(batch);
+
+    if (error) {
+      logBox.innerHTML += `<span style='color:red'>❌ 匯入失敗：${error.message}</span><br>`;
+      return;
+    }
+
+    logBox.innerHTML += `✔ 已匯入 ${i + batch.length} / ${rows.length}<br>`;
+  }
+
+  logBox.innerHTML += "<br>🎉 全部匯入完成！";
+}
