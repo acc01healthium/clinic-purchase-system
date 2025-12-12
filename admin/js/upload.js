@@ -1,7 +1,7 @@
 // /admin/js/upload.js
-// CSV 匯入 FINAL（含分類自動建立）
+// CSV 匯入 FINAL（系統自動判定 + 清除預覽）
 
-console.log("CSV Upload with Category Auto Create 初始化");
+console.log("CSV Upload FINAL 初始化");
 
 const supabaseClient = window.supabaseClient;
 
@@ -11,6 +11,7 @@ const previewBtn = document.getElementById("previewBtn");
 const previewSection = document.getElementById("previewSection");
 const previewTbody = document.getElementById("previewTbody");
 const confirmBtn = document.getElementById("confirmImportBtn");
+const resetBtn = document.getElementById("resetBtn");
 
 let parsedRows = [];
 
@@ -68,16 +69,10 @@ async function ensureCategoriesExist(rows) {
 
   const payload = Array.from(newCategories).map((name) => ({ name }));
 
-  const { error } = await supabaseClient
-    .from("categories")
-    .insert(payload);
+  const { error } = await supabaseClient.from("categories").insert(payload);
+  if (error) throw error;
 
-  if (error) {
-    console.error("建立分類失敗", error);
-    throw error;
-  }
-
-  console.log("已自動建立分類：", payload.map((p) => p.name));
+  console.log("自動建立分類：", payload.map((p) => p.name));
 }
 
 /* ---------- 預覽 ---------- */
@@ -95,13 +90,12 @@ async function handlePreview() {
     skipEmptyLines: "greedy",
     complete: (res) => {
       parsedRows = [];
+      previewTbody.innerHTML = "";
 
       res.data.forEach((r) => {
         const name = (r.name || "").trim();
         const spec = (r.spec || "").trim();
-        const unit = (r.unit || "").trim();
-
-        if (!name && !spec && !unit) return;
+        if (!name && !spec) return;
 
         const key = makeKey(name, spec);
         const exist = existingMap.get(key);
@@ -110,12 +104,12 @@ async function handlePreview() {
           name,
           category: (r.category || "").trim(),
           spec,
-          unit,
+          unit: (r.unit || "").trim(),
           last_price: toNumber(r.last_price),
           suggested_price: toNumber(r.suggested_price),
           description: (r.description || "").trim(),
           is_active: true,
-          action: exist ? "update" : "insert",
+          action: exist ? "更新" : "新增",
           productId: exist?.id || null,
           oldLastPrice: exist?.last_price ?? null,
         });
@@ -134,7 +128,7 @@ function renderPreview() {
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${i + 1}</td>
-      <td>${r.action === "insert" ? "新增" : "更新"}</td>
+      <td>${r.action}</td>
       <td>${r.name}</td>
       <td>${r.category}</td>
       <td>${r.spec}</td>
@@ -142,7 +136,7 @@ function renderPreview() {
       <td>${r.last_price ?? "—"}</td>
       <td>${r.suggested_price ?? "—"}</td>
       <td>${r.description.replace(/\n/g, "<br>")}</td>
-      <td>${r.is_active ? "啟用" : "停用"}</td>
+      <td>啟用</td>
     `;
     previewTbody.appendChild(tr);
   });
@@ -155,14 +149,13 @@ function renderPreview() {
 async function handleConfirm() {
   if (!parsedRows.length) return;
 
-  // ⭐ 先確保分類存在
   await ensureCategoriesExist(parsedRows);
 
   const inserts = [];
   const updates = [];
 
   parsedRows.forEach((r) => {
-    if (r.action === "insert") {
+    if (r.action === "新增") {
       inserts.push({
         name: r.name,
         category: r.category,
@@ -203,10 +196,20 @@ async function handleConfirm() {
     await supabaseClient.from("products").update(u.payload).eq("id", u.id);
   }
 
-  alert(`匯入完成：新增 ${inserts.length}，更新 ${updates.length}`);
+  alert(`匯入完成：新增 ${inserts.length} 筆，更新 ${updates.length} 筆`);
   location.href = "index.html";
+}
+
+/* ---------- 清除預覽 ---------- */
+function handleReset() {
+  parsedRows = [];
+  previewTbody.innerHTML = "";
+  previewSection.style.display = "none";
+  confirmBtn.disabled = true;
+  fileInput.value = "";
 }
 
 /* ---------- 綁定 ---------- */
 previewBtn.addEventListener("click", handlePreview);
 confirmBtn.addEventListener("click", handleConfirm);
+resetBtn.addEventListener("click", handleReset);
