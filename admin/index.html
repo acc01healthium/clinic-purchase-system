@@ -1,72 +1,112 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>康醫採購管理系統｜後台</title>
 
-  <link rel="stylesheet" href="css/admin.css?v=3" />
+  <!-- 後台樣式 -->
+  <link rel="stylesheet" href="css/admin.css?v=11" />
+
+  <!-- Supabase SDK v2 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- 後台 Supabase client -->
   <script src="js/supabase.js?v=3"></script>
-  <script defer src="js/index.js?v=3"></script>
+
+  <!-- 商品列表 JS（排序 + 分頁 + 搜尋） -->
+  <script defer src="js/index.js?v=11"></script>
 </head>
 
 <body>
 
+  <!-- =========================
+       Header 區塊
+  ========================== -->
   <header class="admin-header">
     <div class="admin-header-inner">
       <div>
         <h1 class="admin-title">康醫採購管理系統｜後台</h1>
-        <p class="admin-subtitle">商品列表</p>
+        <p class="admin-subtitle">商品管理</p>
       </div>
 
       <div class="admin-header-buttons">
         <a href="index.html" class="admin-btn">商品列表</a>
-        <a href="login.html" id="logoutBtn" class="admin-btn admin-btn-danger">登出</a>
+        <a href="../index.html" class="admin-btn" target="_blank">前台查看</a>
+        <button id="logoutBtn" class="admin-btn admin-btn-danger">登出</button>
       </div>
     </div>
   </header>
 
+  <!-- =========================
+       Main 區塊
+  ========================== -->
   <main class="admin-main">
-
     <section class="card">
 
+      <!-- 上方按鈕 -->
       <div class="card-header-row">
-        <a href="add.html" class="btn-primary">新增商品</a>
-        <a href="upload.html" class="btn-secondary">CSV 批次匯入</a>
+        <button onclick="location.href='add.html'" class="btn-primary">新增商品</button>
+        <!-- ⚠ 不再放 “匯入CSV” 按鈕（依你的要求） -->
       </div>
 
-      <!-- 後台搜尋列 -->
+      <!-- 搜尋列 -->
       <div class="admin-search-bar">
-        <input type="text" id="adminSearchInput" placeholder="搜尋商品名稱、類別、規格或描述…" />
-        <div class="admin-search-hint">支援名稱、類別、規格、描述等關鍵字模糊查詢</div>
+        <input
+          id="adminSearchInput"
+          type="text"
+          placeholder="搜尋商品名稱、分類、規格、描述…"
+        />
+        <span class="admin-search-hint">可輸入關鍵字搜尋</span>
       </div>
 
-      <h2>商品列表</h2>
+      <!-- 每頁顯示筆數 -->
+      <div style="margin-bottom: 10px;">
+        <label>每頁顯示：</label>
+        <select id="pageSizeSelect" class="page-size-select">
+          <option value="10">10 筆</option>
+          <option value="20">20 筆</option>
+          <option value="50">50 筆</option>
+        </select>
+      </div>
 
+      <!-- 商品列表 -->
       <table class="product-table">
         <thead>
           <tr>
-            <th>名稱</th>
-            <th>類別</th>
-            <th>規格</th>
-            <th>單位</th>
-            <th>描述</th>
-            <th>進價</th>
-            <th>建議售價</th>
-            <th>價格更新時間</th>
-            <th>狀態</th>
+            <th onclick="sortBy('name')">名稱</th>
+            <th onclick="sortBy('category')">分類</th>
+            <th onclick="sortBy('spec')">規格</th>
+            <th onclick="sortBy('unit')">單位</th>
+            <th onclick="sortBy('description')">描述</th>
+            <th onclick="sortBy('last_price')">進價</th>
+            <th onclick="sortBy('suggested_price')">建議售價</th>
+            <th onclick="sortBy('last_price_updated_at')">更新時間</th>
+            <th onclick="sortBy('is_active')">狀態</th>
             <th>操作</th>
           </tr>
         </thead>
 
-        <tbody id="productTbody">
+        <tbody id="productTableBody">
+          <!-- JS 動態插入 -->
         </tbody>
       </table>
 
+      <!-- 分頁器 -->
+      <div id="pagination" class="pagination"></div>
     </section>
-
   </main>
+
+  <script>
+    // 修正後台 "登出" 無作用
+    document.addEventListener("DOMContentLoaded", () => {
+      const logoutBtn = document.getElementById("logoutBtn");
+      logoutBtn.addEventListener("click", () => {
+        window.location.href = "login.html";
+      });
+    });
+  </script>
 
 </body>
 </html>
