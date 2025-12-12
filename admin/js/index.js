@@ -1,150 +1,207 @@
-/*
-  /admin/js/index.js
-  後台列表：搜尋 + 排序 + 分頁器
-*/
+// /admin/js/index.js
+// 後台商品列表：搜尋 / 排序 / 分頁 / Tooltip
 
 console.log("後台商品列表初始化");
 
+// 取得 Supabase client
 const supabaseClient = window.supabaseClient;
+if (!supabaseClient) console.error("supabaseClient 載入失敗！");
 
-// ========== DOM ==========
-const tableBody = document.getElementById("productTableBody");
+// DOM
+const tbody = document.getElementById("productTbody");
 const searchInput = document.getElementById("adminSearchInput");
 const pageSizeSelect = document.getElementById("pageSizeSelect");
-const paginationDiv = document.getElementById("pagination");
+const pageInfo = document.getElementById("pageInfo");
+const prevPageBtn = document.getElementById("prevPageBtn");
+const nextPageBtn = document.getElementById("nextPageBtn");
 
+// 全資料暫存（一次讀全部，前端做分頁 / 排序）
+let fullData = [];
+
+// 排序狀態
+let currentSort = {
+  column: "name",
+  asc: true,
+};
+
+// 分頁狀態
 let currentPage = 1;
 let pageSize = 10;
-let currentSort = { column: "id", order: "asc" };
-let currentKeyword = "";
 
+// 格式化金額（NT$）
+function formatPrice(n) {
+  if (n === null || n === undefined || n === "") return "—";
+  return `NT$ ${Number(n)}`;
+}
 
-// ===========================================
-//  取得資料（搜尋 + 排序 + 分頁）
-// ===========================================
+// 格式化時間
+function formatDate(value) {
+  if (!value) return "—";
+  const d = new Date(value);
+  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(
+    d.getDate()
+  ).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(
+    d.getMinutes()
+  ).padStart(2, "0")}`;
+}
+
+// 讀取全部商品資料 -------------------------------
 async function loadProducts() {
-  const from = (currentPage - 1) * pageSize;
-  const to = from + pageSize - 1;
-
-  let query = supabaseClient
+  const { data, error } = await supabaseClient
     .from("products")
-    .select("*", { count: "exact" })
-    .order(currentSort.column, { ascending: currentSort.order === "asc" })
-    .range(from, to);
-
-  // 搜尋
-  if (currentKeyword.trim() !== "") {
-    query = query.or(`name.ilike.%${currentKeyword}%,category.ilike.%${currentKeyword}%,spec.ilike.%${currentKeyword}%,description.ilike.%${currentKeyword}%`);
-  }
-
-  const { data, count, error } = await query;
+    .select(
+      `
+      id,
+      name,
+      category,
+      spec,
+      unit,
+      description,
+      last_price,
+      suggested_price,
+      last_price_updated_at,
+      is_active
+      `
+    )
+    .order("name", { ascending: true });
 
   if (error) {
-    console.error("載入錯誤：", error);
+    console.error("讀取資料錯誤：", error);
+    alert("讀取資料錯誤");
     return;
   }
 
-  renderTable(data);
-  renderPagination(count);
+  fullData = data || [];
+  applyFilters();
 }
 
+// 排序處理 ---------------------------------------
+function sortData(data) {
+  const { column, asc } = currentSort;
 
-// ===========================================
-//  顯示表格
-// ===========================================
+  return [...data].sort((a, b) => {
+    const v1 = a[column] ?? "";
+    const v2 = b[column] ?? "";
+
+    if (typeof v1 === "number" && typeof v2 === "number") {
+      return asc ? v1 - v2 : v2 - v1;
+    }
+
+    return asc
+      ? String(v1).localeCompare(String(v2))
+      : String(v2).localeCompare(String(v1));
+  });
+}
+
+// 搜尋 + 排序 + 分頁 ------------------------------
+function applyFilters() {
+  const keyword = searchInput.value.trim().toLowerCase();
+
+  let filtered = fullData.filter((p) => {
+    return (
+      (p.name || "").toLowerCase().includes(keyword) ||
+      (p.category || "").toLowerCase().includes(keyword) ||
+      (p.spec || "").toLowerCase().includes(keyword) ||
+      (p.description || "").toLowerCase().includes(keyword)
+    );
+  });
+
+  // 排序
+  filtered = sortData(filtered);
+
+  // 分頁
+  const total = filtered.length;
+  const totalPages = Math.ceil(total / pageSize);
+  if (currentPage > totalPages) currentPage = totalPages || 1;
+
+  const start = (currentPage - 1) * pageSize;
+  const paginated = filtered.slice(start, start + pageSize);
+
+  pageInfo.textContent = `第 ${currentPage} / ${totalPages || 1} 頁（共 ${total} 筆）`;
+
+  renderTable(paginated);
+}
+
+// 渲染表格 ----------------------------------------
 function renderTable(data) {
-  tableBody.innerHTML = "";
+  tbody.innerHTML = "";
 
   data.forEach((p) => {
     const tr = document.createElement("tr");
 
+    const statusText = p.is_active ? "啟用" : "停用";
+
+    const descriptionShort =
+      p.description && p.description.length > 16
+        ? p.description.slice(0, 16) + "…"
+        : p.description || "—";
+
     tr.innerHTML = `
-      <td>${p.name ?? ""}</td>
-      <td>${p.category ?? ""}</td>
-      <td>${p.spec ?? ""}</td>
-      <td>${p.unit ?? ""}</td>
-
+      <td>${p.name || ""}</td>
+      <td>${p.category || "—"}</td>
       <td>
-        <div class="desc-cell" title="${p.description ?? ""}">
-          ${p.description ?? "—"}
-        </div>
+        <span class="tooltip" title="${p.description || ""}">
+          ${descriptionShort}
+        </span>
       </td>
-
-      <td>NT$ ${p.last_price ?? "—"}</td>
-      <td>NT$ ${p.suggested_price ?? "—"}</td>
-
-      <td>${p.last_price_updated_at ? new Date(p.last_price_updated_at).toLocaleString("zh-TW") : "—"}</td>
-
-      <td>${p.is_active ? "啟用" : "停用"}</td>
-
+      <td>${p.unit || "—"}</td>
+      <td>${formatPrice(p.last_price)}</td>
+      <td>${formatPrice(p.suggested_price)}</td>
+      <td>${formatDate(p.last_price_updated_at)}</td>
+      <td>${statusText}</td>
       <td>
-        <a class="btn-edit" href="edit.html?id=${p.id}">編輯</a>
+        <button class="btn-edit" onclick="editProduct(${p.id})">編輯</button>
       </td>
     `;
 
-    tableBody.appendChild(tr);
+    tbody.appendChild(tr);
   });
 }
 
-
-// ===========================================
-//  分頁器
-// ===========================================
-function renderPagination(total) {
-  paginationDiv.innerHTML = "";
-
-  const totalPages = Math.ceil(total / pageSize);
-
-  for (let i = 1; i <= totalPages; i++) {
-    const btn = document.createElement("button");
-    btn.className = i === currentPage ? "page-btn active" : "page-btn";
-    btn.textContent = i;
-
-    btn.addEventListener("click", () => {
-      currentPage = i;
-      loadProducts();
-    });
-
-    paginationDiv.appendChild(btn);
-  }
-}
-
-
-// ===========================================
-//  監聽搜尋
-// ===========================================
-searchInput.addEventListener("input", () => {
-  currentKeyword = searchInput.value.trim();
-  currentPage = 1;
-  loadProducts();
-});
-
-
-// ===========================================
-//  每頁顯示筆數 select
-// ===========================================
-pageSizeSelect.addEventListener("change", () => {
-  pageSize = Number(pageSizeSelect.value);
-  currentPage = 1;
-  loadProducts();
-});
-
-
-// ===========================================
-//  點欄位排序
-// ===========================================
-window.sortBy = function (column) {
-  if (currentSort.column === column) {
-    currentSort.order = currentSort.order === "asc" ? "desc" : "asc";
-  } else {
-    currentSort.column = column;
-    currentSort.order = "asc";
-  }
-  loadProducts();
+// 編輯按鈕
+window.editProduct = function (id) {
+  location.href = `edit.html?id=${id}`;
 };
 
+// 事件綁定 -----------------------------------------
+searchInput.addEventListener("input", () => {
+  currentPage = 1;
+  applyFilters();
+});
 
-// ===========================================
-// 初始化
-// ===========================================
+pageSizeSelect.addEventListener("change", (e) => {
+  pageSize = Number(e.target.value);
+  currentPage = 1;
+  applyFilters();
+});
+
+prevPageBtn.addEventListener("click", () => {
+  if (currentPage > 1) {
+    currentPage--;
+    applyFilters();
+  }
+});
+
+nextPageBtn.addEventListener("click", () => {
+  currentPage++;
+  applyFilters();
+});
+
+// 欄位排序（點表頭就排序）
+document.querySelectorAll("th[data-sort]").forEach((th) => {
+  th.addEventListener("click", () => {
+    const col = th.dataset.sort;
+
+    if (currentSort.column === col) {
+      currentSort.asc = !currentSort.asc;
+    } else {
+      currentSort.column = col;
+      currentSort.asc = true;
+    }
+
+    applyFilters();
+  });
+});
+
+// 初始化 -------------------------------------------
 document.addEventListener("DOMContentLoaded", loadProducts);
