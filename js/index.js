@@ -1,33 +1,55 @@
 // /js/index.js
-// 前台商品查詢初始化
+console.log("前台 商品列表 初始化");
 
-console.log("前台商品查詢初始化");
-
-// 取得 Supabase client（在 /js/supabase.js 建立的）
 const supabaseClient = window.supabaseClient;
-
-// DOM 元素
-const productListEl = document.getElementById("productList");
-const searchInputEl = document.getElementById("searchInput");
-const clearBtnEl = document.getElementById("clearBtn");
-const statusEl = document.getElementById("statusMessage");
-
-let allProducts = [];
-let currentCategory = ""; // 空字串 = 全部
-
-// 金額格式
-function formatPrice(value) {
-  if (value === null || value === undefined || value === "") return "—";
-  const num = Number(value);
-  if (Number.isNaN(num)) return "—";
-  return `NT$ ${num}`;
+if (!supabaseClient) {
+  console.error("supabaseClient 不存在，請確認 js/supabase.js 是否正確載入。");
 }
 
-// 時間格式（若未來卡片要用得到）
-function formatDateTime(value) {
-  if (!value) return "";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return "";
+const els = {
+  grid: document.getElementById("grid"),
+  empty: document.getElementById("emptyState"),
+  emptyResetBtn: document.getElementById("emptyResetBtn"),
+  metaText: document.getElementById("metaText"),
+
+  searchInput: document.getElementById("searchInput"),
+  clearBtn: document.getElementById("clearBtn"),
+  allBtn: document.getElementById("allBtn"),
+
+  categorySelect: document.getElementById("categorySelect"),
+  sortSelect: document.getElementById("sortSelect"),
+  pageSizeSelect: document.getElementById("pageSizeSelect"),
+
+  prevPageBtn: document.getElementById("prevPageBtn"),
+  nextPageBtn: document.getElementById("nextPageBtn"),
+  pageIndicator: document.getElementById("pageIndicator"),
+};
+
+const state = {
+  categories: [],
+  products: [],
+  filtered: [],
+
+  q: "",
+  category: "",
+  sort: "updated_desc",
+
+  page: 1,
+  pageSize: 10,
+  total: 0,
+  totalPages: 1,
+};
+
+function formatPrice(n) {
+  if (n === null || n === undefined || Number.isNaN(Number(n))) return "—";
+  const num = Number(n);
+  return `NT$ ${num.toLocaleString("zh-Hant")}`;
+}
+
+function formatDate(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "—";
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");
@@ -36,197 +58,316 @@ function formatDateTime(value) {
   return `${y}/${m}/${day} ${hh}:${mm}`;
 }
 
-// 建立商品卡片 DOM
-function createProductCard(p) {
-  const card = document.createElement("article");
-  card.className = "product-card";
-
-  const imgWrapper = document.createElement("div");
-  imgWrapper.className = "product-image-wrapper";
-
-  if (p.image_url) {
-    const img = document.createElement("img");
-    img.src = p.image_url;
-    img.alt = p.name || "商品圖片";
-    img.loading = "lazy";
-    imgWrapper.appendChild(img);
-  } else {
-    const placeholder = document.createElement("div");
-    placeholder.className = "product-image-placeholder";
-    placeholder.textContent = "尚未上傳圖片";
-    imgWrapper.appendChild(placeholder);
-  }
-
-  const content = document.createElement("div");
-  content.className = "product-content";
-
-  const nameEl = document.createElement("h3");
-  nameEl.className = "product-name";
-  nameEl.textContent = p.name || "";
-
-  const specEl = document.createElement("p");
-  specEl.className = "product-spec";
-  specEl.textContent = p.spec || "";
-
-// 類別 / 單位
-const metaRow = document.createElement("div");
-metaRow.className = "product-meta-row";
-
-// 類別（美化標籤）
-if (p.category) {
-  const categoryDiv = document.createElement("div");
-  categoryDiv.className = "product-category-tag";
-  categoryDiv.textContent = p.category;
-  metaRow.appendChild(categoryDiv);
+function normalize(s) {
+  return (s || "").toString().trim().toLowerCase();
 }
 
-// 單位（一般文字）
-if (p.unit) {
-  const unitDiv = document.createElement("div");
-  unitDiv.className = "product-meta-line";
-  unitDiv.textContent = `單位：${p.unit}`;
-  metaRow.appendChild(unitDiv);
-}
+function applyFilters() {
+  const q = normalize(state.q);
+  const cat = normalize(state.category);
 
-  // 價格區：進價 / 建議售價（對齊）
-  const priceBlock = document.createElement("div");
-  priceBlock.className = "product-price-block";
+  let arr = state.products.slice();
 
-  const line1 = document.createElement("div");
-  line1.className = "price-line";
-  line1.innerHTML = `
-    <span class="price-label">進　　價：</span>
-    <span class="price-value">${formatPrice(p.last_price)}</span>
-  `;
+  // ✅ 只顯示啟用
+  arr = arr.filter(p => p.is_active === true);
 
-  const line2 = document.createElement("div");
-  line2.className = "price-line";
-  line2.innerHTML = `
-    <span class="price-label">建議售價：</span>
-    <span class="price-value">${formatPrice(p.suggested_price)}</span>
-  `;
-
-  priceBlock.appendChild(line1);
-  priceBlock.appendChild(line2);
-
-  // 若需要顯示價格更新時間，可在卡片下方加一行
-  if (p.last_price_updated_at) {
-    const timeEl = document.createElement("p");
-    timeEl.className = "product-updated-at";
-    timeEl.textContent = `價格更新時間：${formatDateTime(
-      p.last_price_updated_at
-    )}`;
-    content.appendChild(timeEl);
-  }
-
-  content.prepend(priceBlock);
-  content.prepend(metaRow);
-  content.prepend(specEl);
-  content.prepend(nameEl);
-
-  card.appendChild(imgWrapper);
-  card.appendChild(content);
-
-  return card;
-}
-
-// 將目前 allProducts + 篩選條件，渲染到畫面上
-function renderProducts() {
-  if (!productListEl) return;
-
-  const keyword = (searchInputEl?.value || "").trim();
-
-  let filtered = allProducts.filter((p) => p.is_active);
-
-  if (currentCategory) {
-    filtered = filtered.filter((p) => p.category === currentCategory);
-  }
-
-  if (keyword) {
-    const kw = keyword.toLowerCase();
-    filtered = filtered.filter((p) => {
-      const text =
-        `${p.name || ""} ${p.category || ""} ${p.spec || ""}`.toLowerCase();
-      return text.includes(kw);
+  // 搜尋
+  if (q) {
+    arr = arr.filter(p => {
+      const name = normalize(p.name);
+      const spec = normalize(p.spec);
+      const category = normalize(p.category);
+      const unit = normalize(p.unit);
+      return (
+        name.includes(q) ||
+        spec.includes(q) ||
+        category.includes(q) ||
+        unit.includes(q)
+      );
     });
   }
 
-  productListEl.innerHTML = "";
-
-  if (!filtered.length) {
-    if (statusEl) statusEl.textContent = "目前沒有符合條件的商品";
-    return;
+  // 分類
+  if (cat) {
+    arr = arr.filter(p => normalize(p.category) === cat);
   }
 
-  if (statusEl) statusEl.textContent = "";
+  // 排序
+  const sort = state.sort;
+  const getUpdated = (p) => new Date(p.last_price_updated_at || p.updated_at || p.created_at || 0).getTime();
+  const getPrice = (p) => (p.last_price === null || p.last_price === undefined) ? -Infinity : Number(p.last_price);
+  const getName = (p) => (p.name || "").toString();
 
-  filtered.forEach((p) => {
-    productListEl.appendChild(createProductCard(p));
+  arr.sort((a, b) => {
+    if (sort === "updated_desc") return getUpdated(b) - getUpdated(a);
+    if (sort === "updated_asc") return getUpdated(a) - getUpdated(b);
+    if (sort === "price_asc") return getPrice(a) - getPrice(b);
+    if (sort === "price_desc") return getPrice(b) - getPrice(a);
+    if (sort === "name_asc") return getName(a).localeCompare(getName(b), "zh-Hant");
+    if (sort === "name_desc") return getName(b).localeCompare(getName(a), "zh-Hant");
+    return 0;
   });
+
+  state.filtered = arr;
+  state.total = arr.length;
+  state.totalPages = Math.max(1, Math.ceil(state.total / state.pageSize));
+  if (state.page > state.totalPages) state.page = state.totalPages;
+  if (state.page < 1) state.page = 1;
 }
 
-// 載入商品（一次打後端）
-async function loadProducts() {
-  if (!supabaseClient) {
-    console.error("前台 supabaseClient 不存在，請確認 /js/supabase.js 是否正確載入。");
-    if (statusEl) statusEl.textContent = "系統設定錯誤，請聯絡管理者。";
+function render() {
+  applyFilters();
+
+  // meta + pager
+  const start = (state.page - 1) * state.pageSize + 1;
+  const end = Math.min(state.total, state.page * state.pageSize);
+
+  els.metaText.textContent = state.total === 0
+    ? "目前沒有資料"
+    : `顯示第 ${start}–${end} 筆（共 ${state.total} 筆）`;
+
+  els.pageIndicator.textContent = `第 ${state.page} / ${state.totalPages} 頁`;
+  els.prevPageBtn.disabled = state.page <= 1;
+  els.nextPageBtn.disabled = state.page >= state.totalPages;
+
+  // empty
+  if (state.total === 0) {
+    els.grid.innerHTML = "";
+    els.empty.style.display = "block";
     return;
+  } else {
+    els.empty.style.display = "none";
   }
 
-  if (statusEl) statusEl.textContent = "載入中…";
+  // page slice
+  const sliceStart = (state.page - 1) * state.pageSize;
+  const sliceEnd = sliceStart + state.pageSize;
+  const pageItems = state.filtered.slice(sliceStart, sliceEnd);
 
+  els.grid.innerHTML = pageItems.map((p) => {
+    const img = p.image_url || "";
+    const category = p.category || "未分類";
+    const spec = p.spec || "—";
+    const unit = p.unit || "—";
+    const lastPrice = formatPrice(p.last_price);
+    const suggested = formatPrice(p.suggested_price);
+    const updated = formatDate(p.last_price_updated_at || p.updated_at || p.created_at);
+
+    const desc = (p.description || "").toString().trim();
+    const hasDesc = !!desc;
+
+    // ✅ 兩行預覽 + 展開/收合（A 方案）
+    const descHtml = hasDesc
+      ? `
+        <div class="desc clamp" data-desc="${encodeURIComponent(desc)}">${escapeHtml(desc)}</div>
+        <div class="desc-actions">
+          <button class="link-btn" type="button" data-action="toggleDesc">查看更多</button>
+        </div>
+      `
+      : `<div class="desc clamp">（無描述）</div>`;
+
+    return `
+      <article class="card" data-id="${p.id}">
+        <div class="card-img">
+          ${img ? `<img src="${img}" alt="${escapeHtml(p.name || "")}" loading="lazy" />` : ""}
+        </div>
+
+        <div class="card-body">
+          <h3 class="card-title">${escapeHtml(p.name || "")}</h3>
+
+          <div class="card-sub">
+            <span>${escapeHtml(spec)}</span>
+            <span class="tag">${escapeHtml(category)}</span>
+          </div>
+
+          <div class="price">
+            <div class="price-line">
+              <span class="price-label">單位</span>
+              <span class="price-value">${escapeHtml(unit)}</span>
+            </div>
+            <div class="price-line">
+              <span class="price-label">進價</span>
+              <span class="price-value">${lastPrice}</span>
+            </div>
+            <div class="price-line">
+              <span class="price-label">建議售價</span>
+              <span class="price-value">${suggested}</span>
+            </div>
+          </div>
+
+          ${descHtml}
+        </div>
+
+        <div class="card-footer">
+          <span>價格更新時間：${updated}</span>
+        </div>
+      </article>
+    `;
+  }).join("");
+}
+
+// XSS-safe
+function escapeHtml(str) {
+  const s = (str || "").toString();
+  return s
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+// categories：優先用 categories 表；若抓不到就 fallback 用 products distinct
+async function loadCategories() {
+  try {
+    const { data, error } = await supabaseClient
+      .from("categories")
+      .select("name")
+      .order("name", { ascending: true });
+
+    if (error) throw error;
+
+    const names = Array.from(
+      new Set((data || []).map(x => (x.name || "").toString().trim()).filter(Boolean))
+    );
+
+    state.categories = names;
+    renderCategoryOptions();
+  } catch (e) {
+    console.warn("categories 表讀取失敗，改用 products.category fallback：", e?.message || e);
+    const names = Array.from(
+      new Set(state.products.map(p => (p.category || "").toString().trim()).filter(Boolean))
+    ).sort((a,b)=>a.localeCompare(b, "zh-Hant"));
+    state.categories = names;
+    renderCategoryOptions();
+  }
+}
+
+function renderCategoryOptions() {
+  const sel = els.categorySelect;
+  const current = sel.value;
+  sel.innerHTML = `<option value="">全部分類</option>` + state.categories.map(n => {
+    return `<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`;
+  }).join("");
+
+  // 盡量保留原本選取
+  if (current) sel.value = current;
+}
+
+async function loadProducts() {
   const { data, error } = await supabaseClient
     .from("products")
-    .select(
-      `
-      id,
-      name,
-      category,
-      spec,
-      unit,
-      last_price,
-      suggested_price,
-      last_price_updated_at,
-      image_url,
-      is_active
-    `
-    )
-    .order("name", { ascending: true });
+    .select("id,name,category,spec,unit,last_price,suggested_price,description,is_active,image_url,last_price_updated_at,updated_at,created_at");
 
   if (error) {
-    console.error("前台載入商品錯誤：", error);
-    if (statusEl) statusEl.textContent = "讀取資料發生錯誤，請稍後再試。";
+    console.error("讀取 products 失敗：", error);
+    els.metaText.textContent = "讀取資料失敗，請稍後再試。";
     return;
   }
 
-  allProducts = data || [];
-  renderProducts();
+  state.products = data || [];
 }
 
-// 搜尋框 & 清除按鈕事件
-if (searchInputEl) {
-  searchInputEl.addEventListener("input", () => {
-    renderProducts();
+function resetFilters() {
+  state.q = "";
+  state.category = "";
+  state.sort = "updated_desc";
+  state.page = 1;
+  state.pageSize = Number(els.pageSizeSelect.value) || 10;
+
+  els.searchInput.value = "";
+  els.categorySelect.value = "";
+  els.sortSelect.value = "updated_desc";
+  els.pageSizeSelect.value = String(state.pageSize);
+
+  render();
+}
+
+// events
+function bindEvents() {
+  // ✅ 全部商品按鈕（你之前說沒反應，這版會重置）
+  els.allBtn.addEventListener("click", () => resetFilters());
+
+  els.emptyResetBtn.addEventListener("click", () => resetFilters());
+
+  els.clearBtn.addEventListener("click", () => {
+    els.searchInput.value = "";
+    state.q = "";
+    state.page = 1;
+    render();
+  });
+
+  els.searchInput.addEventListener("input", () => {
+    state.q = els.searchInput.value;
+    state.page = 1;
+    render();
+  });
+
+  els.categorySelect.addEventListener("change", () => {
+    state.category = els.categorySelect.value;
+    state.page = 1;
+    render();
+  });
+
+  els.sortSelect.addEventListener("change", () => {
+    state.sort = els.sortSelect.value;
+    state.page = 1;
+    render();
+  });
+
+  els.pageSizeSelect.addEventListener("change", () => {
+    state.pageSize = Number(els.pageSizeSelect.value) || 10;
+    state.page = 1;
+    render();
+  });
+
+  els.prevPageBtn.addEventListener("click", () => {
+    if (state.page > 1) {
+      state.page -= 1;
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  });
+
+  els.nextPageBtn.addEventListener("click", () => {
+    if (state.page < state.totalPages) {
+      state.page += 1;
+      render();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  });
+
+  // description 展開/收合（事件委派）
+  els.grid.addEventListener("click", (e) => {
+    const btn = e.target.closest("[data-action='toggleDesc']");
+    if (!btn) return;
+
+    const card = e.target.closest(".card");
+    if (!card) return;
+
+    const descEl = card.querySelector(".desc");
+    if (!descEl) return;
+
+    const isClamped = descEl.classList.contains("clamp");
+    if (isClamped) {
+      descEl.classList.remove("clamp");
+      btn.textContent = "收合";
+    } else {
+      descEl.classList.add("clamp");
+      btn.textContent = "查看更多";
+    }
   });
 }
 
-if (clearBtnEl) {
-  clearBtnEl.addEventListener("click", () => {
-    if (searchInputEl) searchInputEl.value = "";
-    renderProducts();
-  });
+async function init() {
+  if (!supabaseClient) return;
+
+  bindEvents();
+
+  await loadProducts();
+  await loadCategories(); // 需要 products 先載好，fallback 才有值
+
+  resetFilters();
 }
 
-// 如果有「全部商品」或分類按鈕，這裡可以擴充
-const allBtn = document.getElementById("allProductsBtn");
-if (allBtn) {
-  allBtn.addEventListener("click", () => {
-    currentCategory = "";
-    renderProducts();
-  });
-}
-
-// 初始化
-document.addEventListener("DOMContentLoaded", () => {
-  loadProducts();
-});
+document.addEventListener("DOMContentLoaded", init);
