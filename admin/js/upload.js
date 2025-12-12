@@ -1,13 +1,9 @@
 // /admin/js/upload.js
-// CSV 匯入 FINAL 版（安全、可預覽、不破壞檔案）
+// CSV 匯入 FINAL（含分類自動建立）
 
-console.log("CSV Upload FINAL 初始化");
+console.log("CSV Upload with Category Auto Create 初始化");
 
-// ------------------ 基本檢查 ------------------
 const supabaseClient = window.supabaseClient;
-if (!supabaseClient) {
-  alert("Supabase client 未初始化");
-}
 
 // DOM
 const fileInput = document.getElementById("csvFile");
@@ -15,11 +11,10 @@ const previewBtn = document.getElementById("previewBtn");
 const previewSection = document.getElementById("previewSection");
 const previewTbody = document.getElementById("previewTbody");
 const confirmBtn = document.getElementById("confirmImportBtn");
-const resetBtn = document.getElementById("resetBtn");
 
 let parsedRows = [];
 
-// ------------------ 工具 ------------------
+/* ---------- 工具 ---------- */
 const toNumber = (v) => {
   if (v === undefined || v === null || String(v).trim() === "") return null;
   const n = Number(String(v).replace(/,/g, ""));
@@ -29,8 +24,8 @@ const toNumber = (v) => {
 const makeKey = (name, spec) =>
   `${(name || "").trim()}|||${(spec || "").trim()}`;
 
-// ------------------ 讀取現有商品 ------------------
-async function fetchExistingMap() {
+/* ---------- 讀取現有商品 ---------- */
+async function fetchExistingProducts() {
   const { data, error } = await supabaseClient
     .from("products")
     .select("id, name, spec, last_price");
@@ -47,14 +42,52 @@ async function fetchExistingMap() {
   return map;
 }
 
-// ------------------ 預覽 ------------------
+/* ---------- 讀取現有分類 ---------- */
+async function fetchExistingCategories() {
+  const { data, error } = await supabaseClient
+    .from("categories")
+    .select("name");
+
+  if (error) throw error;
+
+  return new Set(data.map((c) => c.name.trim()));
+}
+
+/* ---------- 自動建立分類 ---------- */
+async function ensureCategoriesExist(rows) {
+  const existing = await fetchExistingCategories();
+  const newCategories = new Set();
+
+  rows.forEach((r) => {
+    if (r.category && !existing.has(r.category)) {
+      newCategories.add(r.category);
+    }
+  });
+
+  if (newCategories.size === 0) return;
+
+  const payload = Array.from(newCategories).map((name) => ({ name }));
+
+  const { error } = await supabaseClient
+    .from("categories")
+    .insert(payload);
+
+  if (error) {
+    console.error("建立分類失敗", error);
+    throw error;
+  }
+
+  console.log("已自動建立分類：", payload.map((p) => p.name));
+}
+
+/* ---------- 預覽 ---------- */
 async function handlePreview() {
   if (!fileInput.files.length) {
-    alert("請先選擇 CSV 檔案");
+    alert("請選擇 CSV 檔案");
     return;
   }
 
-  const existingMap = await fetchExistingMap();
+  const existingMap = await fetchExistingProducts();
   const file = fileInput.files[0];
 
   Papa.parse(file, {
@@ -68,7 +101,6 @@ async function handlePreview() {
         const spec = (r.spec || "").trim();
         const unit = (r.unit || "").trim();
 
-        // 防呆：完全空白列直接忽略
         if (!name && !spec && !unit) return;
 
         const key = makeKey(name, spec);
@@ -91,14 +123,10 @@ async function handlePreview() {
 
       renderPreview();
     },
-    error: (err) => {
-      console.error(err);
-      alert("CSV 解析失敗，請確認格式");
-    },
   });
 }
 
-// ------------------ 畫面 ------------------
+/* ---------- 畫面 ---------- */
 function renderPreview() {
   previewTbody.innerHTML = "";
 
@@ -123,9 +151,12 @@ function renderPreview() {
   confirmBtn.disabled = parsedRows.length === 0;
 }
 
-// ------------------ 匯入 ------------------
+/* ---------- 匯入 ---------- */
 async function handleConfirm() {
   if (!parsedRows.length) return;
+
+  // ⭐ 先確保分類存在
+  await ensureCategoriesExist(parsedRows);
 
   const inserts = [];
   const updates = [];
@@ -134,7 +165,7 @@ async function handleConfirm() {
     if (r.action === "insert") {
       inserts.push({
         name: r.name,
-        category: r.category || null,
+        category: r.category,
         spec: r.spec,
         unit: r.unit,
         last_price: r.last_price,
@@ -147,7 +178,7 @@ async function handleConfirm() {
     } else {
       const payload = {
         name: r.name,
-        category: r.category || null,
+        category: r.category,
         spec: r.spec,
         unit: r.unit,
         last_price: r.last_price,
@@ -176,7 +207,6 @@ async function handleConfirm() {
   location.href = "index.html";
 }
 
-// ------------------ 綁定 ------------------
+/* ---------- 綁定 ---------- */
 previewBtn.addEventListener("click", handlePreview);
 confirmBtn.addEventListener("click", handleConfirm);
-resetBtn?.addEventListener("click", () => location.reload());
