@@ -52,12 +52,15 @@
       .replaceAll("'", "&#039;");
   }
 
-  function formatPrice(value) {
-    if (value === null || value === undefined || value === "") return "—";
-    const num = Number(value);
-    if (Number.isNaN(num)) return "—";
-    return `NT$ ${num}`;
-  }
+ function formatPrice(value) {
+  if (value === null || value === undefined || value === "") return "—";
+
+  const num = Number(value);
+  if (Number.isNaN(num)) return "—";
+
+  // 千位符號（台灣/國際通用）
+  return num.toLocaleString("zh-TW");
+}
 
   function formatDateTime(value) {
     if (!value) return "";
