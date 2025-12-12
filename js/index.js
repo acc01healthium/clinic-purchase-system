@@ -1,251 +1,246 @@
 // /js/index.js
-console.log("前台商品查詢（相容強化版）初始化");
+// 前台商品查詢（分類 + 排序 + 分頁 + description）
+
+console.log("前台商品查詢初始化（完整版）");
 
 const supabaseClient = window.supabaseClient;
 
-// ===== DOM（完全沿用你原本的）=====
+// DOM
 const productListEl = document.getElementById("productList");
 const searchInputEl = document.getElementById("searchInput");
 const clearBtnEl = document.getElementById("clearBtn");
 const statusEl = document.getElementById("statusMessage");
 
-// 分頁 / 排序 / 分類（若不存在就略過，不會報錯）
 const categorySelect = document.getElementById("categorySelect");
 const sortSelect = document.getElementById("sortSelect");
 const pageSizeSelect = document.getElementById("pageSizeSelect");
-const prevPageBtn = document.getElementById("prevPageBtn");
-const nextPageBtn = document.getElementById("nextPageBtn");
-const pageIndicator = document.getElementById("pageIndicator");
 
-// ===== 狀態 =====
-let allProducts = [];
-let filteredProducts = [];
+const prevBtn = document.getElementById("prevPageBtn");
+const nextBtn = document.getElementById("nextPageBtn");
+const pageInfoEl = document.getElementById("pageInfo");
 
-let currentCategory = "";
+// 狀態
 let currentPage = 1;
 let pageSize = 10;
+let totalPages = 1;
+let currentCategory = "";
 let currentSort = "updated_desc";
+let currentKeyword = "";
 
-// ===== 工具 =====
-function formatPrice(value) {
-  if (value === null || value === undefined || value === "") return "—";
-  const num = Number(value);
-  if (Number.isNaN(num)) return "—";
-  return `NT$ ${num.toLocaleString("zh-Hant")}`;
+/* ------------------------
+   工具
+------------------------ */
+function formatPrice(v) {
+  if (v === null || v === undefined || v === "") return "—";
+  const n = Number(v);
+  if (Number.isNaN(n)) return "—";
+  return `NT$ ${n}`;
 }
 
-function formatDateTime(value) {
-  if (!value) return "";
-  const d = new Date(value);
+function formatDate(v) {
+  if (!v) return "";
+  const d = new Date(v);
   if (Number.isNaN(d.getTime())) return "";
-  return `${d.getFullYear()}/${String(d.getMonth() + 1).padStart(2, "0")}/${String(
-    d.getDate()
-  ).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(
-    d.getMinutes()
-  ).padStart(2, "0")}`;
+  return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
 }
 
-// ===== 商品卡片（在原版基礎上加 description 展開）=====
+/* ------------------------
+   商品卡片
+------------------------ */
 function createProductCard(p) {
   const card = document.createElement("article");
   card.className = "product-card";
 
-  const imgWrapper = document.createElement("div");
-  imgWrapper.className = "product-image-wrapper";
-
-  if (p.image_url) {
-    const img = document.createElement("img");
-    img.src = p.image_url;
-    img.loading = "lazy";
-    imgWrapper.appendChild(img);
-  } else {
-    const placeholder = document.createElement("div");
-    placeholder.className = "product-image-placeholder";
-    placeholder.textContent = "尚未上傳圖片";
-    imgWrapper.appendChild(placeholder);
-  }
-
-  const content = document.createElement("div");
-  content.className = "product-content";
-
-  const nameEl = document.createElement("h3");
-  nameEl.className = "product-name";
-  nameEl.textContent = p.name || "";
-
-  const specEl = document.createElement("p");
-  specEl.className = "product-spec";
-  specEl.textContent = p.spec || "";
-
-  const metaRow = document.createElement("div");
-  metaRow.className = "product-meta-row";
-
-  if (p.category) {
-    const tag = document.createElement("div");
-    tag.className = "product-category-tag";
-    tag.textContent = p.category;
-    metaRow.appendChild(tag);
-  }
-
-  if (p.unit) {
-    const unit = document.createElement("div");
-    unit.className = "product-meta-line";
-    unit.textContent = `單位：${p.unit}`;
-    metaRow.appendChild(unit);
-  }
-
-  const priceBlock = document.createElement("div");
-  priceBlock.className = "product-price-block";
-  priceBlock.innerHTML = `
-    <div class="price-line">
-      <span class="price-label">進　　價：</span>
-      <span class="price-value">${formatPrice(p.last_price)}</span>
+  card.innerHTML = `
+    <div class="product-image-wrapper">
+      ${
+        p.image_url
+          ? `<img src="${p.image_url}" loading="lazy">`
+          : `<div class="product-image-placeholder">尚無圖片</div>`
+      }
     </div>
-    <div class="price-line">
-      <span class="price-label">建議售價：</span>
-      <span class="price-value">${formatPrice(p.suggested_price)}</span>
+
+    <div class="product-content">
+      <h3 class="product-name">${p.name}</h3>
+      <p class="product-spec">${p.spec || ""}</p>
+
+      <div class="product-meta-row">
+        <span class="product-category-tag">${p.category || ""}</span>
+        <span class="product-meta-line">單位：${p.unit || ""}</span>
+      </div>
+
+      <div class="product-price-block">
+        <div class="price-line">
+          <span class="price-label">進　　價：</span>
+          <span class="price-value">${formatPrice(p.last_price)}</span>
+        </div>
+        <div class="price-line">
+          <span class="price-label">建議售價：</span>
+          <span class="price-value">${formatPrice(p.suggested_price)}</span>
+        </div>
+      </div>
+
+      ${
+        p.description
+          ? `
+          <div class="product-description">
+            <div class="desc-short">${p.description.replace(/\n/g, "<br>")}</div>
+          </div>
+        `
+          : ""
+      }
     </div>
   `;
-
-  content.appendChild(nameEl);
-  content.appendChild(specEl);
-  content.appendChild(metaRow);
-  content.appendChild(priceBlock);
-
-  // ✅ description（自動斷行 + 展開）
-  if (p.description) {
-    const desc = document.createElement("div");
-    desc.className = "product-description clamp";
-    desc.textContent = p.description;
-
-    const toggle = document.createElement("button");
-    toggle.className = "desc-toggle";
-    toggle.textContent = "查看更多";
-    toggle.type = "button";
-
-    toggle.addEventListener("click", () => {
-      const expanded = desc.classList.toggle("clamp");
-      toggle.textContent = expanded ? "查看更多" : "收合";
-    });
-
-    content.appendChild(desc);
-    content.appendChild(toggle);
-  }
-
-  if (p.last_price_updated_at) {
-    const timeEl = document.createElement("p");
-    timeEl.className = "product-updated-at";
-    timeEl.textContent = `價格更新時間：${formatDateTime(
-      p.last_price_updated_at
-    )}`;
-    content.appendChild(timeEl);
-  }
-
-  card.appendChild(imgWrapper);
-  card.appendChild(content);
 
   return card;
 }
 
-// ===== 核心渲染 =====
-function renderProducts() {
-  if (!productListEl) return;
+/* ------------------------
+   讀取分類
+------------------------ */
+async function loadCategories() {
+  const { data } = await supabaseClient
+    .from("categories")
+    .select("name")
+    .order("name");
 
-  const keyword = (searchInputEl?.value || "").trim().toLowerCase();
+  if (!categorySelect) return;
 
-  filteredProducts = allProducts
-    .filter((p) => p.is_active)
-    .filter((p) => {
-      if (currentCategory && p.category !== currentCategory) return false;
-      if (!keyword) return true;
-      return `${p.name} ${p.category} ${p.spec}`.toLowerCase().includes(keyword);
-    });
-
-  // 排序
-  filteredProducts.sort((a, b) => {
-    if (currentSort === "updated_desc") {
-      return new Date(b.last_price_updated_at || 0) - new Date(a.last_price_updated_at || 0);
-    }
-    return 0;
+  categorySelect.innerHTML = `<option value="">全部分類</option>`;
+  (data || []).forEach((c) => {
+    const opt = document.createElement("option");
+    opt.value = c.name;
+    opt.textContent = c.name;
+    categorySelect.appendChild(opt);
   });
-
-  const total = filteredProducts.length;
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  if (currentPage > totalPages) currentPage = totalPages;
-
-  const start = (currentPage - 1) * pageSize;
-  const pageItems = filteredProducts.slice(start, start + pageSize);
-
-  productListEl.innerHTML = "";
-
-  if (!pageItems.length) {
-    if (statusEl) statusEl.textContent = "目前沒有符合條件的商品";
-    return;
-  }
-
-  if (statusEl) statusEl.textContent = "";
-
-  pageItems.forEach((p) => {
-    productListEl.appendChild(createProductCard(p));
-  });
-
-  if (pageIndicator) {
-    pageIndicator.textContent = `第 ${currentPage} / ${totalPages} 頁`;
-  }
 }
 
-// ===== 載入商品 =====
+/* ------------------------
+   主查詢
+------------------------ */
 async function loadProducts() {
   if (!supabaseClient) return;
 
-  const { data, error } = await supabaseClient
+  statusEl.textContent = "載入中…";
+  productListEl.innerHTML = "";
+
+  const from = (currentPage - 1) * pageSize;
+  const to = from + pageSize - 1;
+
+  let query = supabaseClient
     .from("products")
-    .select(`
+    .select(
+      `
       id,
       name,
       category,
       spec,
       unit,
+      description,
       last_price,
       suggested_price,
-      description,
       last_price_updated_at,
-      image_url,
-      is_active
-    `);
+      image_url
+    `,
+      { count: "exact" }
+    )
+    .eq("is_active", true);
+
+  if (currentCategory) {
+    query = query.eq("category", currentCategory);
+  }
+
+  if (currentKeyword) {
+    query = query.or(
+      `name.ilike.%${currentKeyword}%,spec.ilike.%${currentKeyword}%,category.ilike.%${currentKeyword}%`
+    );
+  }
+
+  // 排序
+  if (currentSort === "updated_desc") {
+    query = query.order("last_price_updated_at", { ascending: false });
+  } else if (currentSort === "price_asc") {
+    query = query.order("last_price", { ascending: true });
+  } else if (currentSort === "price_desc") {
+    query = query.order("last_price", { ascending: false });
+  } else {
+    query = query.order("name", { ascending: true });
+  }
+
+  query = query.range(from, to);
+
+  const { data, error, count } = await query;
 
   if (error) {
-    console.error("載入商品失敗：", error);
-    if (statusEl) statusEl.textContent = "讀取資料失敗";
+    console.error(error);
+    statusEl.textContent = "讀取資料失敗";
     return;
   }
 
-  allProducts = data || [];
-  renderProducts();
+  totalPages = Math.max(1, Math.ceil((count || 0) / pageSize));
+  pageInfoEl.textContent = `第 ${currentPage} / ${totalPages} 頁`;
+
+  if (!data || !data.length) {
+    statusEl.textContent = "找不到符合條件的商品";
+    return;
+  }
+
+  statusEl.textContent = "";
+  data.forEach((p) => productListEl.appendChild(createProductCard(p)));
 }
 
-// ===== 事件 =====
+/* ------------------------
+   事件
+------------------------ */
 searchInputEl?.addEventListener("input", () => {
+  currentKeyword = searchInputEl.value.trim();
   currentPage = 1;
-  renderProducts();
+  loadProducts();
 });
 
 clearBtnEl?.addEventListener("click", () => {
-  if (searchInputEl) searchInputEl.value = "";
+  searchInputEl.value = "";
+  currentKeyword = "";
   currentPage = 1;
-  renderProducts();
+  loadProducts();
 });
 
-prevPageBtn?.addEventListener("click", () => {
+categorySelect?.addEventListener("change", () => {
+  currentCategory = categorySelect.value;
+  currentPage = 1;
+  loadProducts();
+});
+
+sortSelect?.addEventListener("change", () => {
+  currentSort = sortSelect.value;
+  currentPage = 1;
+  loadProducts();
+});
+
+pageSizeSelect?.addEventListener("change", () => {
+  pageSize = Number(pageSizeSelect.value);
+  currentPage = 1;
+  loadProducts();
+});
+
+prevBtn?.addEventListener("click", () => {
   if (currentPage > 1) {
     currentPage--;
-    renderProducts();
+    loadProducts();
   }
 });
 
-nextPageBtn?.addEventListener("click", () => {
-  currentPage++;
-  renderProducts();
+nextBtn?.addEventListener("click", () => {
+  if (currentPage < totalPages) {
+    currentPage++;
+    loadProducts();
+  }
 });
 
-// ===== 初始化 =====
-document.addEventListener("DOMContentLoaded", loadProducts);
+/* ------------------------
+   初始化
+------------------------ */
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadCategories();
+  await loadProducts();
+});
