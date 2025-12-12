@@ -1,350 +1,250 @@
 /* =========================
-   前台漂亮版（統一視覺｜最終穩定）
+   基本變數
 ========================= */
-
 :root{
-  --bg: #eef5ff;
-  --card: #ffffff;
-  --text: #1f2937;
-  --muted: #6b7280;
-  --border: rgba(2, 132, 199, 0.22);
+  --bg:#eef5ff;
+  --card:#fff;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --border:rgba(2,132,199,.22);
 
-  --primary: #00aee0;
-  --primary-2: #14c2c5;
-  --primary-dark: #008bb7;
+  --primary:#00aee0;
+  --primary-2:#14c2c5;
+  --primary-dark:#008bb7;
 
-  --shadow: 0 10px 28px rgba(0,0,0,0.08);
-  --shadow-soft: 0 2px 10px rgba(0,0,0,0.06);
+  --shadow:0 10px 28px rgba(0,0,0,.08);
+  --shadow-soft:0 2px 10px rgba(0,0,0,.06);
 
-  --radius: 18px;
-  --radius-sm: 12px;
+  --radius:18px;
+  --radius-sm:12px;
 }
 
-*{ box-sizing: border-box; }
-
+*{box-sizing:border-box}
 body{
   margin:0;
-  font-family: "Noto Sans TC", system-ui, -apple-system, Segoe UI, Arial, sans-serif;
-  background: var(--bg);
-  color: var(--text);
-}
-
-.sr-only{
-  position:absolute;
-  width:1px;height:1px;
-  overflow:hidden;
-  clip:rect(0,0,0,0);
+  font-family:"Noto Sans TC",system-ui,-apple-system,Segoe UI,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
 }
 
 /* =========================
    Header
 ========================= */
-
 .site-header{
-  background: linear-gradient(90deg, var(--primary), var(--primary-2));
+  background:linear-gradient(90deg,var(--primary),var(--primary-2));
   color:#fff;
-  padding: 22px 26px;
-  box-shadow: 0 2px 10px rgba(0,0,0,.12);
+  padding:22px 26px;
+  box-shadow:0 2px 10px rgba(0,0,0,.12);
 }
-
 .site-header-inner{
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width:1200px;
+  margin:0 auto;
   display:flex;
-  align-items:center;
   justify-content:space-between;
-  gap: 16px;
+  align-items:center;
 }
-
-.site-title{
-  margin:0;
-  font-size: 28px;
-  font-weight: 800;
-}
-
-.site-subtitle{
-  margin-top:6px;
-  font-size: 14px;
-  opacity:.9;
-}
+.site-title{margin:0;font-size:28px;font-weight:800}
+.site-subtitle{margin:6px 0 0;font-size:14px;opacity:.9}
 
 /* =========================
    Layout
 ========================= */
-
 .container{
-  max-width: 1200px;
-  margin: 22px auto 56px;
-  padding: 0 18px;
+  max-width:1200px;
+  margin:22px auto 56px;
+  padding:0 18px;
 }
 
 /* =========================
-   Panel / Search
+   Panel
 ========================= */
-
 .panel{
-  background: var(--card);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 18px;
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:18px;
 }
-
-.panel-row{
-  display:flex;
-  flex-direction:column;
-  gap: 12px;
-}
-
 .search-box{
   display:flex;
-  gap: 10px;
+  gap:10px;
 }
-
 #searchInput{
   flex:1;
-  padding: 12px 14px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  font-size: 15px;
+  padding:12px 14px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  font-size:15px;
 }
-
 .filters{
   display:flex;
-  gap: 12px;
-  flex-wrap: wrap;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-top:12px;
 }
 
-.filter-item{
-  display:flex;
-  flex-direction:column;
-  gap: 6px;
+/* =========================
+   Buttons / Select
+========================= */
+.btn{
+  border:none;
+  border-radius:999px;
+  padding:10px 18px;
+  font-weight:700;
+  cursor:pointer;
+}
+.btn-secondary{
+  background:#fff;
+  color:var(--primary);
+  border:2px solid rgba(0,174,224,.6);
+}
+.btn-secondary:hover{background:rgba(0,174,224,.08)}
+
+.pill{
+  border-radius:999px;
+  padding:10px 16px;
+  font-weight:800;
+  border:0;
+}
+.pill-primary{
+  background:#fff;
+  color:#008bb7;
 }
 
 .select{
-  padding: 10px 36px 10px 14px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  background:#fff;
-  font-size: 14px;
+  padding:10px 14px;
+  border-radius:999px;
+  border:1px solid var(--border);
 }
 
 /* =========================
-   Buttons
+   Toolbar（修正頁碼位置）
 ========================= */
-
-.btn{
-  border-radius: 999px;
-  padding: 10px 18px;
-  font-weight: 700;
-  border:none;
-  cursor:pointer;
-}
-
-.btn-secondary{
-  background:#fff;
-  color: var(--primary);
-  border: 2px solid rgba(0,174,224,.65);
-}
-
-/* =========================
-   Toolbar / Pager
-========================= */
-
 .toolbar{
-  margin-top: 14px;
+  margin-top:16px;
   display:flex;
   justify-content:space-between;
   align-items:center;
-  gap: 12px;
 }
-
-.meta{
-  color: var(--muted);
+.pager{
+  display:flex;
+  align-items:center;
+  gap:10px;
 }
-
 .page-indicator{
+  padding:10px 14px;
+  border-radius:999px;
   background:#fff;
-  padding: 10px 14px;
-  border-radius: 999px;
-  font-weight: 700;
+  box-shadow:var(--shadow-soft);
+  font-weight:700;
 }
 
 /* =========================
    Grid
 ========================= */
-
 .grid{
-  margin-top: 14px;
+  margin-top:18px;
   display:grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
 }
-
-@media (max-width: 980px){
-  .grid{ grid-template-columns: repeat(2, 1fr); }
+@media(max-width:980px){
+  .grid{grid-template-columns:repeat(2,1fr)}
 }
-
-@media (max-width: 640px){
-  .grid{ grid-template-columns: 1fr; }
+@media(max-width:640px){
+  .grid{grid-template-columns:1fr}
 }
 
 /* =========================
-   Card（穩定版）
+   Card
 ========================= */
-
-.card{
-  background: var(--card);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-soft);
-  overflow:hidden;
+.product-card{
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow-soft);
   display:flex;
   flex-direction:column;
+  overflow:hidden;
 }
 
-/* 圖片：不爆版、置中 */
-.card-img{
-  height: 200px;
-  background: rgba(0,174,224,.08);
+/* 圖片區（不超版） */
+.product-image-wrapper{
+  height:200px;
+  background:rgba(0,174,224,.08);
   display:flex;
   align-items:center;
   justify-content:center;
 }
-
-.card-img img{
+.product-image-wrapper img{
   max-width:100%;
   max-height:100%;
-  object-fit: contain;
+  object-fit:contain;
 }
 
-.card-body{
-  padding: 14px;
+/* 內容 */
+.product-content{
+  padding:14px;
   display:flex;
   flex-direction:column;
-  gap: 10px;
+  gap:10px;
 }
-
-.card-title{
-  font-size: 18px;
-  font-weight: 900;
+.product-name{
+  margin:0;
+  font-size:18px;
+  font-weight:900;
+}
+.product-meta-row{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.product-category-tag{
+  padding:6px 10px;
+  border-radius:999px;
+  background:rgba(0,174,224,.1);
+  font-size:12px;
+  font-weight:800;
 }
 
 /* =========================
-   ✅ Description（唯一版本）
-   - 顯示兩行
-   - 不露第三行
+   Description（唯一版本）
 ========================= */
-
 .desc{
-  background: rgba(2,132,199,0.05);
-  border: 1px solid rgba(2,132,199,0.12);
-  border-radius: var(--radius-sm);
-  padding: 10px;
-  font-size: 13px;
-  line-height: 1.5;
-  white-space: pre-wrap;
+  background:rgba(2,132,199,.05);
+  border:1px solid rgba(2,132,199,.12);
+  border-radius:var(--radius-sm);
+  padding:10px;
+  font-size:13px;
+  line-height:1.5;
+  white-space:pre-wrap;
 }
 
-/* 收合 */
+/* ✅ 嚴格兩行，不露第三行 */
 .desc.clamp{
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  max-height: calc(1.5em * 2 + 20px);
-  overflow: hidden;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  overflow:hidden;
+  max-height:3em; /* 1.5 * 2 */
 }
 
 .desc-actions{
-  text-align:right;
+  display:flex;
+  justify-content:flex-end;
+  margin-top:6px;
 }
-
 .link-btn{
-  background:none;
   border:none;
-  color: var(--primary-dark);
-  font-weight: 800;
+  background:none;
+  color:#008bb7;
+  font-weight:800;
   cursor:pointer;
 }
 
 /* =========================
-   Footer / Meta
+   Footer
 ========================= */
-
-.card-footer{
+.product-updated-at{
   margin-top:auto;
-  padding: 12px 14px;
-  font-size: 12px;
-  color: var(--muted);
+  font-size:12px;
+  color:#8a94a6;
 }
-
-/* =========================
-   Empty state
-========================= */
-
-.empty{
-  margin-top: 16px;
-  background:#fff;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 22px;
-  text-align:center;
-}
-
-/* =========================
-   🔥 按鈕樣式救援補丁（重要）
-   不改 HTML / JS，直接救外觀
-========================= */
-
-/* 全部商品 */
-#allBtn {
-  border-radius: 999px;
-  padding: 10px 16px;
-  font-weight: 800;
-  border: none;
-  cursor: pointer;
-  background: rgba(255,255,255,0.95);
-  color: #008bb7;
-  box-shadow: 0 2px 8px rgba(0,0,0,.08);
-}
-
-#allBtn:hover {
-  background: #ffffff;
-}
-
-/* 清除 */
-#clearBtn {
-  border-radius: 999px;
-  padding: 10px 18px;
-  font-weight: 700;
-  cursor: pointer;
-  background: #fff;
-  color: var(--primary);
-  border: 2px solid rgba(0,174,224,.65);
-}
-
-#clearBtn:hover {
-  background: rgba(0,174,224,.08);
-}
-
-/* 上一頁 / 下一頁 */
-#prevPageBtn,
-#nextPageBtn {
-  border-radius: 999px;
-  padding: 10px 18px;
-  font-weight: 700;
-  cursor: pointer;
-  background: #fff;
-  color: var(--primary);
-  border: 2px solid rgba(0,174,224,.65);
-}
-
-#prevPageBtn:hover,
-#nextPageBtn:hover {
-  background: rgba(0,174,224,.08);
-}
-
-#prevPageBtn:disabled,
-#nextPageBtn:disabled {
-  opacity: .45;
-  cursor: not-allowed;
-}
-
