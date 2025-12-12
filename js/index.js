@@ -1,25 +1,39 @@
 // /js/index.js
-// 前台商品查詢（分類 + 排序 + 分頁 + description）
-
-console.log("前台商品查詢初始化（完整版）");
+console.log("前台商品查詢初始化（最終穩定版）");
 
 const supabaseClient = window.supabaseClient;
 
-// DOM
-const productListEl = document.getElementById("productList");
-const searchInputEl = document.getElementById("searchInput");
-const clearBtnEl = document.getElementById("clearBtn");
-const statusEl = document.getElementById("statusMessage");
+/* ===============================
+   DOM（容錯：新舊版 id 都吃）
+================================ */
+function getEl(...ids) {
+  for (const id of ids) {
+    const el = document.getElementById(id);
+    if (el) return el;
+  }
+  return null;
+}
 
-const categorySelect = document.getElementById("categorySelect");
-const sortSelect = document.getElementById("sortSelect");
-const pageSizeSelect = document.getElementById("pageSizeSelect");
+const productListEl = getEl("productGrid", "productList");
+const searchInputEl = getEl("searchInput");
+const clearBtnEl = getEl("clearBtn");
+const statusEl = getEl("statusMessage");
 
-const prevBtn = document.getElementById("prevPageBtn");
-const nextBtn = document.getElementById("nextPageBtn");
-const pageInfoEl = document.getElementById("pageInfo");
+const categorySelect = getEl("categorySelect");
+const sortSelect = getEl("sortSelect");
+const pageSizeSelect = getEl("pageSizeSelect");
 
-// 狀態
+const prevBtn = getEl("prevPageBtn");
+const nextBtn = getEl("nextPageBtn");
+const pageInfoEl = getEl("pageInfo");
+
+if (!productListEl) {
+  console.error("❌ 找不到商品容器（productGrid / productList）");
+}
+
+/* ===============================
+   狀態
+================================ */
 let currentPage = 1;
 let pageSize = 10;
 let totalPages = 1;
@@ -27,26 +41,18 @@ let currentCategory = "";
 let currentSort = "updated_desc";
 let currentKeyword = "";
 
-/* ------------------------
+/* ===============================
    工具
------------------------- */
+================================ */
 function formatPrice(v) {
   if (v === null || v === undefined || v === "") return "—";
   const n = Number(v);
-  if (Number.isNaN(n)) return "—";
-  return `NT$ ${n}`;
+  return Number.isNaN(n) ? "—" : `NT$ ${n}`;
 }
 
-function formatDate(v) {
-  if (!v) return "";
-  const d = new Date(v);
-  if (Number.isNaN(d.getTime())) return "";
-  return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
-}
-
-/* ------------------------
+/* ===============================
    商品卡片
------------------------- */
+================================ */
 function createProductCard(p) {
   const card = document.createElement("article");
   card.className = "product-card";
@@ -56,7 +62,7 @@ function createProductCard(p) {
       ${
         p.image_url
           ? `<img src="${p.image_url}" loading="lazy">`
-          : `<div class="product-image-placeholder">尚無圖片</div>`
+          : `<div class="product-image-placeholder">尚未上傳圖片</div>`
       }
     </div>
 
@@ -65,8 +71,8 @@ function createProductCard(p) {
       <p class="product-spec">${p.spec || ""}</p>
 
       <div class="product-meta-row">
-        <span class="product-category-tag">${p.category || ""}</span>
-        <span class="product-meta-line">單位：${p.unit || ""}</span>
+        ${p.category ? `<span class="product-category-tag">${p.category}</span>` : ""}
+        ${p.unit ? `<span class="product-meta-line">單位：${p.unit}</span>` : ""}
       </div>
 
       <div class="product-price-block">
@@ -82,11 +88,7 @@ function createProductCard(p) {
 
       ${
         p.description
-          ? `
-          <div class="product-description">
-            <div class="desc-short">${p.description.replace(/\n/g, "<br>")}</div>
-          </div>
-        `
+          ? `<div class="product-description">${p.description.replace(/\n/g, "<br>")}</div>`
           : ""
       }
     </div>
@@ -95,9 +97,9 @@ function createProductCard(p) {
   return card;
 }
 
-/* ------------------------
-   讀取分類
------------------------- */
+/* ===============================
+   載入分類
+================================ */
 async function loadCategories() {
   const { data } = await supabaseClient
     .from("categories")
@@ -115,19 +117,19 @@ async function loadCategories() {
   });
 }
 
-/* ------------------------
-   主查詢
------------------------- */
+/* ===============================
+   載入商品（真正關鍵）
+================================ */
 async function loadProducts() {
-  if (!supabaseClient) return;
+  if (!productListEl) return;
 
-  statusEl.textContent = "載入中…";
   productListEl.innerHTML = "";
+  statusEl.textContent = "載入中…";
 
   const from = (currentPage - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  let query = supabaseClient
+  let q = supabaseClient
     .from("products")
     .select(
       `
@@ -139,48 +141,42 @@ async function loadProducts() {
       description,
       last_price,
       suggested_price,
-      last_price_updated_at,
       image_url
     `,
       { count: "exact" }
     )
     .eq("is_active", true);
 
-  if (currentCategory) {
-    query = query.eq("category", currentCategory);
-  }
+  if (currentCategory) q = q.eq("category", currentCategory);
 
   if (currentKeyword) {
-    query = query.or(
+    q = q.or(
       `name.ilike.%${currentKeyword}%,spec.ilike.%${currentKeyword}%,category.ilike.%${currentKeyword}%`
     );
   }
 
-  // 排序
   if (currentSort === "updated_desc") {
-    query = query.order("last_price_updated_at", { ascending: false });
+    q = q.order("updated_at", { ascending: false });
   } else if (currentSort === "price_asc") {
-    query = query.order("last_price", { ascending: true });
+    q = q.order("last_price", { ascending: true });
   } else if (currentSort === "price_desc") {
-    query = query.order("last_price", { ascending: false });
-  } else {
-    query = query.order("name", { ascending: true });
+    q = q.order("last_price", { ascending: false });
   }
 
-  query = query.range(from, to);
+  q = q.range(from, to);
 
-  const { data, error, count } = await query;
+  const { data, error, count } = await q;
 
   if (error) {
     console.error(error);
-    statusEl.textContent = "讀取資料失敗";
+    statusEl.textContent = "資料讀取失敗";
     return;
   }
 
   totalPages = Math.max(1, Math.ceil((count || 0) / pageSize));
   pageInfoEl.textContent = `第 ${currentPage} / ${totalPages} 頁`;
 
-  if (!data || !data.length) {
+  if (!data || data.length === 0) {
     statusEl.textContent = "找不到符合條件的商品";
     return;
   }
@@ -189,9 +185,9 @@ async function loadProducts() {
   data.forEach((p) => productListEl.appendChild(createProductCard(p)));
 }
 
-/* ------------------------
+/* ===============================
    事件
------------------------- */
+================================ */
 searchInputEl?.addEventListener("input", () => {
   currentKeyword = searchInputEl.value.trim();
   currentPage = 1;
@@ -237,9 +233,9 @@ nextBtn?.addEventListener("click", () => {
   }
 });
 
-/* ------------------------
+/* ===============================
    初始化
------------------------- */
+================================ */
 document.addEventListener("DOMContentLoaded", async () => {
   await loadCategories();
   await loadProducts();
