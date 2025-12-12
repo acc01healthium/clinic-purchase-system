@@ -1,210 +1,176 @@
 /* =========================
-   前台漂亮版（統一視覺｜最終穩定）
+   康醫採購查詢系統｜前台最終穩定版
 ========================= */
 
 :root{
-  --bg: #eef5ff;
-  --card: #ffffff;
-  --text: #1f2937;
-  --muted: #6b7280;
-  --border: rgba(2, 132, 199, 0.22);
+  --bg:#eef5ff;
+  --card:#fff;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --border:rgba(2,132,199,.22);
 
-  --primary: #00aee0;
-  --primary-2: #14c2c5;
-  --primary-dark: #008bb7;
+  --primary:#00aee0;
+  --primary-2:#14c2c5;
+  --primary-dark:#008bb7;
 
-  --shadow: 0 10px 28px rgba(0,0,0,0.08);
-  --shadow-soft: 0 2px 10px rgba(0,0,0,0.06);
+  --shadow:0 10px 28px rgba(0,0,0,.08);
+  --shadow-soft:0 2px 10px rgba(0,0,0,.06);
 
-  --radius: 18px;
-  --radius-sm: 12px;
+  --radius:18px;
+  --radius-sm:12px;
 }
 
-*{ box-sizing: border-box; }
+*{ box-sizing:border-box; }
 
 body{
   margin:0;
-  font-family: "Noto Sans TC", system-ui, -apple-system, Segoe UI, Arial, sans-serif;
-  background: var(--bg);
-  color: var(--text);
+  font-family:"Noto Sans TC",system-ui,-apple-system,Segoe UI,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
 }
 
-.sr-only{
-  position:absolute;
-  width:1px;height:1px;
-  overflow:hidden;
-  clip:rect(0,0,0,0);
-}
-
-/* =========================
-   Header
-========================= */
+/* ================= Header ================= */
 
 .site-header{
-  background: linear-gradient(90deg, var(--primary), var(--primary-2));
+  background:linear-gradient(90deg,var(--primary),var(--primary-2));
   color:#fff;
-  padding: 22px 26px;
-  box-shadow: 0 2px 10px rgba(0,0,0,.12);
+  padding:22px 26px;
+  box-shadow:0 2px 10px rgba(0,0,0,.12);
 }
 
 .site-header-inner{
-  max-width: 1200px;
-  margin: 0 auto;
+  max-width:1200px;
+  margin:0 auto;
   display:flex;
-  align-items:center;
   justify-content:space-between;
-  gap: 16px;
+  align-items:center;
 }
 
 .site-title{
   margin:0;
-  font-size: 28px;
-  font-weight: 800;
+  font-size:28px;
+  font-weight:800;
 }
 
 .site-subtitle{
   margin-top:6px;
-  font-size: 14px;
+  font-size:14px;
   opacity:.9;
 }
 
-/* =========================
-   Layout
-========================= */
+/* ================= Layout ================= */
 
 .container{
-  max-width: 1200px;
-  margin: 22px auto 56px;
-  padding: 0 18px;
+  max-width:1200px;
+  margin:22px auto 56px;
+  padding:0 18px;
 }
 
-/* =========================
-   Panel / Search
-========================= */
+/* ================= Panel ================= */
 
 .panel{
-  background: var(--card);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 18px;
-}
-
-.panel-row{
-  display:flex;
-  flex-direction:column;
-  gap: 12px;
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:18px;
 }
 
 .search-box{
   display:flex;
-  gap: 10px;
+  gap:10px;
 }
 
 #searchInput{
   flex:1;
-  padding: 12px 14px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-  font-size: 15px;
+  padding:12px 14px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  font-size:15px;
 }
 
 .filters{
+  margin-top:12px;
   display:flex;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.filter-item{
-  display:flex;
-  flex-direction:column;
-  gap: 6px;
+  gap:12px;
+  flex-wrap:wrap;
 }
 
 .select{
-  padding: 10px 36px 10px 14px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
+  padding:10px 36px 10px 14px;
+  border-radius:999px;
+  border:1px solid var(--border);
   background:#fff;
-  font-size: 14px;
 }
 
-/* =========================
-   Buttons
-========================= */
-
-.btn{
-  border-radius: 999px;
-  padding: 10px 18px;
-  font-weight: 700;
-  border:none;
-  cursor:pointer;
-}
-
-.btn-secondary{
-  background:#fff;
-  color: var(--primary);
-  border: 2px solid rgba(0,174,224,.65);
-}
-
-/* =========================
-   Toolbar / Pager
-========================= */
+/* ================= Toolbar / Pager ================= */
 
 .toolbar{
-  margin-top: 14px;
+  margin:16px 0 6px;
   display:flex;
-  justify-content:space-between;
   align-items:center;
-  gap: 12px;
+  justify-content:space-between;
 }
 
 .meta{
-  color: var(--muted);
+  font-size:14px;
+  color:var(--muted);
+}
+
+.pager{
+  display:flex;
+  align-items:center;
+  gap:10px;
 }
 
 .page-indicator{
   background:#fff;
-  padding: 10px 14px;
-  border-radius: 999px;
-  font-weight: 700;
+  padding:10px 14px;
+  border-radius:999px;
+  font-weight:700;
+  box-shadow:var(--shadow-soft);
 }
 
-/* =========================
-   Grid
-========================= */
+/* 手機版：pager 不跑掉 */
+@media (max-width:640px){
+  .toolbar{
+    flex-direction:column;
+    align-items:center;
+    gap:10px;
+  }
+}
+
+/* ================= Grid ================= */
 
 .grid{
-  margin-top: 14px;
+  margin-top:14px;
   display:grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
 }
 
-@media (max-width: 980px){
-  .grid{ grid-template-columns: repeat(2, 1fr); }
+@media (max-width:980px){
+  .grid{ grid-template-columns:repeat(2,1fr); }
 }
 
-@media (max-width: 640px){
-  .grid{ grid-template-columns: 1fr; }
+@media (max-width:640px){
+  .grid{ grid-template-columns:1fr; }
 }
 
-/* =========================
-   Card（穩定版）
-========================= */
+/* ================= Card ================= */
 
 .card{
-  background: var(--card);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow-soft);
+  background:var(--card);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow-soft);
   overflow:hidden;
   display:flex;
   flex-direction:column;
 }
 
-/* 圖片：不爆版、置中 */
+/* 圖片：不裁切、不爆 */
 .card-img{
-  height: 200px;
-  background: rgba(0,174,224,.08);
+  height:200px;
+  background:rgba(0,174,224,.08);
   display:flex;
   align-items:center;
   justify-content:center;
@@ -213,46 +179,45 @@ body{
 .card-img img{
   max-width:100%;
   max-height:100%;
-  object-fit: contain;
+  object-fit:contain;
 }
 
 .card-body{
-  padding: 14px;
+  padding:14px;
   display:flex;
   flex-direction:column;
-  gap: 10px;
+  gap:10px;
 }
 
 .card-title{
-  font-size: 18px;
-  font-weight: 900;
+  font-size:18px;
+  font-weight:900;
 }
 
-/* =========================
-   ✅ Description（唯一版本）
-   - 顯示兩行
-   - 不露第三行
-========================= */
+/* ================= Description（唯一版本） ================= */
 
+/* 基本樣式 */
 .desc{
-  background: rgba(2,132,199,0.05);
-  border: 1px solid rgba(2,132,199,0.12);
-  border-radius: var(--radius-sm);
-  padding: 10px;
-  font-size: 13px;
-  line-height: 1.5;
-  white-space: pre-wrap;
+  background:rgba(2,132,199,.05);
+  border:1px solid rgba(2,132,199,.12);
+  border-radius:var(--radius-sm);
+  padding:10px;
+  font-size:13px;
+  line-height:1.5;
+  white-space:pre-wrap;
 }
 
-/* 收合 */
+/* 收合：只顯示 2 行，完全不露第 3 行 */
 .desc.clamp{
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  max-height: calc(1.5em * 2 + 20px);
-  overflow: hidden;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+
+  max-height:3em;   /* 1.5em × 2 行 */
+  overflow:hidden;
 }
 
+/* 查看更多 */
 .desc-actions{
   text-align:right;
 }
@@ -260,31 +225,27 @@ body{
 .link-btn{
   background:none;
   border:none;
-  color: var(--primary-dark);
-  font-weight: 800;
+  color:var(--primary-dark);
+  font-weight:800;
   cursor:pointer;
 }
 
-/* =========================
-   Footer / Meta
-========================= */
+/* ================= Footer ================= */
 
 .card-footer{
   margin-top:auto;
-  padding: 12px 14px;
-  font-size: 12px;
-  color: var(--muted);
+  padding:12px 14px;
+  font-size:12px;
+  color:var(--muted);
 }
 
-/* =========================
-   Empty state
-========================= */
+/* ================= Empty ================= */
 
 .empty{
-  margin-top: 16px;
+  margin-top:16px;
   background:#fff;
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
-  padding: 22px;
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:22px;
   text-align:center;
 }
