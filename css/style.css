@@ -231,17 +231,13 @@ body{
 
 .price-line{
   display:grid;
-  grid-template-columns: 88px 40px 1fr; /* 標籤 | NT$ | 金額 */
-  align-items:baseline;
+  grid-template-columns: 88px 1fr;
 }
 
-.price-line::after{
-  content:"NT$";
-  grid-column:2;
-  grid-row:1;
+.price-value::before{
+  content:"NT$ ";
   color:var(--muted);
   font-weight:700;
-  text-align:right;
 }
 
 .price-label{
