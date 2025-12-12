@@ -261,7 +261,10 @@ body{
   .site-header-inner{ flex-direction: column; align-items:flex-start; }
 }
 
-/* Card */
+/* =========================
+   Card（修正：圖片置中不超版面 + mobile 高度微調 + description 展開收合）
+========================= */
+
 .card{
   background: var(--card);
   border-radius: var(--radius);
@@ -271,30 +274,43 @@ body{
   flex-direction:column;
   min-height: 420px;
 }
+
+@media (max-width: 640px){
+  .card{ min-height: 380px; }
+}
+
+/* ✅ 圖片區：置中、等比例、不超框 */
 .card-img{
   background: rgba(0,174,224,.10);
   height: 210px;
   display:flex;
   align-items:center;
   justify-content:center;
+  overflow:hidden;              /* ✅ 防止超出 */
+  padding: 10px;                /* ✅ 給 contain 一點留白 */
 }
+
 .card-img img{
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;          /* ✅ 由 cover 改 contain：不裁切、不爆版 */
+  object-position: center;
 }
+
 .card-body{
   padding: 14px 14px 12px;
   display:flex;
   flex-direction:column;
   gap: 10px;
 }
+
 .card-title{
   font-size: 18px;
   font-weight: 900;
   margin:0;
   line-height: 1.25;
 }
+
 .card-sub{
   display:flex;
   justify-content:space-between;
@@ -303,6 +319,86 @@ body{
   color: var(--muted);
   font-size: 13px;
 }
+
+.tag{
+  display:inline-flex;
+  align-items:center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #067aa0;
+  background: rgba(0,174,224,.10);
+  border: 1px solid rgba(0,174,224,.18);
+  padding: 6px 10px;
+  border-radius: 999px;
+}
+
+.price{
+  margin-top: 2px;
+  display:flex;
+  flex-direction:column;
+  gap: 4px;
+  font-size: 14px;
+}
+.price-line{
+  display:flex;
+  gap: 8px;
+  align-items:baseline;
+}
+.price-label{
+  color: #6b7280;
+  min-width: 76px;
+}
+.price-value{
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.card-footer{
+  margin-top: auto;
+  padding: 12px 14px 14px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap: 10px;
+  color: #8a94a6;
+  font-size: 12px;
+}
+
+/* ✅ Description：支援 \n、預設 2 行、可「查看更多/收合」 */
+.desc{
+  background: rgba(2,132,199,0.05);
+  border: 1px solid rgba(2,132,199,0.12);
+  border-radius: var(--radius-sm);
+  padding: 10px 10px;
+  color: #334155;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+.desc.clamp{
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.desc-actions{
+  display:flex;
+  justify-content:flex-end;
+  margin-top: 6px;
+}
+
+.link-btn{
+  border:none;
+  background: transparent;
+  color: #008bb7;
+  font-weight: 900;
+  cursor:pointer;
+  padding: 0;
+}
+.link-btn:hover{ text-decoration: underline; }
+
 .tag{
   display:inline-flex;
   align-items:center;
