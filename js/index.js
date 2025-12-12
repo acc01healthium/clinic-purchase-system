@@ -231,6 +231,47 @@ async function loadCategories() {
 }
 
 // ====== Load Products (伺服器分頁 + 排序 + 搜尋 + 分類) ======
+async function loadAll() {
+  statusMessage.textContent = "載入中…";
+// ====== State ======
+let currentPage = 1;
+let totalPages = 1;
+
+// 你原本有 pageSize 變數的話就沿用，沒有就用下行
+let pageSize = Number(pageSizeSelect.value) || 10;
+
+  const [{ data: catData, error: catErr }, { data: prodData, error: prodErr }] =
+    await Promise.all([
+      supabaseClient.from("categories").select("name").order("name"),
+      supabaseClient.from("products").select("*").eq("is_active", true),
+    ]);
+// ====== Load Categories (只做分類下拉) ======
+async function loadCategories() {
+  const { data: catData, error: catErr } = await supabaseClient
+    .from("categories")
+    .select("name")
+    .order("name", { ascending: true });
+
+  if (catErr) {
+    console.error("❌ 載入分類失敗", catErr);
+  }
+
+  if (prodErr) {
+    console.error("❌ 載入商品失敗", prodErr);
+  }
+
+  allProducts = prodData || [];
+
+  // 分類下拉
+  categorySelect.innerHTML = `<option value="">全部分類</option>`;
+  (catData || []).forEach((c) => {
+@@ -229,50 +228,161 @@ async function loadAll() {
+    opt.textContent = c.name;
+    categorySelect.appendChild(opt);
+  });
+}
+
+// ====== Load Products (伺服器分頁 + 排序 + 搜尋 + 分類) ======
 async function loadProducts() {
   if (!supabaseClient) return;
 
@@ -302,6 +343,7 @@ async function loadProducts() {
   const totalCount = count || 0;
   totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
+  render();
   // 如果 currentPage 超出（例如你選了分類後資料變少），自動拉回最後一頁
   if (currentPage > totalPages) {
     currentPage = totalPages;
@@ -325,9 +367,11 @@ async function loadProducts() {
   data.forEach((p) => productList.appendChild(createProductCard(p)));
 }
 
+/* ========= Events ========= */
 // ====== Events：全部改成打 loadProducts() ======
 searchInput.oninput = () => {
   currentPage = 1;
+  render();
   loadProducts();
 };
 
@@ -335,11 +379,13 @@ clearBtn.onclick = () => {
   searchInput.value = "";
   categorySelect.value = "";
   currentPage = 1;
+  render();
   loadProducts();
 };
 
 categorySelect.onchange = () => {
   currentPage = 1;
+  render();
   loadProducts();
 };
 
@@ -347,13 +393,18 @@ sortSelect.onchange = () => {
   currentPage = 1;
   loadProducts();
 };
+sortSelect.onchange = render;
 
 pageSizeSelect.onchange = () => {
+  pageSize = Number(pageSizeSelect.value);
   currentPage = 1;
+  render();
   loadProducts();
 };
 
 prevBtn.onclick = () => {
+  currentPage--;
+  render();
   if (currentPage > 1) {
     currentPage--;
     loadProducts();
@@ -361,6 +412,8 @@ prevBtn.onclick = () => {
 };
 
 nextBtn.onclick = () => {
+  currentPage++;
+  render();
   if (currentPage < totalPages) {
     currentPage++;
     loadProducts();
@@ -371,6 +424,7 @@ allBtn.onclick = () => {
   categorySelect.value = "";
   searchInput.value = "";
   currentPage = 1;
+  render();
   loadProducts();
 };
 
@@ -378,9 +432,11 @@ emptyResetBtn.onclick = () => {
   categorySelect.value = "";
   searchInput.value = "";
   currentPage = 1;
+  render();
   loadProducts();
 };
 
+document.addEventListener("DOMContentLoaded", loadAll);
 // ====== Init ======
 document.addEventListener("DOMContentLoaded", async () => {
   await loadCategories(); // 先把分類下拉載入
