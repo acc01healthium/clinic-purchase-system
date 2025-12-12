@@ -304,6 +304,7 @@ async function loadProducts() {
     console.error("前台 supabaseClient 不存在，請確認 /js/supabase.js 是否正確載入。");
     if (statusEl) statusEl.textContent = "系統設定錯誤，請聯絡管理者。";
     return;
+statusEl.textContent = "";
   }
 
   if (statusEl) statusEl.textContent = "載入中…";
