@@ -3,26 +3,25 @@
 
 console.log("後台 編輯商品頁 初始化");
 
-// 取得 Supabase client
 const supabaseClient = window.supabaseClient;
 
-if (!supabaseClient) {
-  console.error("supabaseClient 不存在，請確認 admin/js/supabase.js 是否正確載入。");
-}
-
-// 取得 URL 上的 id 參數
+// -----------------------------
+// 取得 URL id
+// -----------------------------
 function getQueryParam(key) {
   const params = new URLSearchParams(window.location.search);
   return params.get(key);
 }
+const productId = Number(getQueryParam("id"));
 
-const productId = getQueryParam("id");
 if (!productId) {
-  alert("缺少商品編號，將返回商品列表。");
+  alert("缺少商品編號！");
   window.location.href = "index.html";
 }
 
+// -----------------------------
 // DOM 元素
+// -----------------------------
 const form = document.getElementById("editForm");
 
 const nameInput = document.getElementById("name");
@@ -39,54 +38,41 @@ const imagePreview = document.getElementById("imagePreview");
 
 const cancelBtn = document.getElementById("cancelBtn");
 const deleteBtn = document.getElementById("deleteBtn");
-const logoutBtn = document.getElementById("logoutBtn");
 
-let currentImageUrl = null;   // 目前圖片網址（資料庫裡）
-let newImageFile = null;      // 使用者剛選取要上傳的新檔案
+let currentImageUrl = null;
+let newImageFile = null;
+let originalLastPrice = null;   // ⭐ 重要：儲存原本價格
 
 // -----------------------------
 // 載入商品資料
 // -----------------------------
 async function loadProduct() {
-  if (!supabaseClient) return;
-
   const { data, error } = await supabaseClient
     .from("products")
-    .select(
-      `
-        id,
-        name,
-        category,
-        spec,
-        unit,
-        description,
-        last_price,
-        suggested_price,
-        is_active,
-        image_url
-      `
-    )
+    .select("*")
     .eq("id", productId)
     .single();
 
-  if (error) {
-    console.error("載入商品失敗：", error);
-    alert("讀取商品資料失敗，請稍後再試。");
+  if (error || !data) {
+    console.error("商品讀取失敗：", error);
+    alert("讀取商品資料失敗！");
     window.location.href = "index.html";
     return;
   }
 
-  // 填入表單
-  nameInput.value = data.name || "";
-  categoryInput.value = data.category || "";
-  specInput.value = data.spec || "";
-  unitInput.value = data.unit || "";
-  descriptionInput.value = data.description || "";
+  // 填入資料
+  nameInput.value = data.name ?? "";
+  categoryInput.value = data.category ?? "";
+  specInput.value = data.spec ?? "";
+  unitInput.value = data.unit ?? "";
+  descriptionInput.value = data.description ?? "";
   lastPriceInput.value = data.last_price ?? "";
   suggestedPriceInput.value = data.suggested_price ?? "";
   isActiveSelect.value = data.is_active ? "true" : "false";
 
-  currentImageUrl = data.image_url || null;
+  currentImageUrl = data.image_url ?? null;
+  originalLastPrice = data.last_price;   // ⭐ 保存原本價格
+
   renderImagePreview();
 }
 
@@ -109,103 +95,93 @@ function renderImagePreview() {
     imagePreview.appendChild(img);
   } else {
     const span = document.createElement("span");
-    span.className = "edit-image-placeholder";
-    span.textContent = "目前尚無圖片";
+    span.textContent = "目前沒有圖片";
     imagePreview.appendChild(span);
   }
 }
 
 // -----------------------------
-// 圖片上傳到 Supabase Storage
+// 圖片上傳
 // -----------------------------
 async function uploadImageIfNeeded() {
-  if (!newImageFile) {
-    // 沒換新圖，就用原本的網址
-    return currentImageUrl;
-  }
+  if (!newImageFile) return currentImageUrl;
 
-  // 壓縮 / 直接上傳 (這裡先直接上傳檔案；若你之後想加壓縮再來調整)
-  const fileExt = newImageFile.name.split(".").pop();
-  const fileName = `product-${productId}-${Date.now()}.${fileExt}`;
-  const filePath = fileName;
+  const ext = newImageFile.name.split(".").pop();
+  const filename = `product-${productId}-${Date.now()}.${ext}`;
 
   const { data, error } = await supabaseClient.storage
-    .from("product-images")          // ⚠️ 這裡使用你目前 B 專案的 bucket 名稱
-    .upload(filePath, newImageFile, {
-      cacheControl: "3600",
-      upsert: true,
-    });
+    .from("product-images")
+    .upload(filename, newImageFile, { upsert: true });
 
   if (error) {
     console.error("圖片上傳失敗：", error);
-    alert("圖片上傳失敗，將沿用原本圖片。");
+    alert("圖片上傳失敗，將沿用原圖");
     return currentImageUrl;
   }
 
-  const { data: publicData } = supabaseClient.storage
+  const { data: pub } = supabaseClient.storage
     .from("product-images")
     .getPublicUrl(data.path);
 
-  const publicUrl = publicData.publicUrl;
-  return publicUrl || currentImageUrl;
+  return pub.publicUrl ?? currentImageUrl;
 }
 
 // -----------------------------
-// 監聽圖片檔案選取
+// 選擇圖片
 // -----------------------------
-if (imageFileInput) {
-  imageFileInput.addEventListener("change", (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (!file) {
-      newImageFile = null;
-      renderImagePreview();
-      return;
-    }
-    newImageFile = file;
-    renderImagePreview();
-  });
-}
+imageFileInput.addEventListener("change", (e) => {
+  const file = e.target.files?.[0];
+  newImageFile = file || null;
+  renderImagePreview();
+});
 
 // -----------------------------
-// 表單送出：儲存變更
+// 儲存變更
 // -----------------------------
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
-  if (!supabaseClient) return;
 
   const name = nameInput.value.trim();
   if (!name) {
-    alert("商品名稱不可空白。");
+    alert("商品名稱不能為空！");
     return;
   }
 
-  const lastPrice = lastPriceInput.value === "" ? null : Number(lastPriceInput.value);
-  const suggestedPrice =
+  const newLastPrice = lastPriceInput.value === "" ? null : Number(lastPriceInput.value);
+  const newSuggestedPrice =
     suggestedPriceInput.value === "" ? null : Number(suggestedPriceInput.value);
 
-  if (
-    (lastPrice !== null && Number.isNaN(lastPrice)) ||
-    (suggestedPrice !== null && Number.isNaN(suggestedPrice))
-  ) {
-    alert("進價 / 建議售價請輸入數字。");
+  if (newLastPrice !== null && Number.isNaN(newLastPrice)) {
+    alert("進價必須是數字！");
+    return;
+  }
+  if (newSuggestedPrice !== null && Number.isNaN(newSuggestedPrice)) {
+    alert("建議售價必須是數字！");
     return;
   }
 
-  // 先處理圖片上傳（若有）
   const imageUrl = await uploadImageIfNeeded();
 
+  // ⭐ 最重要：只有變更 price 才更新時間
   const payload = {
     name,
     category: categoryInput.value.trim() || null,
     spec: specInput.value.trim() || null,
     unit: unitInput.value.trim() || null,
     description: descriptionInput.value.trim() || null,
-    last_price: lastPrice,
-    suggested_price: suggestedPrice,
+    suggested_price: newSuggestedPrice,
     is_active: isActiveSelect.value === "true",
     image_url: imageUrl,
-    last_price_updated_at: new Date().toISOString(),
   };
+
+  // ⭐ 價格是否改變？
+  if (newLastPrice !== originalLastPrice) {
+    payload.last_price = newLastPrice;
+    payload.last_price_updated_at = new Date().toISOString();
+  } else {
+    payload.last_price = newLastPrice;
+    // 不更新 last_price_updated_at
+  }
 
   const { error } = await supabaseClient
     .from("products")
@@ -214,7 +190,7 @@ form.addEventListener("submit", async (e) => {
 
   if (error) {
     console.error("更新商品失敗：", error);
-    alert("儲存失敗，請稍後再試。");
+    alert("儲存失敗！");
     return;
   }
 
@@ -224,26 +200,17 @@ form.addEventListener("submit", async (e) => {
 
 // -----------------------------
 // 刪除商品
+// -----------------------------
 deleteBtn.addEventListener("click", async () => {
-  if (!confirm("確定要刪除這個商品嗎？刪除後無法復原！")) {
-    return;
-  }
-
-  const idParam = new URLSearchParams(window.location.search).get("id");
-  const productId = Number(idParam);
-
-  if (!productId || Number.isNaN(productId)) {
-    alert("錯誤：讀取商品 ID 失敗，無法刪除！");
-    return;
-  }
+  if (!confirm("確定要刪除這個商品？")) return;
 
   const { error } = await supabaseClient
     .from("products")
-    .delete({ returning: "minimal" })  // 🔥重要：避免 RLS 阻擋
+    .delete()
     .eq("id", productId);
 
   if (error) {
-    console.error("刪除錯誤：", error);
+    console.error("刪除失敗：", error);
     alert("刪除失敗：" + error.message);
     return;
   }
@@ -252,28 +219,9 @@ deleteBtn.addEventListener("click", async () => {
   window.location.href = "index.html";
 });
 
-
-// -----------------------------
-// 取消：回商品列表
-// -----------------------------
-cancelBtn.addEventListener("click", () => {
-  window.location.href = "index.html";
-});
-
-// -----------------------------
-// 登出按鈕（目前僅導回 login 頁）
-// -----------------------------
-if (logoutBtn) {
-  logoutBtn.addEventListener("click", () => {
-    // 若未來有 auth：可在這裡加入 supabaseClient.auth.signOut()
-    window.location.href = "login.html";
-  });
-}
-
 // -----------------------------
 // 初始化
 // -----------------------------
 document.addEventListener("DOMContentLoaded", () => {
   loadProduct();
-  renderImagePreview();
 });
