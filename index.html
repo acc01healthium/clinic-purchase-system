@@ -10,7 +10,7 @@
   <!-- Supabase SDK v2 -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <!-- 共用 Supabase client（沿用你現有的 js/supabase.js） -->
+  <!-- 共用 Supabase client -->
   <script src="js/supabase.js?v=1"></script>
 
   <!-- 前台邏輯 -->
@@ -27,7 +27,9 @@
       </div>
 
       <div class="site-header-actions">
-        <button id="allBtn" class="pill pill-primary" type="button">全部商品</button>
+        <button id="allBtn" class="pill pill-primary" type="button">
+          全部商品
+        </button>
       </div>
     </div>
   </header>
@@ -44,7 +46,9 @@
             placeholder="搜尋商品名稱、規格或分類"
             autocomplete="off"
           />
-          <button id="clearBtn" class="btn btn-secondary" type="button">清除</button>
+          <button id="clearBtn" class="btn btn-secondary" type="button">
+            清除
+          </button>
         </div>
       </div>
 
@@ -62,8 +66,6 @@
             <select id="sortSelect" class="select">
               <option value="updated_desc">更新時間：新 → 舊</option>
               <option value="updated_asc">更新時間：舊 → 新</option>
-              <option value="price_asc">進價：低 → 高</option>
-              <option value="price_desc">進價：高 → 低</option>
               <option value="name_asc">名稱：A → Z</option>
               <option value="name_desc">名稱：Z → A</option>
             </select>
@@ -85,25 +87,42 @@
       </div>
     </section>
 
-    <!-- 結果資訊列 + 分頁器 -->
+    <!-- 結果資訊列 + 分頁 -->
     <section class="toolbar">
-      <div class="meta" id="metaText">載入中…</div>
+      <div class="meta" id="statusMessage">載入中…</div>
 
       <div class="pager">
-        <button id="prevPageBtn" class="btn btn-secondary" type="button">上一頁</button>
-        <div class="page-indicator" id="pageIndicator">第 1 / 1 頁</div>
-        <button id="nextPageBtn" class="btn btn-secondary" type="button">下一頁</button>
+        <button id="prevPageBtn" class="btn btn-secondary" type="button">
+          上一頁
+        </button>
+        <div class="page-indicator" id="pageInfo">
+          第 1 / 1 頁
+        </div>
+        <button id="nextPageBtn" class="btn btn-secondary" type="button">
+          下一頁
+        </button>
       </div>
     </section>
 
-    <!-- 商品卡片 -->
-    <section id="grid" class="grid"></section>
+    <!-- ✅ 商品卡片容器（關鍵） -->
+    <section
+      id="productList"
+      class="grid"
+    ></section>
 
     <!-- 空狀態 -->
     <section id="emptyState" class="empty" style="display:none;">
       <div class="empty-title">找不到符合條件的商品</div>
-      <div class="empty-desc">請嘗試調整搜尋關鍵字或分類篩選。</div>
-      <button id="emptyResetBtn" class="btn btn-primary" type="button">清除條件</button>
+      <div class="empty-desc">
+        請嘗試調整搜尋關鍵字或分類篩選。
+      </div>
+      <button
+        id="emptyResetBtn"
+        class="btn btn-primary"
+        type="button"
+      >
+        清除條件
+      </button>
     </section>
   </main>
 </body>
