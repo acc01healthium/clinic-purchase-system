@@ -51,9 +51,12 @@ function ensureProductContainer() {
     document.querySelector(".container") ||
     document.body;
 
-  const wrap = document.createElement("div");
-  wrap.id = "productList";
-  wrap.className = "product-grid"; // 讓你現有的卡片 grid CSS 能吃到
+if (!productListEl) {
+  console.error("❌ 找不到商品容器 productList，請確認 index.html 結構");
+  if (statusEl) statusEl.textContent = "系統版面設定錯誤";
+  return;
+}
+ // 讓你現有的卡片 grid CSS 能吃到
   wrap.style.minHeight = "160px";
 
   main.appendChild(wrap);
