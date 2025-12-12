@@ -223,28 +223,42 @@ form.addEventListener("submit", async (e) => {
 });
 
 // -----------------------------
-// 刪除商品
+// 刪除商品（Debug 版）
 deleteBtn.addEventListener("click", async () => {
-  if (!confirm("確定要刪除這個商品嗎？刪除後無法復原！")) {
-    return;
-  }
+  if (!confirm("確定要刪除嗎？")) return;
 
+  // 1️⃣ 取得 id 並印出
   const idParam = new URLSearchParams(window.location.search).get("id");
   const productId = Number(idParam);
 
+  console.log("🔍 [DEBUG] URL idParam =", idParam);
+  console.log("🔍 [DEBUG] productId =", productId, " type=", typeof productId);
+
   if (!productId || Number.isNaN(productId)) {
-    alert("錯誤：讀取商品 ID 失敗，無法刪除！");
+    console.error("❌ 無法取得商品 ID，停止刪除。");
+    alert("錯誤：商品 ID 無法讀取！");
     return;
   }
 
-  const { error } = await supabaseClient
+  // 2️⃣ 執行 delete 並印出結果
+  const { data, error } = await supabaseClient
     .from("products")
-    .delete({ returning: "minimal" })  // 🔥重要：避免 RLS 阻擋
+    .delete({ returning: "representation" }) 
     .eq("id", productId);
 
+  console.log("🔍 [DEBUG] Supabase delete result → data:", data);
+  console.log("🔍 [DEBUG] Supabase delete result → error:", error);
+
+  // 3️⃣ 根據結果判斷
   if (error) {
-    console.error("刪除錯誤：", error);
+    console.error("❌ 刪除錯誤：", error);
     alert("刪除失敗：" + error.message);
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    console.warn("⚠ Supabase 回傳空陣列，代表沒有任何資料被刪除！");
+    alert("⚠ 刪除未成功：沒有找到符合 ID 的資料。\n請截圖 Console 給小幫手！");
     return;
   }
 
