@@ -1,36 +1,34 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>康醫採購管理系統｜後台</title>
 
   <!-- 後台樣式 -->
-  <link rel="stylesheet" href="css/admin.css?v=11" />
+  <link rel="stylesheet" href="css/admin.css?v=5" />
 
-  <!-- Supabase SDK v2 -->
+  <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- 後台 Supabase client -->
-  <script src="js/supabase.js?v=3"></script>
+  <script src="js/supabase.js?v=5"></script>
 
-  <!-- 商品列表 JS（排序 + 分頁 + 搜尋） -->
-  <script defer src="js/index.js?v=11"></script>
+  <!-- 後台商品列表邏輯 -->
+  <script defer src="js/index.js?v=5"></script>
 </head>
 
 <body>
 
-  <!-- =========================
-       Header 區塊
-  ========================== -->
+  <!-- █████ HEADER █████ -->
   <header class="admin-header">
     <div class="admin-header-inner">
       <div>
         <h1 class="admin-title">康醫採購管理系統｜後台</h1>
-        <p class="admin-subtitle">商品管理</p>
+        <p class="admin-subtitle">商品列表管理</p>
       </div>
 
+      <!-- 🔥 右上功能鍵（不包含 CSV 匯入 — 已依你要求永久移除） -->
       <div class="admin-header-buttons">
         <a href="index.html" class="admin-btn">商品列表</a>
         <a href="../index.html" class="admin-btn" target="_blank">前台查看</a>
@@ -39,74 +37,81 @@
     </div>
   </header>
 
-  <!-- =========================
-       Main 區塊
-  ========================== -->
+  <!-- █████ MAIN █████ -->
   <main class="admin-main">
+
+    <!-- 🔍 後台搜尋列 -->
     <section class="card">
-
-      <!-- 上方按鈕 -->
-      <div class="card-header-row">
-        <button onclick="location.href='add.html'" class="btn-primary">新增商品</button>
-        <!-- ⚠ 不再放 “匯入CSV” 按鈕（依你的要求） -->
-      </div>
-
-      <!-- 搜尋列 -->
       <div class="admin-search-bar">
         <input
-          id="adminSearchInput"
           type="text"
-          placeholder="搜尋商品名稱、分類、規格、描述…"
+          id="adminSearchInput"
+          placeholder="搜尋商品名稱、規格、分類…"
         />
-        <span class="admin-search-hint">可輸入關鍵字搜尋</span>
+        <p class="admin-search-hint">輸入關鍵字後自動篩選（不限欄位）</p>
+      </div>
+    </section>
+
+    <!-- █████ 商品列表卡片 █████ -->
+    <section class="card">
+
+      <!-- 新增商品 + CSV 批次匯入（✔ 只留這組） -->
+      <div class="card-header-row">
+        <button onclick="location.href='add.html'" class="btn-primary">
+          新增商品
+        </button>
+
+        <!-- ★★★ 你要求保留的 CSV 批次匯入在這裡 ★★★ -->
+        <button onclick="location.href='upload.html'" class="btn-secondary">
+          CSV 批次匯入
+        </button>
       </div>
 
-      <!-- 每頁顯示筆數 -->
-      <div style="margin-bottom: 10px;">
-        <label>每頁顯示：</label>
-        <select id="pageSizeSelect" class="page-size-select">
-          <option value="10">10 筆</option>
-          <option value="20">20 筆</option>
-          <option value="50">50 筆</option>
-        </select>
+      <h2>商品列表</h2>
+
+      <!-- 分頁器（上方） -->
+      <div class="pagination-top">
+        <label>
+          每頁顯示：
+          <select id="pageSizeSelect">
+            <option value="10">10 筆</option>
+            <option value="20">20 筆</option>
+            <option value="50">50 筆</option>
+          </select>
+        </label>
+
+        <span id="pageInfo"></span>
       </div>
 
-      <!-- 商品列表 -->
+      <!-- 商品表格 -->
       <table class="product-table">
         <thead>
           <tr>
-            <th onclick="sortBy('name')">名稱</th>
-            <th onclick="sortBy('category')">分類</th>
-            <th onclick="sortBy('spec')">規格</th>
-            <th onclick="sortBy('unit')">單位</th>
-            <th onclick="sortBy('description')">描述</th>
-            <th onclick="sortBy('last_price')">進價</th>
-            <th onclick="sortBy('suggested_price')">建議售價</th>
-            <th onclick="sortBy('last_price_updated_at')">更新時間</th>
-            <th onclick="sortBy('is_active')">狀態</th>
+            <th data-sort="name">名稱</th>
+            <th data-sort="category">類別</th>
+            <th>規格 / 描述</th>
+            <th data-sort="unit">單位</th>
+            <th data-sort="last_price">進價</th>
+            <th data-sort="suggested_price">建議售價</th>
+            <th data-sort="last_price_updated_at">更新時間</th>
+            <th data-sort="is_active">狀態</th>
             <th>操作</th>
           </tr>
         </thead>
 
-        <tbody id="productTableBody">
-          <!-- JS 動態插入 -->
+        <tbody id="productTbody">
+          <!-- JS 會插入商品列 -->
         </tbody>
       </table>
 
-      <!-- 分頁器 -->
-      <div id="pagination" class="pagination"></div>
+      <!-- 分頁器（下方） -->
+      <div class="pagination-bottom">
+        <button id="prevPageBtn">上一頁</button>
+        <button id="nextPageBtn">下一頁</button>
+      </div>
+
     </section>
+
   </main>
-
-  <script>
-    // 修正後台 "登出" 無作用
-    document.addEventListener("DOMContentLoaded", () => {
-      const logoutBtn = document.getElementById("logoutBtn");
-      logoutBtn.addEventListener("click", () => {
-        window.location.href = "login.html";
-      });
-    });
-  </script>
-
 </body>
 </html>
