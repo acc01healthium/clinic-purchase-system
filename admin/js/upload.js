@@ -1,456 +1,369 @@
 // /admin/js/upload.js
-// CSV 批次匯入：解析、預覽、衝突判斷、分批匯入、同步分類
+// 後台 CSV 匯入商品：解析 / 預覽 / 寫入 Supabase
 
 console.log("後台 CSV 匯入 初始化");
 
 // 取得 Supabase client
 const supabaseClient = window.supabaseClient;
 if (!supabaseClient) {
-  console.error("supabaseClient 不存在，請確認 js/supabase.js 是否正確載入。");
+  console.error("supabaseClient 不存在，請確認 admin/js/supabase.js 是否正確載入。");
 }
 
-// DOM 元素
-const fileInput = document.getElementById("csvFile");
-const previewBtn = document.getElementById("previewBtn");
-const previewSection = document.getElementById("previewSection");
-const previewTbody = document.getElementById("previewTbody");
-const statusEl = document.getElementById("statusMessage");
-const summaryText = document.getElementById("summaryText");
-const confirmBtn = document.getElementById("confirmImportBtn");
-const resetBtn = document.getElementById("resetBtn");
-const logoutBtn = document.getElementById("logoutBtn");
+// --- DOM 元素（多種 id 做保險） ---
+const fileInput =
+  document.getElementById("csvFile") ||
+  document.getElementById("csvInput") ||
+  document.querySelector('input[type="file"]');
 
-// 匯入資料暫存
-let importedRows = []; // 每筆：{ index, name, category, spec, unit, last_price, suggested_price, description, exists, productId, action }
+const startBtn =
+  document.getElementById("startImportBtn") ||
+  document.getElementById("csvStartBtn");
 
-// -----------------------------
-// 小工具：字串 / 數字處理
-// -----------------------------
-function toNumberOrNull(value) {
-  if (value === undefined || value === null) return null;
-  const trimmed = String(value).trim();
-  if (trimmed === "") return null;
-  const num = Number(trimmed);
-  return Number.isNaN(num) ? null : num;
+const previewTbody =
+  document.getElementById("previewTbody") ||
+  document.querySelector("#previewTable tbody");
+
+const summaryEl =
+  document.getElementById("importSummary") ||
+  document.getElementById("summaryText");
+
+const modeSelect =
+  document.getElementById("importMode") ||
+  document.querySelector("select#importMode");
+
+// 預設模式：新增 + 更新
+let currentMode = "insert_update";
+if (modeSelect) {
+  currentMode = modeSelect.value || "insert_update";
+  modeSelect.addEventListener("change", () => {
+    currentMode = modeSelect.value || "insert_update";
+  });
 }
 
-// 簡單 CSV 解析（假設欄位中不含逗號）
+// 暫存解析後資料
+let parsedRecords = [];
+
+// -----------------------------
+// 工具函式：CSV 解析
+// -----------------------------
 function parseCsv(text) {
   const lines = text
     .split(/\r?\n/)
     .map((l) => l.trim())
     .filter((l) => l !== "");
 
-  if (lines.length < 2) {
-    throw new Error("檔案內容不足，至少要有一列標題與一列資料。");
-  }
+  if (lines.length < 2) return [];
 
-  const header = lines[0].split(",").map((h) => h.trim().toLowerCase());
-
-  const colIndex = {
-    name: header.indexOf("name"),
-    category: header.indexOf("category"),
-    spec: header.indexOf("spec"),
-    unit: header.indexOf("unit"),
-    last_price: header.indexOf("last_price"),
-    suggested_price: header.indexOf("suggested_price"),
-    description: header.indexOf("description"),
-  };
-
-  const requiredCols = ["name", "category", "spec", "unit", "last_price"];
-  const missing = requiredCols.filter((k) => colIndex[k] === -1);
-  if (missing.length > 0) {
-    throw new Error("缺少必填欄位：" + missing.join(", "));
-  }
-
+  const header = splitCsvLine(lines[0]).map((h) => h.trim());
   const rows = [];
+
   for (let i = 1; i < lines.length; i++) {
-    const raw = lines[i];
-    if (!raw) continue;
-    const parts = raw.split(","); // 簡化處理：假設欄位中沒有逗號
+    const cols = splitCsvLine(lines[i]);
+    if (cols.length === 1 && cols[0].trim() === "") continue;
 
-    const name = (parts[colIndex.name] || "").trim();
-    const category = (parts[colIndex.category] || "").trim();
-    const spec = (parts[colIndex.spec] || "").trim();
-    const unit = (parts[colIndex.unit] || "").trim();
-    const last_price = toNumberOrNull(parts[colIndex.last_price]);
-    const suggested_price =
-      colIndex.suggested_price >= 0
-        ? toNumberOrNull(parts[colIndex.suggested_price])
-        : null;
-    const description =
-      colIndex.description >= 0 ? (parts[colIndex.description] || "").trim() : "";
-
-    if (!name && !spec) continue; // 完全空白就略過
-
-    rows.push({
-      index: i, // 原始列號（含標題）
-      name,
-      category,
-      spec,
-      unit,
-      last_price,
-      suggested_price,
-      description,
-      exists: false,
-      productId: null,
-      action: "insert", // 預設
+    const obj = {};
+    header.forEach((key, idx) => {
+      obj[key] = cols[idx] !== undefined ? cols[idx].trim() : "";
     });
+    rows.push(obj);
   }
-
   return rows;
 }
 
+// 簡單 CSV 行解析（處理引號 + 逗點）
+function splitCsvLine(line) {
+  const result = [];
+  let cur = "";
+  let inQuote = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+
+    if (ch === '"') {
+      if (inQuote && line[i + 1] === '"') {
+        cur += '"';
+        i++;
+      } else {
+        inQuote = !inQuote;
+      }
+    } else if (ch === "," && !inQuote) {
+      result.push(cur);
+      cur = "";
+    } else {
+      cur += ch;
+    }
+  }
+  result.push(cur);
+  return result;
+}
+
+function toNumberOrNull(v) {
+  if (v === undefined || v === null) return null;
+  const s = String(v).trim();
+  if (!s) return null;
+  const n = Number(s);
+  return Number.isNaN(n) ? null : n;
+}
+
+function toBoolOrNull(v) {
+  if (v === undefined || v === null) return null;
+  const s = String(v).trim().toLowerCase();
+  if (!s) return null;
+  if (["1", "true", "是", "啟用", "yes"].includes(s)) return true;
+  if (["0", "false", "否", "停用", "no"].includes(s)) return false;
+  return null;
+}
+
+function shortText(s, len = 20) {
+  if (!s) return "";
+  return s.length > len ? s.slice(0, len) + "…" : s;
+}
+
 // -----------------------------
-// 檢查是否有重複商品（name + spec）
+// 讀檔 & 預覽
 // -----------------------------
-async function detectConflicts(rows) {
+if (startBtn && fileInput) {
+  startBtn.addEventListener("click", () => {
+    const file = fileInput.files && fileInput.files[0];
+    if (!file) {
+      alert("請先選擇一個 CSV 檔案。");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const text = e.target.result;
+      const rawRows = parseCsv(text);
+      if (!rawRows.length) {
+        alert("CSV 內容為空或格式錯誤。");
+        return;
+      }
+      await buildPreview(rawRows);
+    };
+    reader.readAsText(file, "utf-8");
+  });
+}
+
+// 將 CSV 資料 + DB 現有商品比對，產生預覽
+async function buildPreview(rawRows) {
   if (!supabaseClient) return;
 
-  const names = Array.from(new Set(rows.map((r) => r.name).filter(Boolean)));
-  const specs = Array.from(new Set(rows.map((r) => r.spec).filter(Boolean)));
-
-  if (names.length === 0 || specs.length === 0) {
-    return;
-  }
-
-  const { data, error } = await supabaseClient
+  // 先抓現有商品 (name + spec 做 key)
+  const { data: existing, error } = await supabaseClient
     .from("products")
-    .select("id, name, spec")
-    .in("name", names)
-    .in("spec", specs);
+    .select("id, name, spec, last_price");
 
   if (error) {
-    console.error("檢查重複商品失敗：", error);
+    console.error("讀取現有商品失敗：", error);
+    alert("讀取現有商品失敗，請稍後再試。");
     return;
   }
 
   const map = new Map();
-  (data || []).forEach((p) => {
-    const key = `${p.name}|||${p.spec}`;
-    map.set(key, p.id);
+  (existing || []).forEach((p) => {
+    const key = (p.name || "").trim() + "||" + (p.spec || "");
+    map.set(key, p);
   });
 
-  rows.forEach((row) => {
-    const key = `${row.name}|||${row.spec}`;
-    if (map.has(key)) {
-      row.exists = true;
-      row.productId = map.get(key);
-      row.action = "update"; // 有重複 → 預設更新
-    } else {
-      row.exists = false;
-      row.productId = null;
-      row.action = "insert"; // 沒重複 → 預設新增
-    }
+  parsedRecords = [];
+  let countNew = 0;
+  let countUpdate = 0;
+
+  if (previewTbody) previewTbody.innerHTML = "";
+
+  rawRows.forEach((r, idx) => {
+    const name = (r.name || "").trim();
+    if (!name) return; // 沒 name 略過
+
+    const spec = (r.spec || "").trim();
+    const key = name + "||" + spec;
+    const existed = map.get(key) || null;
+
+    const row = {
+      idx: idx + 1,
+      name,
+      category: (r.category || "").trim() || null,
+      spec: spec || null,
+      unit: (r.unit || "").trim() || null,
+      last_price: toNumberOrNull(r.last_price),
+      suggested_price: toNumberOrNull(r.suggested_price),
+      is_active: toBoolOrNull(r.is_active),
+      description: (r.description || "").trim() || null,
+      sku: (r.sku || "").trim() || null,
+      existedId: existed ? existed.id : null,
+      existedLastPrice: existed ? existed.last_price : null,
+    };
+
+    // 判斷預設動作（先不看 mode，後面再套用）
+    row.baseAction = existed ? "update" : "insert";
+
+    if (row.baseAction === "insert") countNew++;
+    else countUpdate++;
+
+    parsedRecords.push(row);
   });
+
+  // 畫預覽表格
+  if (previewTbody) {
+    parsedRecords.forEach((r) => {
+      const tr = document.createElement("tr");
+
+      const statusText =
+        r.baseAction === "insert" ? "新商品" : "更新";
+      const statusColor =
+        r.baseAction === "insert" ? "#00a86b" : "#ff9800";
+
+      tr.innerHTML = `
+        <td>${r.idx}</td>
+        <td>${r.name}</td>
+        <td>${r.category || "—"}</td>
+        <td>${r.spec || "—"}</td>
+        <td>${r.unit || "—"}</td>
+        <td>${r.last_price ?? "—"}</td>
+        <td>${r.suggested_price ?? "—"}</td>
+        <td>${r.is_active === null ? "—" : r.is_active ? "啟用" : "停用"}</td>
+        <td title="${r.description || ""}">${shortText(r.description, 18) || "—"}</td>
+        <td><span style="color:${statusColor};font-weight:600;">${statusText}</span></td>
+      `;
+      previewTbody.appendChild(tr);
+    });
+  }
+
+  if (summaryEl) {
+    summaryEl.textContent = `預計新增：${countNew} 筆，更新：${countUpdate} 筆（實際執行會依上方模式設定調整）`;
+  }
+
+  const modeLabel =
+    currentMode === "insert_only"
+      ? "【僅新增，不更新既有商品】"
+      : currentMode === "update_only"
+      ? "【僅更新既有商品，不新增】"
+      : "【新增 + 更新】";
+
+  if (
+    confirm(
+      `${modeLabel}\n\n共解析 ${parsedRecords.length} 筆商品資料。\n\n是否開始寫入 Supabase？`
+    )
+  ) {
+    await applyChangesToSupabase();
+  }
 }
 
 // -----------------------------
-// 確保 categories 表中有對應分類（若有建 table）
+// 寫入 Supabase（重點：更新不再 insert id）
 // -----------------------------
-async function syncCategories(rows) {
-  const categories = Array.from(
-    new Set(rows.map((r) => r.category).filter((c) => c && c.trim() !== ""))
-  );
+async function applyChangesToSupabase() {
+  if (!supabaseClient) return;
+  if (!parsedRecords.length) {
+    alert("目前沒有可匯入的資料。");
+    return;
+  }
 
-  if (categories.length === 0) return;
+  let toInsert = [];
+  let toUpdate = [];
 
-  try {
-    // 先找出已存在的
-    const { data: existing, error: selErr } = await supabaseClient
-      .from("categories")
-      .select("id, name")
-      .in("name", categories);
+  parsedRecords.forEach((r) => {
+    const hasExisting = !!r.existedId;
+    let action = "skip";
 
-    if (selErr) {
-      console.warn("讀取 categories 失敗，將略過分類同步：", selErr.message);
+    if (currentMode === "insert_only") {
+      action = hasExisting ? "skip" : "insert";
+    } else if (currentMode === "update_only") {
+      action = hasExisting ? "update" : "skip";
+    } else {
+      // insert_update
+      action = hasExisting ? "update" : "insert";
+    }
+
+    if (action === "insert") {
+      toInsert.push(r);
+    } else if (action === "update") {
+      toUpdate.push(r);
+    }
+  });
+
+  // --- 新增商品：使用 insert，不帶 id ---
+  if (toInsert.length > 0) {
+    const insertPayload = toInsert.map((r) =>
+      buildProductPayload(r, /*isNew*/ true)
+    );
+
+    const { error: insertErr } = await supabaseClient
+      .from("products")
+      .insert(insertPayload);
+
+    if (insertErr) {
+      console.error("批次新增失敗：", insertErr);
+      alert("新增商品發生錯誤：" + insertErr.message);
       return;
     }
-
-    const existingMap = new Map();
-    (existing || []).forEach((c) => existingMap.set(c.name, c.id));
-
-    const toInsert = categories.filter((c) => !existingMap.has(c));
-    if (toInsert.length === 0) return;
-
-    const { error: insErr } = await supabaseClient
-      .from("categories")
-      .insert(toInsert.map((name) => ({ name })));
-
-    if (insErr) {
-      console.warn("新增 categories 失敗，將略過分類同步：", insErr.message);
-    }
-  } catch (err) {
-    console.warn("同步分類時發生錯誤（可能尚未建立 categories 表）：", err.message);
-  }
-}
-
-// -----------------------------
-// 預覽畫面渲染
-// -----------------------------
-function renderPreview() {
-  previewTbody.innerHTML = "";
-  if (!importedRows || importedRows.length === 0) {
-    previewSection.style.display = "none";
-    confirmBtn.disabled = true;
-    summaryText.textContent = "";
-    return;
   }
 
-  previewSection.style.display = "block";
-
-  let insertCount = 0;
-  let updateCount = 0;
-  let skipCount = 0;
-
-  importedRows.forEach((row, idx) => {
-    const tr = document.createElement("tr");
-
-    const descPreview =
-      row.description && row.description.length > 20
-        ? row.description.slice(0, 20) + "…"
-        : row.description || "—";
-
-    const statusText = row.exists ? "已存在（可更新）" : "新商品";
-    const statusColor = row.exists ? "#e67e22" : "#2ecc71";
-
-    // 計算摘要（依 action）
-    if (row.action === "insert") insertCount++;
-    if (row.action === "update") updateCount++;
-    if (row.action === "skip") skipCount++;
-
-    const actionSelectId = `action-${idx}`;
-
-    tr.innerHTML = `
-      <td>${row.index}</td>
-      <td><span style="color:${statusColor}; font-size:0.9rem;">${statusText}</span></td>
-      <td>${row.name || "—"}</td>
-      <td>${row.category || "—"}</td>
-      <td>${row.spec || "—"}</td>
-      <td>${row.unit || "—"}</td>
-      <td>${row.last_price ?? "—"}</td>
-      <td>${row.suggested_price ?? "—"}</td>
-      <td title="${row.description ? row.description.replace(/"/g, "&#34;") : ""}">
-        ${descPreview}
-      </td>
-      <td>
-        <select id="${actionSelectId}" data-row-index="${idx}" class="edit-input-short">
-          ${row.exists
-            ? `
-              <option value="update" ${row.action === "update" ? "selected" : ""}>更新現有商品</option>
-              <option value="insert" ${row.action === "insert" ? "selected" : ""}>新增另一筆</option>
-              <option value="skip" ${row.action === "skip" ? "selected" : ""}>略過</option>
-            `
-            : `
-              <option value="insert" ${row.action === "insert" ? "selected" : ""}>新增商品</option>
-              <option value="skip" ${row.action === "skip" ? "selected" : ""}>略過</option>
-            `}
-        </select>
-      </td>
-    `;
-
-    previewTbody.appendChild(tr);
-  });
-
-  summaryText.textContent = `預計新增：${insertCount} 筆，更新：${updateCount} 筆，略過：${skipCount} 筆`;
-  confirmBtn.disabled = false;
-
-  // 綁定 select 事件
-  importedRows.forEach((_, idx) => {
-    const select = document.getElementById(`action-${idx}`);
-    if (!select) return;
-    select.addEventListener("change", (e) => {
-      const rowIndex = Number(e.target.dataset.rowIndex);
-      const action = e.target.value;
-      if (!importedRows[rowIndex]) return;
-      importedRows[rowIndex].action = action;
-      renderPreview(); // 重新計算 summary，但不要重綁事件 => 簡單作法：先移除 listener 再重畫
-    });
-  });
-}
-
-// -----------------------------
-// 讀檔 + 預覽
-// -----------------------------
-async function handlePreview() {
-  const file = fileInput.files && fileInput.files[0];
-  if (!file) {
-    alert("請先選擇一個 CSV 檔案。");
-    return;
-  }
-
-  statusEl.textContent = "讀取檔案中…";
-  confirmBtn.disabled = true;
-  previewBtn.disabled = true;
-  importedRows = [];
-
-  const reader = new FileReader();
-  reader.onload = async (e) => {
-    try {
-      const text = e.target.result;
-      const rows = parseCsv(text);
-      if (rows.length === 0) {
-        alert("沒有可匯入的資料列。");
-        statusEl.textContent = "";
-        previewBtn.disabled = false;
-        return;
-      }
-
-      statusEl.textContent = "檢查重複商品中…";
-      await detectConflicts(rows);
-
-      importedRows = rows;
-
-      statusEl.textContent = "";
-      previewBtn.disabled = false;
-
-      renderPreview();
-    } catch (err) {
-      console.error("解析 CSV 失敗：", err);
-      alert("解析 CSV 失敗：" + err.message);
-      statusEl.textContent = "";
-      previewBtn.disabled = false;
-    }
-  };
-  reader.onerror = () => {
-    alert("讀取檔案失敗，請重新選擇檔案。");
-    statusEl.textContent = "";
-    previewBtn.disabled = false;
-  };
-  reader.readAsText(file, "utf-8");
-}
-
-// -----------------------------
-// 確認匯入
-// -----------------------------
-async function handleConfirmImport() {
-  if (!supabaseClient) return;
-  if (!importedRows || importedRows.length === 0) {
-    alert("目前沒有預覽資料。");
-    return;
-  }
-
-  const toInsert = importedRows.filter((r) => r.action === "insert");
-  const toUpdate = importedRows.filter((r) => r.action === "update");
-  const skipped = importedRows.filter((r) => r.action === "skip").length;
-
-  if (toInsert.length === 0 && toUpdate.length === 0) {
-    alert("目前所有資料都設定為略過，沒有可匯入的項目。");
-    return;
-  }
-
-  const confirmMsg = `確認匯入？\n\n新增：${toInsert.length} 筆\n更新：${toUpdate.length} 筆\n略過：${skipped} 筆`;
-  if (!window.confirm(confirmMsg)) return;
-
-  statusEl.textContent = "匯入中，請稍候…";
-  confirmBtn.disabled = true;
-  previewBtn.disabled = true;
-
-  try {
-    // 先同步分類（若有 categories 表）
-    await syncCategories(importedRows);
-
-    const nowIso = new Date().toISOString();
-
-    // 分批新增
-    if (toInsert.length > 0) {
-      const chunkSize = 100;
-      for (let i = 0; i < toInsert.length; i += chunkSize) {
-        const slice = toInsert.slice(i, i + chunkSize);
-        const payload = slice.map((r) => ({
-          name: r.name,
-          category: r.category || null,
-          spec: r.spec || null,
-          unit: r.unit || null,
-          description: r.description || null,
-          last_price: r.last_price,
-          suggested_price: r.suggested_price,
-          is_active: true,
-          currency: "TWD",
-          last_price_updated_at: nowIso, // CSV 匯入視為成本更新
-        }));
-
-        const { error } = await supabaseClient.from("products").insert(payload);
-        if (error) {
-          console.error("新增商品失敗：", error);
-          throw new Error("新增商品時發生錯誤：" + error.message);
-        }
-      }
-    }
-
-    // 分批更新
-    if (toUpdate.length > 0) {
-      const chunkSize = 50;
-      for (let i = 0; i < toUpdate.length; i += chunkSize) {
-        const slice = toUpdate.slice(i, i + chunkSize);
-        const payload = slice.map((r) => ({
-          id: r.productId,
-          name: r.name,
-          category: r.category || null,
-          spec: r.spec || null,
-          unit: r.unit || null,
-          description: r.description || null,
-          last_price: r.last_price,
-          suggested_price: r.suggested_price,
-          last_price_updated_at: nowIso, // 有填 last_price → 視為成本更新
-        }));
-
-        const { error } = await supabaseClient
-          .from("products")
-          .upsert(payload, { onConflict: "id" });
-
-        if (error) {
-          console.error("更新商品失敗：", error);
-          throw new Error("更新商品時發生錯誤：" + error.message);
-        }
-      }
-    }
-
-    statusEl.textContent = "";
-    alert(
-      `匯入完成！\n\n新增：${toInsert.length} 筆\n更新：${toUpdate.length} 筆\n略過：${skipped} 筆`
+  // --- 更新商品：逐筆 update，不再用 upsert / insert id ---
+  let updateError = null;
+  for (const r of toUpdate) {
+    const payload = buildProductPayload(
+      r,
+      /*isNew*/ false,
+      r.existedLastPrice
     );
-    window.location.href = "index.html";
-  } catch (err) {
-    console.error("匯入流程錯誤：", err);
-    alert("匯入失敗：" + err.message);
-    statusEl.textContent = "";
-    confirmBtn.disabled = false;
-    previewBtn.disabled = false;
+
+    const { error: updErr } = await supabaseClient
+      .from("products")
+      .update(payload)
+      .eq("id", r.existedId);
+
+    if (updErr) {
+      console.error("更新商品失敗：", updErr, "商品：", r.name, r.spec);
+      updateError = updErr;
+      break;
+    }
   }
+
+  if (updateError) {
+    alert("部分商品更新失敗：" + updateError.message);
+    return;
+  }
+
+  alert(
+    `匯入完成！新增 ${toInsert.length} 筆，更新 ${toUpdate.length} 筆，其餘依模式略過。`
+  );
+  window.location.href = "index.html";
 }
 
-// -----------------------------
-// Reset 預覽
-// -----------------------------
-function handleReset() {
-  importedRows = [];
-  previewTbody.innerHTML = "";
-  previewSection.style.display = "none";
-  summaryText.textContent = "";
-  confirmBtn.disabled = true;
-  statusEl.textContent = "";
-}
+// 建立寫入 products 的 payload
+// isNew: 是否為新增資料
+// existedLastPrice: 舊的 last_price（用來判斷是否要更新 last_price_updated_at）
+function buildProductPayload(record, isNew, existedLastPrice) {
+  const payload = {
+    name: record.name,
+    category: record.category,
+    spec: record.spec,
+    unit: record.unit,
+    description: record.description,
+    last_price: record.last_price,
+    suggested_price: record.suggested_price,
+    is_active:
+      record.is_active === null ? true : !!record.is_active,
+    sku: record.sku,
+  };
 
-// -----------------------------
-// 事件綁定
-// -----------------------------
-if (fileInput) {
-  fileInput.addEventListener("change", () => {
-    previewBtn.disabled = !(fileInput.files && fileInput.files[0]);
-  });
-}
-if (previewBtn) {
-  previewBtn.addEventListener("click", handlePreview);
-}
-if (confirmBtn) {
-  confirmBtn.addEventListener("click", handleConfirmImport);
-}
-if (resetBtn) {
-  resetBtn.addEventListener("click", handleReset);
-}
-if (logoutBtn) {
-  logoutBtn.addEventListener("click", () => {
-    window.location.href = "login.html";
-  });
+  // 只在「進價有變」時更新 last_price_updated_at
+  const lp = record.last_price;
+
+  if (isNew) {
+    if (lp !== null && lp !== undefined) {
+      payload.last_price_updated_at = new Date().toISOString();
+    }
+  } else {
+    const oldLp = existedLastPrice;
+    const changed =
+      (lp === null && oldLp !== null) ||
+      (lp !== null && Number(lp) !== Number(oldLp ?? null));
+    if (changed) {
+      payload.last_price_updated_at = new Date().toISOString();
+    }
+  }
+
+  return payload;
 }
