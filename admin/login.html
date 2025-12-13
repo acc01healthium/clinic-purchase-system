@@ -5,10 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>後台登入｜康醫採購管理系統</title>
 
-  <link rel="stylesheet" href="css/admin.css?v=2" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase.js?v=2"></script>
+  <!-- 後台樣式 -->
+  <link rel="stylesheet" href="css/admin.css?v=3" />
 
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js?v=3"></script>
 </head>
 
 <body class="login-body">
@@ -18,38 +20,58 @@
 
     <div class="login-form">
       <label>帳號（Email）</label>
-      <input id="loginEmail" type="email" placeholder="example@gmail.com" class="login-input" />
+      <input
+        id="loginEmail"
+        type="email"
+        placeholder="example@gmail.com"
+        class="login-input"
+      />
 
       <label>密碼</label>
-      <input id="loginPassword" type="password" class="login-input" />
+      <input
+        id="loginPassword"
+        type="password"
+        class="login-input"
+      />
 
-      <button class="btn-login" id="loginBtn">登入</button>
+      <button type="button" class="btn-login" id="loginBtn">
+        登入
+      </button>
     </div>
   </div>
 
-<script>
-document.getElementById("loginBtn").addEventListener("click", async () => {
-  const email = loginEmail.value.trim();
-  const password = loginPassword.value.trim();
+  <!-- ✅ 登入邏輯（穩定版） -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const loginBtn = document.getElementById("loginBtn");
+      const emailInput = document.getElementById("loginEmail");
+      const passwordInput = document.getElementById("loginPassword");
 
-  if (!email || !password) {
-    alert("請輸入帳號與密碼");
-    return;
-  }
+      loginBtn.addEventListener("click", async () => {
+        const email = emailInput.value.trim();
+        const password = passwordInput.value.trim();
 
-  const { data, error } = await window.supabaseClient.auth.signInWithPassword({
-    email,
-    password
-  });
+        if (!email || !password) {
+          alert("請輸入帳號與密碼");
+          return;
+        }
 
-  if (error) {
-    alert("登入失敗：" + error.message);
-    return;
-  }
+        const { error } =
+          await window.supabaseClient.auth.signInWithPassword({
+            email,
+            password
+          });
 
-  location.replace = "index.html";
-});
-</script>
+        if (error) {
+          alert("登入失敗：" + error.message);
+          return;
+        }
+
+        // ✅ 登入成功 → 後台首頁（不留歷史紀錄，避免上一頁回來）
+        location.replace("index.html");
+      });
+    });
+  </script>
 
 </body>
 </html>
