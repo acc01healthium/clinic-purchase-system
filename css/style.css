@@ -260,30 +260,20 @@ body{
 
 .price-line{
   display:grid;
-  grid-template-columns: 8ch 3ch 8ch;
-  /* 標籤 | NT$ | 金額 */
-  column-gap:6px;
+  grid-template-columns: 8ch auto;
+  column-gap:8px;
   align-items:baseline;
 }
 
 .price-label{
   font-weight:800;
-  color:#111827;
-  text-align:left;        /* ← 關鍵：不要 justify */
-  white-space:nowrap;     /* ← 禁止拆字 */
-}
-
-.price-currency{
-  text-align:right;
-  font-weight:700;
-  color:#111827;
+  white-space:nowrap;
 }
 
 .price-value{
-  text-align:right;
   font-weight:900;
-  color:#111827;
   font-variant-numeric: tabular-nums;
+  white-space:nowrap;
 }
 
 /* =========================
