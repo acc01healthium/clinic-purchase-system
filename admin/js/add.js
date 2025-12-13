@@ -48,37 +48,30 @@ document.addEventListener("DOMContentLoaded", () => {
       .single();
 
     if (error) {
-      alert("新增商品失敗：" + error.message);
+      alert("新增失敗：" + error.message);
       return;
     }
 
     const productId = product.id;
 
-    /* ========= ② 有選圖片才上傳 ========= */
+    /* ========= ② 上傳圖片（有選才做） ========= */
     if (imageInput && imageInput.files.length > 0) {
       const file = imageInput.files[0];
-
-      // 檔名建議：productId/時間戳-原檔名
       const filePath = `${productId}/${Date.now()}-${file.name}`;
 
       const { error: uploadError } = await supabase.storage
         .from("product-images")
-        .upload(filePath, file, {
-          cacheControl: "3600",
-          upsert: true,
-        });
+        .upload(filePath, file, { upsert: true });
 
       if (uploadError) {
         alert("圖片上傳失敗：" + uploadError.message);
         return;
       }
 
-      // 取得公開網址
       const publicUrl = supabase.storage
         .from("product-images")
         .getPublicUrl(filePath).data.publicUrl;
 
-      // 回寫到商品
       await supabase
         .from("products")
         .update({ image_url: publicUrl })
