@@ -260,8 +260,9 @@ body{
 
 .price-line{
   display:grid;
-  grid-template-columns: max-content max-content;
-  column-gap:6px;          /* 你可以調成 6px / 4px */
+  grid-template-columns: max-content 3ch 8ch;
+  /* 標籤 | NT$ | 金額 */
+  column-gap:4px;
   align-items:baseline;
 }
 
@@ -281,14 +282,15 @@ body{
 }
 
 .price-currency{
+  text-align:right;
   font-weight:700;
   color:#111827;
 }
 
 .price-value{
+  text-align:right;
   font-weight:900;
   color:#111827;
-  text-align:right;
   font-variant-numeric: tabular-nums;
 }
 
