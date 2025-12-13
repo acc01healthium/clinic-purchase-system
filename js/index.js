@@ -137,18 +137,20 @@
     if (p.spec) sub.appendChild(spec);
 
     // 價格
-    const price = document.createElement("div");
-    price.className = "price";
-    price.innerHTML = `
-      <div class="price-line">
-        <span class="price-label">進　　價：</span>
-        <span class="price-value">${escapeHtml(formatPrice(p.last_price))}</span>
-      </div>
-      <div class="price-line">
-        <span class="price-label">建議售價：</span>
-        <span class="price-value">${escapeHtml(formatPrice(p.suggested_price))}</span>
-      </div>
-    `;
+  const price = document.createElement("div");
+price.className = "price";
+price.innerHTML = `
+  <div class="price-line">
+    <span class="price-label">進　　價：</span>
+    <span class="price-currency">NT$</span>
+    <span class="price-value">${escapeHtml(formatPrice(p.last_price))}</span>
+  </div>
+  <div class="price-line">
+    <span class="price-label">建議售價：</span>
+    <span class="price-currency">NT$</span>
+    <span class="price-value">${escapeHtml(formatPrice(p.suggested_price))}</span>
+  </div>
+`;
 
     // description + 查看更多/收合
     const descText = (p.description || "").trim();
