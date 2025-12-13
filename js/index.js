@@ -105,36 +105,52 @@
     title.className = "card-title";
     title.textContent = p.name || "";
 
-    const sub = document.createElement("div");
-    sub.className = "card-sub";
+const meta = document.createElement("div");
+meta.className = "card-meta";
 
-    const left = document.createElement("div");
-    left.style.display = "flex";
-    left.style.gap = "8px";
-    left.style.alignItems = "center";
-    left.style.flexWrap = "wrap";
+if (p.category) {
+  const item = document.createElement("div");
+  item.className = "meta-item";
 
-    if (p.category) {
-      const tag = document.createElement("span");
-      tag.className = "tag";
-      tag.textContent = p.category;
-      left.appendChild(tag);
-    }
+  const tag = document.createElement("span");
+  tag.className = "tag";
+  tag.textContent = p.category;
 
-    if (p.unit) {
-      const unit = document.createElement("span");
-      unit.style.color = "#6b7280";
-      unit.style.fontWeight = "700";
-      unit.textContent = `單位：${p.unit}`;
-      left.appendChild(unit);
-    }
+  item.appendChild(tag);
+  meta.appendChild(item);
+}
 
-    const spec = document.createElement("span");
-    spec.style.color = "#6b7280";
-    spec.style.fontWeight = "700";
-    spec.textContent = p.spec ? `${p.spec}` : "";
-    sub.appendChild(left);
-    if (p.spec) sub.appendChild(spec);
+if (p.unit) {
+  const item = document.createElement("div");
+  item.className = "meta-item";
+
+  const label = document.createElement("span");
+  label.className = "meta-label";
+  label.textContent = "單位：";
+
+  const val = document.createElement("span");
+  val.textContent = p.unit;
+
+  item.appendChild(label);
+  item.appendChild(val);
+  meta.appendChild(item);
+}
+
+if (p.spec) {
+  const item = document.createElement("div");
+  item.className = "meta-item";
+
+  const label = document.createElement("span");
+  label.className = "meta-label";
+  label.textContent = "規格：";
+
+  const val = document.createElement("span");
+  val.textContent = p.spec;
+
+  item.appendChild(label);
+  item.appendChild(val);
+  meta.appendChild(item);
+}
 
     // 價格
   const price = document.createElement("div");
@@ -199,7 +215,7 @@ price.innerHTML = `
     footer.appendChild(t);
 
     body.appendChild(title);
-    if (p.spec || p.category || p.unit) body.appendChild(sub);
+    if (meta.children.length > 0) body.appendChild(meta);
     body.appendChild(price);
     if (descBlock) body.appendChild(descBlock);
     body.appendChild(footer);
