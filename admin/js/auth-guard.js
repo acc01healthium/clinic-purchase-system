@@ -1,25 +1,20 @@
-document.addEventListener("DOMContentLoaded", async () => {
+// /admin/js/auth-guard.js
+(async () => {
   const supabase = window.supabaseClient;
-  const body = document.body;
 
-  if (!supabase) return;
+  if (!supabase) {
+    console.error("❌ supabaseClient 不存在");
+    return;
+  }
 
-  body.classList.add("hidden");
+  const { data } = await supabase.auth.getSession();
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  if (!session) {
+  if (!data.session) {
+    // 未登入 → 回登入頁
     location.replace("/clinic-purchase-system/admin/login.html");
     return;
   }
 
-  body.classList.remove("hidden");
-
-  supabase.auth.onAuthStateChange((event, newSession) => {
-    if (!newSession) {
-      location.replace("/clinic-purchase-system/admin/login.html");
-    }
-  });
-});
+  // 已登入 → 顯示頁面（解決閃一下）
+  document.body.classList.remove("hidden");
+})();
