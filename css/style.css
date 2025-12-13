@@ -249,7 +249,7 @@ body{
 }
 
 /* =========================
-   Price（最終穩定版，不再漂移）
+   Price（企業級最終版）
 ========================= */
 .price{
   display:flex;
@@ -260,25 +260,16 @@ body{
 
 .price-line{
   display:grid;
-  grid-template-columns: max-content 3ch 8ch;
+  grid-template-columns: 4em 3ch 8ch;
   /* 標籤 | NT$ | 金額 */
-  column-gap:8px;
+  column-gap:6px;
   align-items:baseline;
 }
 
 .price-label{
   font-weight:800;
   color:#111827;
-  white-space:nowrap;
-}
-
-/* 金額單元 */
-.price-amount{
-  display:inline-flex;
-  align-items:baseline;
-  gap:4px;
-  justify-content:flex-end;
-  white-space:nowrap;   /* ← 🔥 關鍵：禁止 NT$ 與數字斷行 */
+  text-align-last:justify;   /* ← 關鍵：中文對齊 */
 }
 
 .price-currency{
