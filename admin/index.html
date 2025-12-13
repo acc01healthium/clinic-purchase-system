@@ -10,26 +10,19 @@
 
   <!-- Supabase SDK -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
+   
   <!-- 後台 Supabase client -->
   <script src="js/supabase.js?v=5"></script>
 
+ <!-- 🔐 後台登入防護（一定要在最前面） -->
+  <script src="js/auth-guard.js"></script>
+  
   <!-- 後台商品列表邏輯 -->
   <script defer src="js/index.js?v=5"></script>
 </head>
 
 <body>
 
-<script>
-  const supabase = window.supabaseClient;
-
-  supabase.auth.getSession().then(({ data }) => {
-    if (!data.session) {
-      location.replace("index.html");
-    }
-  });
-</script>
- 
   <!-- █████ HEADER █████ -->
   <header class="admin-header">
     <div class="admin-header-inner">
