@@ -22,14 +22,18 @@
       <label>密碼</label>
       <input id="loginPassword" type="password" class="login-input" />
 
-      <button class="btn-login" id="loginBtn">登入</button>
+      <button class="btn-login" id="loginBtn" type="button">登入</button>
     </div>
   </div>
 
 <script>
-document.getElementById("loginBtn").addEventListener("click", async () => {
-  const email = loginEmail.value.trim();
-  const password = loginPassword.value.trim();
+const loginBtn = document.getElementById("loginBtn");
+const emailInput = document.getElementById("loginEmail");
+const passwordInput = document.getElementById("loginPassword");
+
+loginBtn.addEventListener("click", async () => {
+  const email = emailInput.value.trim();
+  const password = passwordInput.value.trim();
 
   if (!email || !password) {
     alert("請輸入帳號與密碼");
@@ -38,7 +42,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
 
   const { error } = await window.supabaseClient.auth.signInWithPassword({
     email,
-    password
+    password,
   });
 
   if (error) {
@@ -46,17 +50,9 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     return;
   }
 
+  // ✅ 登入成功 → 只做一件事：跳後台
   location.replace("/clinic-purchase-system/admin/index.html");
 });
-</script>
-
-<script>
-(async () => {
-  const { data } = await window.supabaseClient.auth.getSession();
-  if (data.session) {
-    location.replace("/clinic-purchase-system/admin/index.html");
-  }
-})();
 </script>
 
 </body>
