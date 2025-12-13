@@ -46,12 +46,11 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     return;
   }
 
-  // ⚠️ 一定要寫完整 GitHub Pages 路徑
   location.replace("/clinic-purchase-system/admin/index.html");
 });
 </script>
 
- <script>
+<script>
 (async () => {
   const { data } = await window.supabaseClient.auth.getSession();
   if (data.session) {
