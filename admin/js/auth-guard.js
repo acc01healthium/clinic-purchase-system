@@ -1,18 +1,16 @@
-// auth-guard.js
-(async () => {
+// auth-guard.js（最終封版）
+(() => {
   const supabase = window.supabaseClient;
+  if (!supabase) return;
 
-  if (!supabase) {
-    console.error("Supabase client not found");
-    return;
-  }
+  let checked = false;
 
-  // ⭐ 等待 session 真正恢復
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  supabase.auth.onAuthStateChange((_event, session) => {
+    if (checked) return;
+    checked = true;
 
-  if (!session) {
-    location.replace("/clinic-purchase-system/admin/login.html");
-  }
+    if (!session) {
+      location.replace("/clinic-purchase-system/admin/login.html");
+    }
+  });
 })();
