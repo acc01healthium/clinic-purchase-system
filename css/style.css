@@ -214,10 +214,22 @@ body{
   gap:10px;
   flex:1;
 }
+
+/* 商品名 + 標籤區塊 */
+.card-head{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  padding-bottom:8px;
+  border-bottom:1px solid rgba(0,0,0,.06);
+}
+
 .card-title{
-  font-size:18px;
-  font-weight:900;
+  font-size:17px;
+  font-weight:600;        /* ← 改這裡（不要粗體） */
+  line-height:1.4;
   margin:0;
+  color:#111827;
 }
 .card-sub{
   display:flex;
