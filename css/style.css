@@ -271,7 +271,7 @@ body{
 /* NT$ */
 .price-value::before{
   content:"NT$ ";
-  color:var(--muted);
+  color:#111827(--muted);
   font-weight:700;
 }
 
