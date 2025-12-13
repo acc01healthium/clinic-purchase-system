@@ -368,3 +368,9 @@ h1, h2, h3, h4 {
 .btn-login:hover {
   background: var(--primary-dark);
 }
+
+/* ===== 後台登入防護用 ===== */
+.hidden {
+  visibility: hidden;
+}
+
