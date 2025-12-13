@@ -165,18 +165,24 @@ if (p.spec) {
     // 價格
   const price = document.createElement("div");
 price.className = "price";
-price.innerHTML = `
-  <div class="price-line">
-    <span class="price-label">進　　價：</span>
-    price.innerHTML = `
-  <div class="price-line">
-    <span class="price-label">進價：</span>
-    <span class="price-amount">
-      <span class="price-currency">NT$</span>
-      <span class="price-value">${escapeHtml(formatPrice(p.last_price))}</span>
-    </span>
-  </div>
-  <div class="price-line">
+
+price.innerHTML =
+  '<div class="price-line">' +
+    '<span class="price-label">進價：</span>' +
+    '<span class="price-amount">' +
+      '<span class="price-currency">NT$</span>' +
+      '<span class="price-value">' + escapeHtml(formatPrice(p.last_price)) + '</span>' +
+    '</span>' +
+  '</div>' +
+  '<div class="price-line">' +
+    '<span class="price-label">建議售價：</span>' +
+    '<span class="price-amount">' +
+      '<span class="price-currency">NT$</span>' +
+      '<span class="price-value">' + escapeHtml(formatPrice(p.suggested_price)) + '</span>' +
+    '</span>' +
+  '</div>';
+
+    <div class="price-line">
     <span class="price-label">建議售價：</span>
     <span class="price-amount">
       <span class="price-currency">NT$</span>
