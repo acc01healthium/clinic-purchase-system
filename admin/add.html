@@ -12,22 +12,15 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase.js"></script>
 
+    <!-- 🔐 後台登入防護（一定要在最前面） -->
+    <script src="js/auth-guard.js"></script>
+    
     <!-- add.js -->
     <script defer src="js/add.js"></script>
 </head>
 
-<body>
-    
-<script>
-  const supabase = window.supabaseClient;
-
-  supabase.auth.getSession().then(({ data }) => {
-    if (!data.session) {
-      location.replace("index.html");
-    }
-  });
-</script>
-    
+<body>  
+   
     <!-- Header -->
     <header class="admin-header">
         <div class="admin-header-inner">
