@@ -27,7 +27,7 @@
   supabase.auth.getSession().then(({ data }) => {
     if (!data.session) {
       // 未登入 → 強制回登入頁
-      location.replace("/admin/account.html");
+      location.replace("account.html");
     }
   });
 </script>
