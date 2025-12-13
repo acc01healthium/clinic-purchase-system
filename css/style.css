@@ -260,7 +260,7 @@ body{
 
 .price-line{
   display:grid;
-  grid-template-columns: 6ch 3ch 8ch;
+  grid-template-columns: 8ch 3ch 8ch;
   /* 標籤 | NT$ | 金額 */
   column-gap:6px;
   align-items:baseline;
