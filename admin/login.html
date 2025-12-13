@@ -31,22 +31,17 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   const email = loginEmail.value.trim();
   const password = loginPassword.value.trim();
 
-  if (!email || !password) {
-    alert("請輸入帳號與密碼");
-    return;
-  }
-
   const { error } = await window.supabaseClient.auth.signInWithPassword({
     email,
-    password
+    password,
   });
 
   if (error) {
-    alert("登入失敗：" + error.message);
+    alert(error.message);
     return;
   }
 
-  location.href = "/clinic-purchase-system/admin/index.html";
+  location.replace("/clinic-purchase-system/admin/index.html");
 });
 </script>
 
