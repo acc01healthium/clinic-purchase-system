@@ -1,16 +1,22 @@
-// auth-guard.js（最終封版）
-(() => {
+// admin/js/auth-guard.js
+(async () => {
   const supabase = window.supabaseClient;
-  if (!supabase) return;
+  const body = document.body;
 
-  let checked = false;
+  if (!supabase) {
+    console.error("Supabase client not found");
+    return;
+  }
 
-  supabase.auth.onAuthStateChange((_event, session) => {
-    if (checked) return;
-    checked = true;
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
-    if (!session) {
-      location.replace("/clinic-purchase-system/admin/login.html");
-    }
-  });
+  if (!session) {
+    location.replace("/clinic-purchase-system/admin/login.html");
+    return;
+  }
+
+  // ✅ 已登入 → 顯示畫面（解除 hidden）
+  body.classList.remove("hidden");
 })();
