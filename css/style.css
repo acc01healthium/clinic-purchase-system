@@ -276,8 +276,9 @@ body{
 .price-amount{
   display:inline-flex;
   align-items:baseline;
-  gap:4px;                       /* ← NT$ 與數字的距離在這裡控 */
+  gap:4px;
   justify-content:flex-end;
+  white-space:nowrap;   /* ← 🔥 關鍵：禁止 NT$ 與數字斷行 */
 }
 
 .price-currency{
