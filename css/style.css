@@ -391,9 +391,12 @@ body{
   font-weight:600;
 }
 
-.site-title,
-.card-title{
+.site-title{
   font-weight:900;
+}
+
+.card-title{
+  font-weight:600;   /* 商品名不粗體 */
 }
 
 .site-subtitle,
