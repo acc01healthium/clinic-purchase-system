@@ -249,7 +249,7 @@ body{
 }
 
 /* =========================
-   Price（千位符號精準對齊版）
+   Price（緊湊對齊版 v2）
 ========================= */
 .price{
   display:flex;
@@ -260,9 +260,9 @@ body{
 
 .price-line{
   display:grid;
-  grid-template-columns: 88px 40px 96px;
-  /* 標籤 | NT$ | 數字（固定寬度） */
-  column-gap:6px;
+  grid-template-columns: auto 32px minmax(72px, auto);
+  /* 標籤 | NT$ | 金額 */
+  column-gap:6px;              /* ← 關鍵：縮小間距 */
   align-items:baseline;
 }
 
@@ -279,11 +279,10 @@ body{
 }
 
 .price-value{
-  text-align:right;                    /* ← 關鍵 1：右對齊 */
+  text-align:right;
   font-weight:900;
   color:#111827;
-  font-variant-numeric: tabular-nums;  /* ← 關鍵 2：等寬數字 */
-  letter-spacing:0;
+  font-variant-numeric: tabular-nums;
 }
 
 /* =========================
@@ -428,6 +427,36 @@ body{
   gap:4px;
   font-weight:700;
   white-space:nowrap;
+}
+
+.meta-label{
+  color:#6b7280;
+  font-weight:600;
+}
+
+/* =========================
+   商品屬性列（含 icon 版）
+========================= */
+.card-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px 16px;
+  align-items:center;
+  font-size:13px;
+  color:#374151;
+}
+
+.meta-item{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-weight:700;
+  white-space:nowrap;
+}
+
+.meta-icon{
+  font-size:14px;
+  line-height:1;
 }
 
 .meta-label{
