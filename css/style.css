@@ -409,3 +409,28 @@ body{
   font-weight:600;
   color:#4b5563;
 }
+
+/* =========================
+   商品屬性列（v2 Meta Row）
+========================= */
+.card-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px 14px;
+  align-items:center;
+  font-size:13px;
+  color:#4b5563;
+}
+
+.meta-item{
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  font-weight:700;
+  white-space:nowrap;
+}
+
+.meta-label{
+  color:#6b7280;
+  font-weight:600;
+}
