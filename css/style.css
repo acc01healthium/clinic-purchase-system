@@ -262,7 +262,7 @@ body{
   display:grid;
   grid-template-columns: max-content 3ch 8ch;
   /* 標籤 | NT$ | 金額 */
-  column-gap:4px;
+  column-gap:8px;
   align-items:baseline;
 }
 
