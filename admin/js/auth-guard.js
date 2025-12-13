@@ -1,22 +1,20 @@
 // admin/js/auth-guard.js
-(async () => {
-  const supabase = window.supabaseClient;
-  const body = document.body;
+const supabase = window.supabaseClient;
 
-  if (!supabase) {
-    console.error("Supabase client not found");
-    return;
-  }
+if (!supabase) {
+  console.error("Supabase client not found");
+} else {
+  // 🔒 預設隱藏畫面
+  document.body.classList.add("hidden");
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  supabase.auth.onAuthStateChange((event, session) => {
+    // ❌ 未登入 or 已登出
+    if (!session) {
+      location.replace("/clinic-purchase-system/admin/login.html");
+      return;
+    }
 
-  if (!session) {
-    location.replace("/clinic-purchase-system/admin/login.html");
-    return;
-  }
-
-  // ✅ 已登入 → 顯示畫面（解除 hidden）
-  body.classList.remove("hidden");
-})();
+    // ✅ 已登入
+    document.body.classList.remove("hidden");
+  });
+}
