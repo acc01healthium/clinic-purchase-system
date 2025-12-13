@@ -249,7 +249,7 @@ body{
 }
 
 /* =========================
-   Price（緊湊對齊版 v2）
+   Price（精準對齊最終版）
 ========================= */
 .price{
   display:flex;
@@ -260,9 +260,9 @@ body{
 
 .price-line{
   display:grid;
-  grid-template-columns: auto 32px minmax(72px, auto);
+  grid-template-columns: 72px 28px minmax(60px, auto);
   /* 標籤 | NT$ | 金額 */
-  column-gap:6px;              /* ← 關鍵：縮小間距 */
+  column-gap:4px;               /* 再縮一點，更緊湊 */
   align-items:baseline;
 }
 
@@ -270,6 +270,7 @@ body{
   font-weight:800;
   color:#111827;
   white-space:nowrap;
+  text-align:justify;           /* ← 關鍵 */
 }
 
 .price-currency{
