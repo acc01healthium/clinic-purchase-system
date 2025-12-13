@@ -1,1 +1,12 @@
+<script src="/js/supabase.js"></script>
+<script>
+  const supabase = window.supabaseClient;
+
+  supabase.auth.getSession().then(({ data }) => {
+    if (!data.session) {
+      // ❌ 沒登入 → 強制回登入頁
+      location.replace("/admin/account.html");
+    }
+  });
+</script>
 
