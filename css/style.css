@@ -69,6 +69,23 @@ body{
   padding:18px;
 }
 
+/* =========================
+   搜尋提示文字位置修正
+========================= */
+.panel-row-bottom{
+  display:flex;
+  flex-direction:column;
+}
+
+.hint{
+  order:-1;                    /* 拉到最上面 */
+  margin-top:8px;
+  margin-bottom:12px;
+  font-size:14px;
+  color:#374151;
+  font-weight:600;
+}
+
 .search-box{
   display:flex;
   gap:10px;
@@ -236,17 +253,20 @@ body{
   align-items:baseline;
 }
 
+/* =========================
+   Price 標籤一致化（企業版）
+========================= */
 .price-label{
-  color:var(--muted);
-  text-align:justify;
-  text-align-last:justify;
+  color:#111827;       /* 與數字同色系 */
+  font-weight:800;     /* 與數字一致 */
   white-space:nowrap;
 }
 
 .price-value{
   font-weight:900;
-  white-space:nowrap;
+  color:#111827;
 }
+
 
 /* NT$ */
 .price-value::before{
@@ -344,4 +364,34 @@ body{
 .filter-item .select {
   min-width: 160px;
   max-width: 200px;
+}
+
+/* =========================
+   全站字體層級統一
+========================= */
+body{
+  font-weight:600;
+}
+
+.site-title,
+.card-title{
+  font-weight:900;
+}
+
+.site-subtitle,
+.filter-label,
+.hint{
+  font-weight:600;
+}
+
+.tag,
+.btn,
+.pill-primary{
+  font-weight:800;
+}
+
+.card-footer,
+.page-indicator{
+  font-weight:600;
+  color:#4b5563;
 }
