@@ -249,7 +249,7 @@ body{
 }
 
 /* =========================
-   Price（緊湊專業版）
+   Price（千位符號精準對齊版）
 ========================= */
 .price{
   display:flex;
@@ -260,10 +260,16 @@ body{
 
 .price-line{
   display:grid;
-  grid-template-columns: 88px 42px auto;
-  /* 標籤 | NT$ | 金額 */
+  grid-template-columns: 88px 40px 96px;
+  /* 標籤 | NT$ | 數字（固定寬度） */
   column-gap:6px;
   align-items:baseline;
+}
+
+.price-label{
+  font-weight:800;
+  color:#111827;
+  white-space:nowrap;
 }
 
 .price-currency{
@@ -273,24 +279,11 @@ body{
 }
 
 .price-value{
+  text-align:right;                    /* ← 關鍵 1：右對齊 */
   font-weight:900;
   color:#111827;
-  font-variant-numeric: tabular-nums; /* ← 關鍵：數字等寬 */
-  letter-spacing:.5px;
-}
-
-/* =========================
-   Price 標籤一致化（企業版）
-========================= */
-.price-label{
-  color:#111827;       /* 與數字同色系 */
-  font-weight:800;     /* 與數字一致 */
-  white-space:nowrap;
-}
-
-.price-value{
-  font-weight:900;
-  color:#111827;
+  font-variant-numeric: tabular-nums;  /* ← 關鍵 2：等寬數字 */
+  letter-spacing:0;
 }
 
 /* =========================
