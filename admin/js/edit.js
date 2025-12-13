@@ -32,7 +32,6 @@ const imagePreview = document.getElementById("imagePreview");
 
 const cancelBtn = document.getElementById("cancelBtn");
 const deleteBtn = document.getElementById("deleteBtn");
-const logoutBtn = document.getElementById("logoutBtn");
 
 let currentImageUrl = null;
 let newImageFile = null;
