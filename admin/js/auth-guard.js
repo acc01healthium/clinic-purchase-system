@@ -1,27 +1,15 @@
-(async function () {
+(async () => {
+  const BASE = "/clinic-purchase-system/admin";
+
+  // login 頁直接放行
+  if (location.pathname.endsWith("/login.html")) return;
+
   const supabase = window.supabaseClient;
-  if (!supabase) {
-    console.error("❌ supabaseClient 不存在");
-    return;
-  }
+  if (!supabase) return;
 
-  // 取得 session
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  const { data } = await supabase.auth.getSession();
 
-  // 未登入 → 強制回 login
-  if (!session) {
-    location.replace("login.html");
-    return;
-  }
-
-  // 登出按鈕（如果頁面有）
-  const logoutBtn = document.getElementById("logoutBtn");
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", async () => {
-      await supabase.auth.signOut();
-      location.replace("login.html");
-    });
+  if (!data || !data.session) {
+    location.replace(`${BASE}/login.html`);
   }
 })();
