@@ -1,18 +1,25 @@
-const supabase = window.supabaseClient;
+// admin/js/login.js
 
 document.addEventListener("DOMContentLoaded", () => {
-  const form = document.querySelector("form");
-  if (!form) return;
+  const btn = document.getElementById("loginBtn");
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  if (!btn) {
+    console.error("❌ 找不到 loginBtn");
+    return;
+  }
 
-    const email = document.querySelector("#email").value.trim();
-    const password = document.querySelector("#password").value;
+  btn.addEventListener("click", async () => {
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value.trim();
 
-    const { error } = await supabase.auth.signInWithPassword({
+    if (!email || !password) {
+      alert("請輸入帳號與密碼");
+      return;
+    }
+
+    const { error } = await window.supabaseClient.auth.signInWithPassword({
       email,
-      password,
+      password
     });
 
     if (error) {
@@ -20,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // ✅ 成功 → 只在這裡導向一次
+    // ✅ 登入成功 → 後台首頁（不留歷史）
     location.replace("index.html");
   });
 });
