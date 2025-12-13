@@ -206,3 +206,9 @@ document.querySelectorAll("th[data-sort]").forEach((th) => {
 
 // 初始化 -------------------------------------------
 document.addEventListener("DOMContentLoaded", loadProducts);
+
+logoutBtn.addEventListener("click", async () => {
+  await supabaseClient.auth.signOut();
+  location.replace("/clinic-purchase-system/admin/login.html");
+});
+
