@@ -82,5 +82,35 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     alert("儲存完成");
     location.href = "index.html";
+
+    // === 刪除商品 ===
+const deleteBtn = document.getElementById("deleteBtn");
+
+if (deleteBtn) {
+  deleteBtn.addEventListener("click", async () => {
+    if (!productId) {
+      alert("找不到商品 ID，無法刪除");
+      return;
+    }
+
+    const ok = confirm("確定要刪除此商品嗎？此動作無法復原！");
+    if (!ok) return;
+
+    const { error } = await supabaseClient
+      .from("products")
+      .delete()
+      .eq("id", productId);
+
+    if (error) {
+      console.error("刪除失敗", error);
+      alert("刪除失敗：" + error.message);
+      return;
+    }
+
+    alert("商品已刪除");
+    location.replace("index.html");
+  });
+}
+
   });
 });
