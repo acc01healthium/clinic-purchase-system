@@ -23,7 +23,7 @@
 
   supabase.auth.getSession().then(({ data }) => {
     if (!data.session) {
-      location.replace("account.html");
+      location.replace("index.html");
     }
   });
 </script>
