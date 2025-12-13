@@ -1,4 +1,5 @@
-// /admin/js/add.js
+import { compressImage, previewImage } from "./image-utils.js";
+
 console.log("新增商品頁 初始化");
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -6,79 +7,61 @@ document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("addForm");
   const cancelBtn = document.getElementById("cancelBtn");
   const imageInput = document.getElementById("imageFile");
+  const preview = document.getElementById("imagePreview");
 
-  if (!supabase || !form) {
-    console.error("Supabase 或表單不存在");
-    return;
-  }
+  imageInput.addEventListener("change", () =>
+    previewImage(imageInput, preview)
+  );
 
-  cancelBtn.addEventListener("click", () => {
-    location.href = "index.html";
-  });
+  cancelBtn.addEventListener("click", () => location.href = "index.html");
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const name = document.getElementById("name").value.trim();
-    const last_price = document.getElementById("last_price").value;
-
-    if (!name || last_price === "") {
-      alert("請至少填寫：商品名稱、進價");
+    const name = nameEl.value.trim();
+    if (!name || last_price.value === "") {
+      alert("商品名稱與進價必填");
       return;
     }
 
-    /* ========= ① 新增商品 ========= */
     const { data: product, error } = await supabase
       .from("products")
       .insert({
         name,
-        category: document.getElementById("category").value.trim() || null,
-        spec: document.getElementById("spec").value.trim() || null,
-        unit: document.getElementById("unit").value.trim() || null,
-        description: document.getElementById("description").value.trim() || null,
-        last_price: Number(last_price),
-        suggested_price:
-          document.getElementById("suggested_price").value === ""
-            ? null
-            : Number(document.getElementById("suggested_price").value),
-        is_active: document.getElementById("isActive").value === "true",
+        category: category.value || null,
+        spec: spec.value || null,
+        unit: unit.value || null,
+        description: description.value || null,
+        last_price: Number(last_price.value),
+        suggested_price: suggested_price.value
+          ? Number(suggested_price.value)
+          : null,
+        is_active: isActive.value === "true",
         last_price_updated_at: new Date().toISOString(),
       })
       .select()
       .single();
 
-    if (error) {
-      alert("新增失敗：" + error.message);
-      return;
+    if (error) return alert(error.message);
+
+    if (imageInput.files.length) {
+      const compressed = await compressImage(imageInput.files[0]);
+      const path = `${product.id}/${Date.now()}.jpg`;
+
+      await supabase.storage
+        .from("product-images")
+        .upload(path, compressed, { upsert: true });
+
+      const url = supabase.storage
+        .from("product-images")
+        .getPublicUrl(path).data.publicUrl;
+
+      await supabase.from("products")
+        .update({ image_url: url })
+        .eq("id", product.id);
     }
 
-    const productId = product.id;
-
-    /* ========= ② 上傳圖片（有選才做） ========= */
-    if (imageInput && imageInput.files.length > 0) {
-      const file = imageInput.files[0];
-      const filePath = `${productId}/${Date.now()}-${file.name}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from("product-images")
-        .upload(filePath, file, { upsert: true });
-
-      if (uploadError) {
-        alert("圖片上傳失敗：" + uploadError.message);
-        return;
-      }
-
-      const publicUrl = supabase.storage
-        .from("product-images")
-        .getPublicUrl(filePath).data.publicUrl;
-
-      await supabase
-        .from("products")
-        .update({ image_url: publicUrl })
-        .eq("id", productId);
-    }
-
-    alert("新增成功");
+    alert("新增完成");
     location.href = "index.html";
   });
 });
