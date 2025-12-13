@@ -51,5 +51,14 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
 });
 </script>
 
+ <script>
+(async () => {
+  const { data } = await window.supabaseClient.auth.getSession();
+  if (data.session) {
+    location.replace("/clinic-purchase-system/admin/index.html");
+  }
+})();
+</script>
+
 </body>
 </html>
