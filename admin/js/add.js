@@ -1,3 +1,5 @@
+console.log("✅ add.js 已載入");
+
 // /admin/js/add.js
 // 新增商品邏輯：新增、圖片上傳、表單驗證
 
