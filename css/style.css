@@ -260,7 +260,7 @@ body{
 
 .price-line{
   display:grid;
-  grid-template-columns: 4em 3ch 8ch;
+  grid-template-columns: 6ch 3ch 8ch;
   /* 標籤 | NT$ | 金額 */
   column-gap:6px;
   align-items:baseline;
@@ -269,7 +269,8 @@ body{
 .price-label{
   font-weight:800;
   color:#111827;
-  text-align-last:justify;   /* ← 關鍵：中文對齊 */
+  text-align:left;        /* ← 關鍵：不要 justify */
+  white-space:nowrap;     /* ← 禁止拆字 */
 }
 
 .price-currency{
