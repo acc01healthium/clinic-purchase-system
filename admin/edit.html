@@ -14,21 +14,14 @@
   <!-- 後台 Supabase client（B 專案，已在這裡建立 window.supabaseClient） -->
   <script src="js/supabase.js?v=1"></script>
 
+ <!-- 🔐 後台登入防護（一定要在最前面） -->
+  <script src="js/auth-guard.js"></script>
+  
   <!-- 編輯商品邏輯 -->
   <script defer src="js/edit.js?v=1"></script>
 </head>
 
 <body>
-
- <script>
-  const supabase = window.supabaseClient;
-
-  supabase.auth.getSession().then(({ data }) => {
-    if (!data.session) {
-      location.replace("index.html");
-    }
-  });
-</script>
   
   <!-- Header -->
   <header class="admin-header">
