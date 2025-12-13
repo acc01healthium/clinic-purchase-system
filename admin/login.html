@@ -28,8 +28,8 @@
 
 <script>
 document.getElementById("loginBtn").addEventListener("click", async () => {
-  const email = document.getElementById("loginEmail").value.trim();
-  const password = document.getElementById("loginPassword").value.trim();
+  const email = loginEmail.value.trim();
+  const password = loginPassword.value.trim();
 
   if (!email || !password) {
     alert("請輸入帳號與密碼");
@@ -46,7 +46,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     return;
   }
 
-  // ✅ GitHub Pages 正確路徑
+  // ⚠️ 一定要寫完整 GitHub Pages 路徑
   location.replace("/clinic-purchase-system/admin/index.html");
 });
 </script>
