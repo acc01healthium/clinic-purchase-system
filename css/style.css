@@ -260,9 +260,8 @@ body{
 
 .price-line{
   display:grid;
-  grid-template-columns: 72px auto;
-  /* 標籤 | 金額單元 */
-  column-gap:6px;
+  grid-template-columns: max-content max-content;
+  column-gap:6px;          /* 你可以調成 6px / 4px */
   align-items:baseline;
 }
 
