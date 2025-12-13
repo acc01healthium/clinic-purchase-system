@@ -124,6 +124,10 @@ if (p.unit) {
   const item = document.createElement("div");
   item.className = "meta-item";
 
+  const icon = document.createElement("span");
+  icon.className = "meta-icon";
+  icon.textContent = "📦";
+
   const label = document.createElement("span");
   label.className = "meta-label";
   label.textContent = "單位：";
@@ -131,6 +135,7 @@ if (p.unit) {
   const val = document.createElement("span");
   val.textContent = p.unit;
 
+  item.appendChild(icon);
   item.appendChild(label);
   item.appendChild(val);
   meta.appendChild(item);
@@ -140,6 +145,10 @@ if (p.spec) {
   const item = document.createElement("div");
   item.className = "meta-item";
 
+  const icon = document.createElement("span");
+  icon.className = "meta-icon";
+  icon.textContent = "📏";
+
   const label = document.createElement("span");
   label.className = "meta-label";
   label.textContent = "規格：";
@@ -147,6 +156,7 @@ if (p.spec) {
   const val = document.createElement("span");
   val.textContent = p.spec;
 
+  item.appendChild(icon);
   item.appendChild(label);
   item.appendChild(val);
   meta.appendChild(item);
