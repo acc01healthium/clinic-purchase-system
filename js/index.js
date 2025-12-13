@@ -167,7 +167,7 @@ if (p.spec) {
 price.className = "price";
 price.innerHTML = `
   <div class="price-line">
-    <span class="price-label">進價：</span>
+    <span class="price-label">進　　價：</span>
     <span class="price-currency">NT$</span>
     <span class="price-value">${escapeHtml(formatPrice(p.last_price))}</span>
   </div>
