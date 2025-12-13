@@ -26,7 +26,6 @@ const imageFileInput = document.getElementById("imageFile");
 const imagePreview = document.getElementById("imagePreview");
 
 const cancelBtn = document.getElementById("cancelBtn");
-const logoutBtn = document.getElementById("logoutBtn");
 
 let newImageFile = null;
 
