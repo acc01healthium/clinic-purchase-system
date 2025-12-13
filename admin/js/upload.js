@@ -214,11 +214,12 @@ previewBtn.addEventListener("click", handlePreview);
 confirmBtn.addEventListener("click", handleConfirm);
 resetBtn.addEventListener("click", handleReset);
 
+// === 登出 ===
 const logoutBtn = document.getElementById("logoutBtn");
 
 if (logoutBtn) {
   logoutBtn.addEventListener("click", async () => {
-    await supabaseClient.auth.signOut();
+    await window.supabaseClient.auth.signOut();
     location.replace("/clinic-purchase-system/admin/login.html");
   });
 }
