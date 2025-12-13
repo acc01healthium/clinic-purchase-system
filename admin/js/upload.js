@@ -213,3 +213,12 @@ function handleReset() {
 previewBtn.addEventListener("click", handlePreview);
 confirmBtn.addEventListener("click", handleConfirm);
 resetBtn.addEventListener("click", handleReset);
+
+const logoutBtn = document.getElementById("logoutBtn");
+
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", async () => {
+    await supabaseClient.auth.signOut();
+    location.replace("/clinic-purchase-system/admin/login.html");
+  });
+}
