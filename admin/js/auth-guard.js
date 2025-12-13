@@ -1,5 +1,5 @@
 // admin/js/auth-guard.js
-(async () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const supabase = window.supabaseClient;
   const body = document.body;
 
@@ -8,10 +8,10 @@
     return;
   }
 
-  // 🔒 預設隱藏畫面
+  // 🔒 先隱藏畫面
   body.classList.add("hidden");
 
-  // ✅ 1️⃣ 先主動檢查一次 session（解決空白頁）
+  // ✅ 檢查目前 session
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -21,13 +21,13 @@
     return;
   }
 
-  // ✅ 已登入 → 先顯示畫面
+  // ✅ 已登入 → 顯示畫面
   body.classList.remove("hidden");
 
-  // ✅ 2️⃣ 再監聽後續登入 / 登出狀態
+  // 🔄 監聽後續登出
   supabase.auth.onAuthStateChange((event, newSession) => {
     if (!newSession) {
       location.replace("/clinic-purchase-system/admin/login.html");
     }
   });
-})();
+});
