@@ -1,13 +1,11 @@
-// /admin/js/auth-guard.js
-
 (async () => {
-  const { data } = await window.supabaseClient.auth.getSession();
+  const { data, error } = await window.supabaseClient.auth.getSession();
 
-  if (!data.session) {
+  if (error || !data.session) {
     location.replace("/clinic-purchase-system/admin/login.html");
     return;
   }
 
-  // ✅ 有登入 → 顯示畫面
+  // 顯示畫面（解除 hidden）
   document.body.classList.remove("hidden");
 })();
