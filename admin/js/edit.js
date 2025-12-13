@@ -1,13 +1,16 @@
 // /admin/js/edit.js
+let productId = null;
 console.log("後台 編輯商品 初始化");
 
 document.addEventListener("DOMContentLoaded", async () => {
   const supabase = window.supabaseClient;
 
+  // 取得 ID
   const params = new URLSearchParams(location.search);
-  const id = params.get("id");
+  productId = params.get("id");
+  console.log("edit productId =", productId);
 
-  if (!id) {
+  if (!productId) {
     alert("缺少商品 ID");
     location.href = "index.html";
     return;
@@ -16,12 +19,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 表單欄位
   const form = document.getElementById("editForm");
   const cancelBtn = document.getElementById("cancelBtn");
+  const deleteBtn = document.getElementById("deleteBtn");
 
   // 讀取資料
   const { data, error } = await supabase
     .from("products")
     .select("*")
-    .eq("id", id)
+    .eq("id", productId)
     .single();
 
   if (error || !data) {
@@ -41,10 +45,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     data.suggested_price ?? "";
   document.getElementById("isActive").value = String(data.is_active);
 
+  // 取消
   cancelBtn.addEventListener("click", () => {
     location.href = "index.html";
   });
 
+  // 儲存
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -73,7 +79,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const { error } = await supabase
       .from("products")
       .update(payload)
-      .eq("id", id);
+      .eq("id", productId);
 
     if (error) {
       alert("儲存失敗：" + error.message);
@@ -82,35 +88,29 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     alert("儲存完成");
     location.href = "index.html";
-
-    // === 刪除商品 ===
-const deleteBtn = document.getElementById("deleteBtn");
-
-if (deleteBtn) {
-  deleteBtn.addEventListener("click", async () => {
-    if (!productId) {
-      alert("找不到商品 ID，無法刪除");
-      return;
-    }
-
-    const ok = confirm("確定要刪除此商品嗎？此動作無法復原！");
-    if (!ok) return;
-
-    const { error } = await supabaseClient
-      .from("products")
-      .delete()
-      .eq("id", productId);
-
-    if (error) {
-      console.error("刪除失敗", error);
-      alert("刪除失敗：" + error.message);
-      return;
-    }
-
-    alert("商品已刪除");
-    location.replace("index.html");
   });
-}
 
-  });
+  // 刪除（一定要在 submit 外面）
+  if (deleteBtn) {
+    deleteBtn.addEventListener("click", async () => {
+      console.log("delete clicked, id =", productId);
+
+      if (!confirm("確定要刪除此商品嗎？此動作無法復原！")) {
+        return;
+      }
+
+      const { error } = await supabase
+        .from("products")
+        .delete()
+        .eq("id", productId);
+
+      if (error) {
+        alert("刪除失敗：" + error.message);
+        return;
+      }
+
+      alert("商品已刪除");
+      location.href = "index.html";
+    });
+  }
 });
