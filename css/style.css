@@ -260,9 +260,23 @@ body{
 
 .price-line{
   display:grid;
-  grid-template-columns: 88px auto; /* 標籤 | 金額 */
-  column-gap:12px;
+  grid-template-columns: 88px 42px auto;
+  /* 標籤 | NT$ | 金額 */
+  column-gap:6px;
   align-items:baseline;
+}
+
+.price-currency{
+  text-align:right;
+  font-weight:700;
+  color:#111827;
+}
+
+.price-value{
+  font-weight:900;
+  color:#111827;
+  font-variant-numeric: tabular-nums; /* ← 關鍵：數字等寬 */
+  letter-spacing:.5px;
 }
 
 /* =========================
@@ -277,14 +291,6 @@ body{
 .price-value{
   font-weight:900;
   color:#111827;
-}
-
-
-/* NT$ */
-.price-value::before{
-  content:"NT$ ";
-  color:#111827(--muted);
-  font-weight:700;
 }
 
 /* =========================
