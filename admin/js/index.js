@@ -187,12 +187,6 @@ nextPageBtn.addEventListener("click", () => {
   applyFilters();
 });
 
-// -----------------------------
-// 修正：index.html 的登出按鈕沒有綁事件
-// -----------------------------
-logoutBtn.addEventListener("click", () => {
-  window.location.href = "login.html";
-});
 
 // 欄位排序（點表頭就排序）
 document.querySelectorAll("th[data-sort]").forEach((th) => {
