@@ -170,9 +170,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const jpgBlob = await compressToJpg(file, 1280, 0.82);
 
         const filePath = `products/product-${productId}.jpg`;
-
-       const filePath = `products/product-${productId}.jpg`;
-
+       
 // ✅ 1. 先嘗試刪除舊檔（沒有也不會報錯）
 await supabase.storage
   .from("product-images")
