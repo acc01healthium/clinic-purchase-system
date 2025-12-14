@@ -47,6 +47,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     location.href = "index.html";
   });
 
+  // ②-1 顯示目前圖片（預覽）
+const preview = document.getElementById("imagePreview");
+preview.innerHTML = "";
+
+if (data.image_url) {
+  const img = document.createElement("img");
+  img.src = data.image_url;
+  img.style.maxWidth = "220px";
+  img.style.borderRadius = "8px";
+  img.style.display = "block";
+  preview.appendChild(img);
+} else {
+  preview.innerHTML = `<span class="edit-image-placeholder">目前尚無圖片</span>`;
+}  
+
   // ③ 儲存
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -78,8 +93,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     // 圖片更新
     if (imageInput.files.length > 0) {
       const file = imageInput.files[0];
-      const ext = file.name.split(".").pop();
-      const path = `${productId}.${ext}`;
+      const path = `products/${productId}.jpg`;
 
       await supabase.storage
         .from("product-images")
@@ -108,9 +122,3 @@ document.addEventListener("DOMContentLoaded", async () => {
     location.href = "index.html";
   });
 });
-
-if (product.image_url) {
-  const img = document.getElementById("imagePreview");
-  img.src = product.image_url;
-  img.style.display = "block";
-}
