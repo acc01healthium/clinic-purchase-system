@@ -108,3 +108,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     location.href = "index.html";
   });
 });
+
+if (product.image_url) {
+  const img = document.getElementById("imagePreview");
+  img.src = product.image_url;
+  img.style.display = "block";
+}
