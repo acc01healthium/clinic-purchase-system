@@ -171,12 +171,26 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const filePath = `products/product-${productId}.jpg`;
 
-        const { error: uploadError } = await supabase.storage
-          .from("product-images")
-          .upload(filePath, jpgBlob, {
-            upsert: true,
-            contentType: "image/jpeg",
-          });
+       const filePath = `products/product-${productId}.jpg`;
+
+// ✅ 1. 先嘗試刪除舊檔（沒有也不會報錯）
+await supabase.storage
+  .from("product-images")
+  .remove([filePath]);
+
+// ✅ 2. 再上傳新檔（只會走 INSERT）
+const { error: uploadError } = await supabase.storage
+  .from("product-images")
+  .upload(filePath, jpgBlob, {
+    upsert: false,              // ← 這裡非常重要
+    contentType: "image/jpeg",
+  });
+
+if (uploadError) {
+  alert("圖片上傳失敗：" + uploadError.message);
+  return;
+}
+
 
         if (uploadError) {
           alert("圖片上傳失敗：" + uploadError.message);
