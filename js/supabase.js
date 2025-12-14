@@ -14,3 +14,9 @@ if (!window.supabase) {
   });
   console.log("✅ 前台 Supabase 初始化成功");
 }
+
+// 後台專用（service role）
+window.supabaseAdmin = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_SERVICE_ROLE_KEY
+);
