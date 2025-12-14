@@ -79,7 +79,7 @@ if (imageFileInput.files.length > 0) {
         .eq("id", productId);
     }
 
-    alert("新增成功");
+    alert("新增成功！";
     location.href = "index.html";
   });
 });
