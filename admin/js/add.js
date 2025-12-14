@@ -1,5 +1,3 @@
-import { compressImage, previewImage } from "./image-utils.js";
-
 console.log("新增商品頁 初始化");
 
 document.addEventListener("DOMContentLoaded", () => {
