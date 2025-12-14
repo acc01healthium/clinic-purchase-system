@@ -95,9 +95,13 @@ if (data.image_url) {
       const file = imageInput.files[0];
       const path = `products/${productId}.jpg`;
 
-      await supabase.storage
-        .from("product-images")
-        .upload(path, file, { upsert: true });
+      - await supabase.storage
++ await window.supabaseAdmin.storage
+    .from("product-images")
+    .upload(path, file, {
+      upsert: true,
+      contentType: file.type,
+    });
 
       const image_url = supabase.storage
         .from("product-images")
