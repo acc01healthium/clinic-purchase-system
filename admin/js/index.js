@@ -139,6 +139,7 @@ function renderTable(data) {
     tr.innerHTML = `
       <td>${p.name || ""}</td>
       <td>${p.category || "—"}</td>
+      <td>${p.spec || "—"}</td>
       <td>
         <span class="tooltip" title="${p.description || ""}">
           ${descriptionShort}
