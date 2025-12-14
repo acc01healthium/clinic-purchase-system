@@ -1,88 +1,120 @@
-// /admin/js/add.js
-console.log("新增商品頁 初始化");
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>新增商品 | 康醫採購管理系統</title>
 
-document.addEventListener("DOMContentLoaded", () => {
-  const supabase = window.supabaseClient;
-  const form = document.getElementById("addForm");
-  const cancelBtn = document.getElementById("cancelBtn");
-  const imageInput = document.getElementById("imageFile");
+    <!-- 全站通用樣式 -->
+    <link rel="stylesheet" href="css/admin.css?v=5" />
 
-  if (!supabase || !form) {
-    console.error("Supabase 或表單不存在");
-    return;
-  }
+    <!-- Supabase Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
 
-  cancelBtn.addEventListener("click", () => {
-    location.href = "index.html";
-  });
+    <!-- 🔐 後台登入防護（一定要在最前面） -->
+    <script src="js/auth-guard.js"></script>
+    
+    <!-- add.js -->
+   <script src="js/add.js"></script>
+</head>
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+<body class="admin-body hidden">  
+   
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="admin-header-inner">
+            <div>
+                <div class="admin-title">康醫採購管理系統 | 後台</div>
+                <div class="admin-subtitle">新增商品</div>
+            </div>
 
-    const name = document.getElementById("name").value.trim();
-    const last_price = document.getElementById("last_price").value;
+            <div class="admin-header-buttons">
+                <a href="index.html" class="admin-btn">商品列表</a>
+                <a href="login.html" class="admin-btn admin-btn-danger" id="logoutBtn">登出</a>
+            </div>
+        </div>
+    </header>
 
-    if (!name || last_price === "") {
-      alert("請至少填寫：商品名稱、進價");
-      return;
-    }
+    <main class="admin-main">
+        <div class="card edit-card">
+            <h2>新增商品</h2>
 
-    // ① 先新增商品（不含圖片）
-    const payload = {
-      name,
-      category: document.getElementById("category").value.trim() || null,
-      spec: document.getElementById("spec").value.trim() || null,
-      unit: document.getElementById("unit").value.trim() || null,
-      description: document.getElementById("description").value.trim() || null,
-      last_price: Number(last_price),
-      suggested_price:
-        document.getElementById("suggested_price").value === ""
-          ? null
-          : Number(document.getElementById("suggested_price").value),
-      is_active: document.getElementById("isActive").value === "true",
-      last_price_updated_at: new Date().toISOString(),
-    };
+            <form id="addForm" class="edit-form">
+                <!-- 商品名稱 -->
+                <div class="edit-row">
+                    <label class="edit-label">商品名稱（必填）</label>
+                    <input type="text" id="name" class="edit-input" placeholder="例如：BD-24G留置針" required />
+                </div>
 
-    const { data, error } = await supabase
-      .from("products")
-      .insert(payload)
-      .select()
-      .single();
+                <!-- 類別 -->
+                <div class="edit-row">
+                    <label class="edit-label">類別</label>
+                    <input type="text" id="category" class="edit-input" placeholder="例如：醫療耗材" />
+                </div>
 
-    if (error) {
-      alert("新增失敗：" + error.message);
-      return;
-    }
+                <!-- 規格 -->
+                <div class="edit-row">
+                    <label class="edit-label">規格 / 描述（規格）</label>
+                    <input type="text" id="spec" class="edit-input" placeholder="例如：50支" />
+                </div>
 
-    const productId = data.id;
+                <!-- 單位 -->
+                <div class="edit-row">
+                    <label class="edit-label">單位</label>
+                    <input type="text" id="unit" class="edit-input" placeholder="例如：盒、瓶..." />
+                </div>
 
-    // ② 若有圖片 → 上傳
-    if (imageInput.files.length > 0) {
-      const file = imageInput.files[0];
-      const ext = file.name.split(".").pop();
-      const path = `${productId}.${ext}`;
+                <!-- 描述 -->
+                <div class="edit-row">
+                    <label class="edit-label">
+                        大量採購備註（description）
+                    </label>
+                    <textarea id="description" class="edit-textarea" placeholder="例如：大量採購價格可議，或特殊備註"></textarea>
+                </div>
 
-      const { error: uploadError } = await supabase.storage
-        .from("product-images")
-        .upload(path, file, { upsert: true });
+                <!-- 進價 -->
+                <div class="edit-row">
+                    <label class="edit-label">進價（必填，數字）</label>
+                    <input type="number" id="last_price" class="edit-input" placeholder="例如：250" required />
+                </div>
 
-      if (uploadError) {
-        alert("商品已新增，但圖片上傳失敗：" + uploadError.message);
-        location.href = "index.html";
-        return;
-      }
+                <!-- 建議售價 -->
+                <div class="edit-row">
+                    <label class="edit-label">建議售價（選填，數字）</label>
+                    <input type="number" id="suggested_price" class="edit-input" placeholder="例如：300" />
+                </div>
 
-      const image_url = supabase.storage
-        .from("product-images")
-        .getPublicUrl(path).data.publicUrl;
+                <!-- 狀態 -->
+                <div class="edit-row">
+                    <label class="edit-label">是否啟用</label>
+                    <select id="isActive" class="edit-input">
+                        <option value="true">啟用</option>
+                        <option value="false">停用</option>
+                    </select>
+                </div>
 
-      await supabase
-        .from("products")
-        .update({ image_url })
-        .eq("id", productId);
-    }
+                <!-- 圖片 -->
+                <div class="edit-row">
+                    <label class="edit-label">商品圖片（選填）</label>
 
-    alert("新增成功");
-    location.href = "index.html";
-  });
-});
+                    <div class="edit-image-row">
+                        <input type="file" id="imageFile" class="edit-input-file" accept="image/*" />
+                        <span class="edit-image-hint">選擇圖片後會自動壓縮上傳至系統（建議長邊約1280px）</span>
+                    </div>
+
+                    <div id="imagePreview" class="edit-image-preview">
+                        <span class="edit-image-placeholder">尚未選擇圖片</span>
+                    </div>
+                </div>
+
+                <!-- 按鈕 -->
+                <div class="edit-actions">
+                    <button type="button" id="cancelBtn" class="btn-secondary">取消</button>
+                    <button type="submit" class="btn-primary">新增商品</button>
+                </div>
+            </form>
+        </div>
+    </main>
+</body>
+</html>
