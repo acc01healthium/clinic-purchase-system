@@ -49,20 +49,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const productId = inserted.id;
 
-    // ② 如果有選圖片 → 上傳圖片
-    if (imageFileInput.files.length > 0) {
-      const file = imageFileInput.files[0];
-      const ext = file.name.split(".").pop();
-      const filePath = `products/product-${productId}.${ext}`;
+  // ② 如果有選圖片 → 上傳圖片
+if (imageFileInput.files.length > 0) {
+  const file = imageFileInput.files[0];
+  const ext = file.name.split(".").pop();
+  const filePath = `products/product-${productId}.${ext}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from("product-images")
-        .upload(filePath, file, { upsert: true });
+  const { error: uploadError } = await supabase.storage
+    .from("product-images")
+    .upload(filePath, file, {
+      upsert: false,
+      contentType: file.type
+    });
 
-      if (uploadError) {
-        alert("圖片上傳失敗：" + uploadError.message);
-        return;
-      }
+  if (uploadError) {
+    alert("圖片上傳失敗：" + uploadError.message);
+    return;
+  }
+}
 
       const imageUrl =
         `https://utwhtjtgwryeljgwlwzm.supabase.co/storage/v1/object/public/product-images/` +
