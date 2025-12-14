@@ -22,34 +22,21 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // ① 先新增商品（不含圖片）
-    const { data: inserted, error } = await supabase
-      .from("products")
-      .insert({
-        name,
-        category: document.getElementById("category").value.trim() || null,
-        spec: document.getElementById("spec").value.trim() || null,
-        unit: document.getElementById("unit").value.trim() || null,
-        description: document.getElementById("description").value.trim() || null,
-        last_price: Number(last_price),
-        suggested_price:
-          document.getElementById("suggested_price").value === ""
-            ? null
-            : Number(document.getElementById("suggested_price").value),
-        is_active: document.getElementById("isActive").value === "true",
-        last_price_updated_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
+   // 新增商品
+const { data, error } = await supabase
+  .from("products")
+  .insert([payload])
+  .select()
+  .single();
 
-    if (error) {
-      alert("新增商品失敗：" + error.message);
-      return;
-    }
+if (error) {
+  alert("新增失敗：" + error.message);
+  return;
+}
 
-    const productId = inserted.id;
+const productId = data.id;
 
-  // ② 如果有選圖片 → 上傳圖片
+// 上傳圖片（如果有）
 if (imageFileInput.files.length > 0) {
   const file = imageFileInput.files[0];
   const ext = file.name.split(".").pop();
@@ -66,20 +53,16 @@ if (imageFileInput.files.length > 0) {
     alert("圖片上傳失敗：" + uploadError.message);
     return;
   }
+
+  // 回寫 image_url
+  const imageUrl =
+    `${SUPABASE_URL}/storage/v1/object/public/product-images/${filePath}`;
+
+  await supabase
+    .from("products")
+    .update({ image_url: imageUrl })
+    .eq("id", productId);
 }
 
-      const imageUrl =
-        `https://utwhtjtgwryeljgwlwzm.supabase.co/storage/v1/object/public/product-images/` +
-        filePath;
-
-      // ③ 回寫 image_url
-      await supabase
-        .from("products")
-        .update({ image_url: imageUrl })
-        .eq("id", productId);
-    }
-
-    alert("新增成功！";
-    location.href = "index.html";
-  });
-});
+alert("新增成功");
+location.href = "index.html";
