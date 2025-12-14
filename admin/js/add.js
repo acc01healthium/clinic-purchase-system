@@ -52,14 +52,15 @@ document.addEventListener("DOMContentLoaded", () => {
     // ② 上傳圖片
     if (imageInput.files.length > 0) {
       const file = imageInput.files[0];
-      const path = `products/${productId}.jpg`;
+      const ext = file.name.split(".").pop().toLowerCase();
+      const filePath = `products/product-${productId}.${ext}`;
 
-      const { error } = await window.supabaseAdmin.storage
-  .from("product-images")
-  .upload(filePath, file, {
-    upsert: true,
-    contentType: file.type,
-  });
+      const { error: uploadError } = await supabase.storage
+        .from("product-images")
+        .upload(filePath, file, {
+          upsert: true,
+          contentType: file.type,
+        });
 
       if (uploadError) {
         alert("圖片上傳失敗：" + uploadError.message);
@@ -67,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       const image_url =
-        `${SUPABASE_URL}/storage/v1/object/public/product-images/${path}`;
+        `${SUPABASE_URL}/storage/v1/object/public/product-images/${filePath}`;
 
       await supabase
         .from("products")
