@@ -1,11 +1,15 @@
+// /admin/js/auth-guard.js
 (async () => {
-  const { data, error } = await window.supabaseClient.auth.getSession();
+  const supabase = window.supabaseClient;
+  if (!supabase) return;
 
-  if (error || !data.session) {
-    location.replace("/clinic-purchase-system/admin/login.html");
+  const { data } = await supabase.auth.getSession();
+
+  if (!data.session) {
+    location.replace("login.html");
     return;
   }
 
-  // 顯示畫面（解除 hidden）
+  // ✅ 登入成功才顯示畫面（解除 hidden）
   document.body.classList.remove("hidden");
 })();
