@@ -92,20 +92,23 @@ if (data.image_url) {
 
     // 圖片更新
     if (imageInput.files.length > 0) {
+      if (!window.supabaseAdmin) {
+  alert("系統錯誤：supabaseAdmin 尚未初始化");
+  return;
+}
       const file = imageInput.files[0];
       const path = `products/${productId}.jpg`;
-
       - await supabase.storage
-+ await window.supabaseAdmin.storage
+      + await window.supabaseAdmin.storage
     .from("product-images")
     .upload(path, file, {
       upsert: true,
       contentType: file.type,
     });
 
-      const image_url = supabase.storage
-        .from("product-images")
-        .getPublicUrl(path).data.publicUrl;
+      const image_url = window.supabaseAdmin.storage
+  .from("product-images")
+  .getPublicUrl(path).data.publicUrl;
 
       await supabase
         .from("products")
