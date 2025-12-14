@@ -54,13 +54,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const file = imageInput.files[0];
       const path = `products/${productId}.jpg`;
 
-      const { error: uploadError } = - await supabase.storage
-+ await window.supabaseAdmin.storage
-        .from("product-images")
-        .upload(path, file, {
-          upsert: true,
-          contentType: file.type,
-        });
+      const { error } = await window.supabaseAdmin.storage
+  .from("product-images")
+  .upload(filePath, file, {
+    upsert: true,
+    contentType: file.type,
+  });
 
       if (uploadError) {
         alert("圖片上傳失敗：" + uploadError.message);
