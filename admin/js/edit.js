@@ -90,31 +90,39 @@ if (data.image_url) {
 
     await supabase.from("products").update(payload).eq("id", productId);
 
-    // 圖片更新
-    if (imageInput.files.length > 0) {
-      if (!window.supabaseAdmin) {
-  alert("系統錯誤：supabaseAdmin 尚未初始化");
-  return;
+   // 圖片更新
+if (imageInput.files.length > 0) {
+  if (!window.supabaseAdmin) {
+    alert("系統錯誤：supabaseAdmin 尚未初始化");
+    return;
+  }
+
+  const file = imageInput.files[0];
+  const path = `products/${productId}.jpg`;
+
+  const { error: uploadError } =
+    await window.supabaseAdmin.storage
+      .from("product-images")
+      .upload(path, file, {
+        upsert: true,
+        contentType: "image/jpeg",
+      });
+
+  if (uploadError) {
+    alert("圖片上傳失敗：" + uploadError.message);
+    return;
+  }
+
+  const image_url =
+    window.supabaseAdmin.storage
+      .from("product-images")
+      .getPublicUrl(path).data.publicUrl;
+
+  await supabase
+    .from("products")
+    .update({ image_url })
+    .eq("id", productId);
 }
-      const file = imageInput.files[0];
-      const path = `products/${productId}.jpg`;
-      - await supabase.storage
-      + await window.supabaseAdmin.storage
-    .from("product-images")
-    .upload(path, file, {
-      upsert: true,
-      contentType: file.type,
-    });
-
-      const image_url = window.supabaseAdmin.storage
-  .from("product-images")
-  .getPublicUrl(path).data.publicUrl;
-
-      await supabase
-        .from("products")
-        .update({ image_url })
-        .eq("id", productId);
-    }
 
     alert("儲存完成");
     location.href = "index.html";
