@@ -84,17 +84,20 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   // ① 讀商品資料
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .eq("id", productId)
-    .single();
+ const { data, error } = await supabase
+  .from("products")
+  .select("*")
+  .eq("id", productId)
+  .single();
 
-  if (error || !data) {
-    alert("讀取商品失敗：" + (error?.message || ""));
-    location.href = "index.html";
-    return;
-  }
+if (error || !data) {
+  alert("讀取商品失敗：" + (error?.message || ""));
+  location.href = "index.html";
+  return;
+}
+
+// ⭐ 正確位置
+const originalLastPrice = data.last_price;
 
   // ② 帶入表單
   document.getElementById("name").value = data.name || "";
@@ -121,106 +124,87 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   // ③ 儲存
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
 
-    try {
-      const name = document.getElementById("name").value.trim();
-      const last_price_raw = document.getElementById("last_price").value;
+  try {
+    const name = document.getElementById("name").value.trim();
+    const last_price_raw = document.getElementById("last_price").value;
 
-      if (!name || last_price_raw === "") {
-        alert("商品名稱與進價不可空白");
-        return;
-      }
-
-      const last_price = Number(last_price_raw);
-      if (Number.isNaN(last_price)) {
-        alert("進價必須是數字");
-        return;
-      }
-
-      const suggested_raw = document.getElementById("suggested_price").value;
-
-      const payload = {
-        name,
-        category: document.getElementById("category").value.trim() || null,
-        spec: document.getElementById("spec").value.trim() || null,
-        unit: document.getElementById("unit").value.trim() || null,
-        description: document.getElementById("description").value.trim() || null,
-        last_price,
-        suggested_price: suggested_raw === "" ? null : Number(suggested_raw),
-        is_active: document.getElementById("isActive").value === "true",
-      };
-
-      const { error: updateError } = await supabase
-        .from("products")
-        .update(payload)
-        .eq("id", productId);
-
-      if (updateError) {
-        alert("儲存商品資料失敗：" + updateError.message);
-        return;
-      }
-
-      // 圖片更新（統一路徑 products/product-{id}.jpg）
-      if (imageInput.files && imageInput.files.length > 0) {
-        const file = imageInput.files[0];
-
-        // 先壓縮成 JPG
-        const jpgBlob = await compressToJpg(file, 1280, 0.82);
-
-        const filePath = `products/product-${productId}.jpg`;
-       
-// ✅ 1. 先嘗試刪除舊檔（沒有也不會報錯）
-await supabase.storage
-  .from("product-images")
-  .remove([filePath]);
-
-// ✅ 2. 再上傳新檔（只會走 INSERT）
-const { error: uploadError } = await supabase.storage
-  .from("product-images")
-  .upload(filePath, jpgBlob, {
-    upsert: false,              // ← 這裡非常重要
-    contentType: "image/jpeg",
-  });
-
-if (uploadError) {
-  alert("圖片上傳失敗：" + uploadError.message);
-  return;
-}
-
-
-        if (uploadError) {
-          alert("圖片上傳失敗：" + uploadError.message);
-          return;
-        }
-
-        // 取得公開網址並回寫 products.image_url
-        const publicUrl = supabase.storage
-          .from("product-images")
-          .getPublicUrl(filePath).data.publicUrl;
-
-        const { error: writeBackError } = await supabase
-          .from("products")
-          .update({ image_url: publicUrl })
-          .eq("id", productId);
-
-        if (writeBackError) {
-          alert("回寫 image_url 失敗：" + writeBackError.message);
-          return;
-        }
-
-        // 更新預覽（避免快取）
-        setPreviewFromUrl(publicUrl + `?t=${Date.now()}`);
-      }
-
-      alert("儲存完成");
-      location.href = "index.html";
-    } catch (err) {
-      console.error(err);
-      alert("發生例外錯誤：" + (err?.message || err));
+    if (!name || last_price_raw === "") {
+      alert("商品名稱與進價不可空白");
+      return;
     }
-  });
+
+    const last_price = Number(last_price_raw);
+    const suggested_raw = document.getElementById("suggested_price").value;
+
+    const payload = {
+      name,
+      category: document.getElementById("category").value.trim() || null,
+      spec: document.getElementById("spec").value.trim() || null,
+      unit: document.getElementById("unit").value.trim() || null,
+      description: document.getElementById("description").value.trim() || null,
+      last_price,
+      suggested_price: suggested_raw === "" ? null : Number(suggested_raw),
+      is_active: document.getElementById("isActive").value === "true",
+    };
+
+    // ⭐ 價格有變才更新時間
+    if (last_price !== originalLastPrice) {
+      payload.last_price_updated_at = new Date().toISOString();
+    }
+
+    // ① 更新商品資料
+    const { error: updateError } = await supabase
+      .from("products")
+      .update(payload)
+      .eq("id", productId);
+
+    if (updateError) {
+      alert("儲存商品資料失敗：" + updateError.message);
+      return;
+    }
+
+    // ② 若有選圖片 → 處理圖片
+    if (imageInput.files && imageInput.files.length > 0) {
+      const file = imageInput.files[0];
+      const jpgBlob = await compressToJpg(file, 1280, 0.82);
+      const filePath = `products/product-${productId}.jpg`;
+
+      await supabase.storage
+        .from("product-images")
+        .remove([filePath]);
+
+      const { error: uploadError } = await supabase.storage
+        .from("product-images")
+        .upload(filePath, jpgBlob, {
+          upsert: false,
+          contentType: "image/jpeg",
+        });
+
+      if (uploadError) {
+        alert("圖片上傳失敗：" + uploadError.message);
+        return;
+      }
+
+      const publicUrl = supabase.storage
+        .from("product-images")
+        .getPublicUrl(filePath).data.publicUrl;
+
+      await supabase
+        .from("products")
+        .update({ image_url: publicUrl })
+        .eq("id", productId);
+    }
+
+    alert("儲存完成");
+    location.href = "index.html";
+  } catch (err) {
+    console.error(err);
+    alert("發生例外錯誤：" + (err?.message || err));
+  }
+});
 
   // ④ 刪除
   deleteBtn.addEventListener("click", async () => {
