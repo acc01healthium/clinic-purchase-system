@@ -237,15 +237,14 @@ price.innerHTML =
     if (emptyState) emptyState.style.display = isEmpty ? "block" : "none";
   }
 
-  function updatePager() {
+ function updatePager() {
   const text = `第 ${currentPage} / ${totalPages} 頁`;
 
-  // 桌機
   if (pageInfo) pageInfo.textContent = text;
   if (prevBtn) prevBtn.disabled = currentPage <= 1;
   if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
 
-  // 手機（同步頁碼＋按鈕狀態）
+  // ✅ mobile sync
   if (mPageIndicator) mPageIndicator.textContent = text;
   if (mPrevBtn) mPrevBtn.disabled = currentPage <= 1;
   if (mNextBtn) mNextBtn.disabled = currentPage >= totalPages;
@@ -429,7 +428,7 @@ async function loadProducts() {
     });
   }
 
-// ===== Mobile pager events =====
+// ✅ Mobile pager events
 if (mPrevBtn) {
   mPrevBtn.addEventListener("click", () => {
     if (currentPage > 1) {
@@ -448,30 +447,36 @@ if (mNextBtn) {
   });
 }
 
-// 回到頂部
 if (mTopBtn) {
   mTopBtn.addEventListener("click", () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 }
-  
-  if (allBtn) {
-    allBtn.addEventListener("click", () => {
-      if (categorySelect) categorySelect.value = "";
-      if (searchInput) searchInput.value = "";
-      currentPage = 1;
-      loadProducts();
-    });
+
+// ✅ 滑動自動隱藏/顯示（像原生 App）
+let lastY = window.scrollY;
+let ticking = false;
+
+function handleScroll() {
+  const y = window.scrollY;
+  const goingDown = y > lastY;
+
+  if (mobilePager) {
+    // 往下滑且離頂部有一段距離才隱藏；往上滑就顯示
+    if (goingDown && y > 120) mobilePager.classList.add("is-hidden");
+    else mobilePager.classList.remove("is-hidden");
   }
 
-  if (emptyResetBtn) {
-    emptyResetBtn.addEventListener("click", () => {
-      if (categorySelect) categorySelect.value = "";
-      if (searchInput) searchInput.value = "";
-      currentPage = 1;
-      loadProducts();
-    });
+  lastY = y;
+  ticking = false;
+}
+
+window.addEventListener("scroll", () => {
+  if (!ticking) {
+    window.requestAnimationFrame(handleScroll);
+    ticking = true;
   }
+}, { passive: true });
 
   // ===== Init =====
   document.addEventListener("DOMContentLoaded", async () => {
