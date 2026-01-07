@@ -28,29 +28,12 @@
   const nextBtn = document.getElementById("nextPageBtn");
   const pageInfo = document.getElementById("pageInfo");
 
-    /* =========================
-     ✅ 手機底部 sticky 分頁列 綁定
-  ========================= */
-  const mPrevBtn = document.getElementById("mPrevBtn");
-  const mNextBtn = document.getElementById("mNextBtn");
-  const mPageIndicator = document.getElementById("mPageIndicator");
-
-  if (mPrevBtn && prevBtn) {
-    mPrevBtn.addEventListener("click", () => prevBtn.click());
-  }
-
-  if (mNextBtn && nextBtn) {
-    mNextBtn.addEventListener("click", () => nextBtn.click());
-  }
-
-  const allBtn = document.getElementById("allBtn");
-  const emptyState = document.getElementById("emptyState");
-  const emptyResetBtn = document.getElementById("emptyResetBtn");
-
-  if (!productList) {
-    console.error("❌ 找不到 #productList，請確認 index.html 有 <section id='productList'>");
-    return;
-  }
+   // ✅ Mobile pager elements
+const mobilePager = document.getElementById("mobilePager");
+const mPrevBtn = document.getElementById("mPrevBtn");
+const mNextBtn = document.getElementById("mNextBtn");
+const mPageIndicator = document.getElementById("mPageIndicator");
+const mTopBtn = document.getElementById("mTopBtn");
 
   // ===== State =====
   let currentPage = 1;
@@ -255,14 +238,18 @@ price.innerHTML =
   }
 
   function updatePager() {
-    if (pageInfo) pageInfo.textContent = `第 ${currentPage} / ${totalPages} 頁`;
-    if (prevBtn) prevBtn.disabled = currentPage <= 1;
-    if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
-  }
+  const text = `第 ${currentPage} / ${totalPages} 頁`;
 
-    if (mPageIndicator) {
-    mPageIndicator.textContent = pageInfo.textContent;
-  }
+  // 桌機
+  if (pageInfo) pageInfo.textContent = text;
+  if (prevBtn) prevBtn.disabled = currentPage <= 1;
+  if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
+
+  // 手機（同步頁碼＋按鈕狀態）
+  if (mPageIndicator) mPageIndicator.textContent = text;
+  if (mPrevBtn) mPrevBtn.disabled = currentPage <= 1;
+  if (mNextBtn) mNextBtn.disabled = currentPage >= totalPages;
+}
 
   // ===== Load Categories =====
   async function loadCategories() {
@@ -429,6 +416,32 @@ price.innerHTML =
     });
   }
 
+// ===== Mobile pager events =====
+if (mPrevBtn) {
+  mPrevBtn.addEventListener("click", () => {
+    if (currentPage > 1) {
+      currentPage--;
+      loadProducts();
+    }
+  });
+}
+
+if (mNextBtn) {
+  mNextBtn.addEventListener("click", () => {
+    if (currentPage < totalPages) {
+      currentPage++;
+      loadProducts();
+    }
+  });
+}
+
+// 回到頂部
+if (mTopBtn) {
+  mTopBtn.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+}
+  
   if (allBtn) {
     allBtn.addEventListener("click", () => {
       if (categorySelect) categorySelect.value = "";
