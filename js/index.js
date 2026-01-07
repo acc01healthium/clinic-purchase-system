@@ -274,20 +274,52 @@ price.innerHTML =
     });
   }
 
-  // ===== Load Products (server paging) =====
-  async function loadProducts() {
-    const pageSize = Number(pageSizeSelect?.value || 10);
-    const from = (currentPage - 1) * pageSize;
-    const to = from + pageSize - 1;
+// ===== Load Products (server paging) =====
+async function loadProducts() {
+  const pageSize = Number(pageSizeSelect?.value || 10);
+  const from = (currentPage - 1) * pageSize;
+  const to = from + pageSize - 1;
 
-    if (statusMessage) statusMessage.textContent = "載入中…";
-    productList.innerHTML = "";
-    setEmpty(false);
+  if (statusMessage) statusMessage.textContent = "載入中…";
+  productList.innerHTML = "";
+  setEmpty(false);
 
-    let q = supabaseClient
-      .from("products")
-      .select(
-        `
+  // ===== 共同條件（先做一份 base）=====
+  const cat = (categorySelect?.value || "").trim();
+  const kw = (searchInput?.value || "").trim();
+  const sort = sortSelect?.value || "updated_desc";
+
+  // ① 先拿 count（最穩定）
+  let qCount = supabaseClient
+    .from("products")
+    .select("id", { count: "exact", head: true })
+    .eq("is_active", true);
+
+  if (cat) qCount = qCount.eq("category", cat);
+  if (kw) qCount = qCount.or(`name.ilike.%${kw}%,spec.ilike.%${kw}%,category.ilike.%${kw}%`);
+
+  const { count: exactCount, error: countError } = await qCount;
+
+  if (countError) {
+    console.error("❌ 取得筆數失敗", countError);
+    if (statusMessage) statusMessage.textContent = "資料讀取失敗，請稍後再試";
+    return;
+  }
+
+  totalCount = exactCount ?? 0;
+  totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+
+  // 如果目前頁數超出（例如篩選後變少），拉回最後一頁再載一次
+  if (currentPage > totalPages) {
+    currentPage = totalPages;
+    return loadProducts();
+  }
+
+  // ② 再抓當頁資料
+  let qData = supabaseClient
+    .from("products")
+    .select(
+      `
         id,
         name,
         category,
@@ -299,66 +331,47 @@ price.innerHTML =
         image_url,
         is_active,
         last_price_updated_at
-      `,
-        { count: "exact" }
-      )
-      .eq("is_active", true);
+      `
+    )
+    .eq("is_active", true);
 
-    // 分類
-    const cat = (categorySelect?.value || "").trim();
-    if (cat) q = q.eq("category", cat);
+  if (cat) qData = qData.eq("category", cat);
+  if (kw) qData = qData.or(`name.ilike.%${kw}%,spec.ilike.%${kw}%,category.ilike.%${kw}%`);
 
-    // 搜尋
-    const kw = (searchInput?.value || "").trim();
-    if (kw) {
-      // name/spec/category 模糊
-      q = q.or(`name.ilike.%${kw}%,spec.ilike.%${kw}%,category.ilike.%${kw}%`);
-    }
-
-    // 排序
-    const sort = sortSelect?.value || "updated_desc";
-    if (sort === "updated_asc") {
-      q = q.order("last_price_updated_at", { ascending: true, nullsFirst: false });
-    } else if (sort === "name_asc") {
-      q = q.order("name", { ascending: true });
-    } else if (sort === "name_desc") {
-      q = q.order("name", { ascending: false });
-    } else {
-      q = q.order("last_price_updated_at", { ascending: false, nullsFirst: false });
-    }
-
-    // 分頁
-    q = q.range(from, to);
-
-    const { data, count, error } = await q;
-
-    if (error) {
-      console.error("❌ 載入商品失敗", error);
-      if (statusMessage) statusMessage.textContent = "資料讀取失敗，請稍後再試";
-      return;
-    }
-
-    totalCount = count || 0;
-    totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
-
-    // 如果分頁超出（例如篩選後變少），拉回最後一頁再載一次
-    if (currentPage > totalPages) {
-      currentPage = totalPages;
-      return loadProducts();
-    }
-
-    updatePager();
-
-    if (!data || data.length === 0) {
-      if (statusMessage) statusMessage.textContent = "找不到符合條件的商品";
-      setEmpty(true);
-      return;
-    }
-
-    if (statusMessage) statusMessage.textContent = `共 ${totalCount} 筆商品`;
-
-    data.forEach((p) => productList.appendChild(createProductCard(p)));
+  // 排序
+  if (sort === "updated_asc") {
+    qData = qData.order("last_price_updated_at", { ascending: true, nullsFirst: false });
+  } else if (sort === "name_asc") {
+    qData = qData.order("name", { ascending: true });
+  } else if (sort === "name_desc") {
+    qData = qData.order("name", { ascending: false });
+  } else {
+    qData = qData.order("last_price_updated_at", { ascending: false, nullsFirst: false });
   }
+
+  // 分頁
+  qData = qData.range(from, to);
+
+  const { data, error } = await qData;
+
+  if (error) {
+    console.error("❌ 載入商品失敗", error);
+    if (statusMessage) statusMessage.textContent = "資料讀取失敗，請稍後再試";
+    return;
+  }
+
+  updatePager();
+
+  if (!data || data.length === 0) {
+    if (statusMessage) statusMessage.textContent = "找不到符合條件的商品";
+    setEmpty(true);
+    return;
+  }
+
+  if (statusMessage) statusMessage.textContent = `共 ${totalCount} 筆商品`;
+
+  data.forEach((p) => productList.appendChild(createProductCard(p)));
+}
 
   // ===== Events =====
   if (searchInput) {
