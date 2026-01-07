@@ -481,3 +481,48 @@ body{
 
   .page-indicator{ font-size: var(--fs-md); }
 }
+
+/* =========================
+   ✅ 手機底部 sticky 分頁列
+========================= */
+.mobile-sticky-pager{
+  display:none; /* 預設桌機不顯示 */
+}
+
+@media (max-width: 640px){
+  .mobile-sticky-pager{
+    display:flex;
+    position:sticky;     /* ✅ iOS Safari OK */
+    bottom:0;
+    left:0;
+    right:0;
+    z-index:50;
+
+    gap:10px;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:10px 12px;
+    background:rgba(238,245,255,.92);  /* 你的 bg 透明版 */
+    backdrop-filter: blur(8px);
+    border-top:1px solid rgba(2,132,199,.20);
+  }
+
+  .mobile-sticky-pager .btn{
+    flex:0 0 auto;
+    padding:12px 14px;
+    font-size: var(--fs-md);
+  }
+
+  .mobile-sticky-pager .page-indicator{
+    flex:1;
+    text-align:center;
+    font-size: var(--fs-md);
+    padding:10px 12px;
+  }
+
+  /* ✅ 避免 sticky 壓住最後一排商品 */
+  body{
+    padding-bottom: 76px;
+  }
+}
