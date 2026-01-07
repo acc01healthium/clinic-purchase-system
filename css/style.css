@@ -268,9 +268,9 @@ body{
 
 .price-line{
   display:flex;
-  justify-content:space-between;
+  justify-content:flex-start;   /* ✅不要 space-between */
   align-items:baseline;
-  gap:12px;
+  gap:10px;                      /* ✅控制「標籤-金額」距離 */
   padding:2px 0;
 }
 
@@ -282,7 +282,7 @@ body{
 }
 
 .price-value{
-  font-size: var(--fs-lg);
+  font-size: var(--fs-md);
   font-weight:900;
   font-variant-numeric: tabular-nums;
   white-space:nowrap;
