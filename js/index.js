@@ -28,6 +28,21 @@
   const nextBtn = document.getElementById("nextPageBtn");
   const pageInfo = document.getElementById("pageInfo");
 
+    /* =========================
+     ✅ 手機底部 sticky 分頁列 綁定
+  ========================= */
+  const mPrevBtn = document.getElementById("mPrevBtn");
+  const mNextBtn = document.getElementById("mNextBtn");
+  const mPageIndicator = document.getElementById("mPageIndicator");
+
+  if (mPrevBtn && prevBtn) {
+    mPrevBtn.addEventListener("click", () => prevBtn.click());
+  }
+
+  if (mNextBtn && nextBtn) {
+    mNextBtn.addEventListener("click", () => nextBtn.click());
+  }
+
   const allBtn = document.getElementById("allBtn");
   const emptyState = document.getElementById("emptyState");
   const emptyResetBtn = document.getElementById("emptyResetBtn");
@@ -243,6 +258,10 @@ price.innerHTML =
     if (pageInfo) pageInfo.textContent = `第 ${currentPage} / ${totalPages} 頁`;
     if (prevBtn) prevBtn.disabled = currentPage <= 1;
     if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
+  }
+
+    if (mPageIndicator) {
+    mPageIndicator.textContent = pageInfo.textContent;
   }
 
   // ===== Load Categories =====
