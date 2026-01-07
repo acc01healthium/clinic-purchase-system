@@ -168,7 +168,7 @@ price.className = "price";
 
 price.innerHTML =
   '<div class="price-line">' +
-    '<span class="price-label">進　　價：</span>' +
+    '<span class="price-label">參考進價：</span>' +
     '<span class="price-value">NT$ ' + escapeHtml(formatPrice(p.last_price)) + '</span>' +
   '</div>' +
   '<div class="price-line">' +
