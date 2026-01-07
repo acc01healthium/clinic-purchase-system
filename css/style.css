@@ -134,6 +134,10 @@ body{
   border:2px solid rgba(0,174,224,.5);
   color:#008bb7;
 }
+.btn-secondary:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
 
 /* ✅ 修正 select 比例 */
 .select{
