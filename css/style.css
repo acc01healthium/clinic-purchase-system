@@ -519,12 +519,21 @@ body{
 .mobile-pager-btn{
   border: 0;
   border-radius: 999px;
-  padding: 10px 14px;
+  padding: 10px 16px;
   font-weight: 900;
   cursor: pointer;
 
-  background: rgba(0,174,224,.12);
-  color: #067aa0;
+  /* 🔵 主品牌藍 */
+  background: linear-gradient(135deg, var(--primary), #14c2c5);
+  color: #fff;
+
+  box-shadow: 0 6px 14px rgba(0,174,224,.35);
+  transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+}
+
+.mobile-pager-btn:active{
+  transform: translateY(1px);
+  box-shadow: 0 3px 8px rgba(0,174,224,.25);
 }
 
 .mobile-pager-btn:disabled{
