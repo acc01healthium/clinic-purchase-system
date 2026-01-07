@@ -483,77 +483,80 @@ body{
 }
 
 /* =========================
-   ✅ Mobile Sticky Pager (Bottom)
+   ✅ Mobile Sticky Pager（底部）
 ========================= */
 .mobile-pager{
-  display:none;                 /* 預設不顯示，手機才開 */
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  display: none; /* 預設不顯示，手機才顯示 */
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+
+  padding: 10px 12px;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* iPhone 安全區 */
+
+  background: rgba(255,255,255,.92);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 -10px 24px rgba(0,0,0,.10);
+  border-top: 1px solid rgba(0,0,0,.06);
+
+  z-index: 9999;
+
+  transform: translateY(0);
+  transition: transform .22s ease, opacity .22s ease;
 }
 
+.mobile-pager.is-hidden{
+  transform: translateY(110%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.mobile-pager-btn{
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 14px;
+  font-weight: 900;
+  cursor: pointer;
+
+  background: rgba(0,174,224,.12);
+  color: #067aa0;
+}
+
+.mobile-pager-btn:disabled{
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.mobile-pager-indicator{
+  font-weight: 900;
+  font-size: var(--fs-md);
+  color: #111827;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(2,132,199,.06);
+  border: 1px solid rgba(2,132,199,.10);
+  white-space: nowrap;
+}
+
+.mobile-pager-top{
+  border: 0;
+  border-radius: 999px;
+  width: 42px;
+  height: 42px;
+  font-weight: 900;
+  cursor: pointer;
+
+  background: #111827;
+  color: #fff;
+}
+
+/* 手機才顯示 + 預留底部空間，避免被 sticky 擋到 */
 @media (max-width: 640px){
-  .mobile-pager{
-    display:flex;
-    position:fixed;             /* ✅ 固定在底部，不用 sticky */
-    left:0; right:0; bottom:0;
-    z-index:9999;
-
-    gap:10px;
-    align-items:center;
-    justify-content:center;
-
-    padding:10px 12px;
-    padding-bottom: calc(10px + env(safe-area-inset-bottom)); /* ✅ iPhone 安全區 */
-    background: rgba(255,255,255,.95);
-    backdrop-filter: blur(10px);
-
-    border-top: 1px solid rgba(0,0,0,.06);
-    box-shadow: 0 -10px 28px rgba(0,0,0,.10); /* ✅ 陰影 */
-    transform: translateY(0);
-    transition: transform .22s ease, opacity .22s ease;
-  }
-
-  /* ✅ 隱藏狀態（往下滑會加上這個 class） */
-  .mobile-pager.is-hidden{
-    transform: translateY(110%);
-    opacity: .98;
-  }
-
-  .mp-btn{
-    border-radius:999px;
-    padding:10px 14px;
-    border:2px solid rgba(0,174,224,.35);
-    background:#fff;
-    color:#067aa0;
-    font-weight:900;
-    cursor:pointer;
-  }
-  .mp-btn:disabled{
-    opacity:.45;
-    cursor:not-allowed;
-  }
-
-  .mp-indicator{
-    padding:10px 14px;
-    border-radius:999px;
-    background:#fff;
-    border:1px solid rgba(0,0,0,.06);
-    font-weight:900;
-    white-space:nowrap;
-  }
-
-  .mp-top{
-    border-radius:999px;
-    width:42px;
-    height:42px;
-    border:0;
-    background:#00aee0;
-    color:#fff;
-    font-weight:900;
-    cursor:pointer;
-    box-shadow: 0 10px 22px rgba(0,0,0,.12);
-  }
-
-  /* ✅ 避免底部分頁列蓋住內容：整頁留出空間 */
-  body{
-    padding-bottom: calc(84px + env(safe-area-inset-bottom));
-  }
+  .mobile-pager{ display: flex; }
+  body{ padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
 }
