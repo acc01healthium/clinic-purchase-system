@@ -490,9 +490,12 @@ function handleScroll() {
 }
 
 window.addEventListener("scroll", () => {
-  if (!ticking) {
-    window.requestAnimationFrame(handleScroll);
-    ticking = true;
+  // ✅只在手機才做「滑動自動隱藏」
+  if (window.matchMedia("(max-width: 640px)").matches) {
+    if (!ticking) {
+      window.requestAnimationFrame(handleScroll);
+      ticking = true;
+    }
   }
 }, { passive: true });
 
