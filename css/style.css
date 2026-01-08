@@ -360,6 +360,9 @@ body{
   font-size:12px;
   color:#8a94a6;
   border-top:1px dashed rgba(0,0,0,.08);
+
+  text-align: center;        /* ✅ 水平置中 */
+  letter-spacing: .3px;   /* 可選：讓時間看起來更舒服 */
 }
 
 /* =========================
