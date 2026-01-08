@@ -529,6 +529,7 @@ body{
   z-index: 9999;
 
   transition: transform .22s ease, opacity .22s ease;
+  flex-wrap: nowrap;          /* ✅整排不要折行 */
 }
 
 /* ✅滑動隱藏（手機才會套用 class，但這邊保留動畫） */
@@ -550,6 +551,8 @@ body{
 
   box-shadow: 0 6px 14px rgba(0,174,224,.30);
   transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+  white-space: nowrap;        /* ✅按鈕文字不要換行 */
+  min-width: 64px;            /* ✅給基本寬度，避免被擠太窄 */
 }
 
 .mobile-pager-btn:active{
@@ -610,8 +613,20 @@ body{
 /* ✅只在手機才允許自動隱藏 */
 @media (min-width: 641px){
   .mobile-pager.is-hidden{
-    transform: translateY(0);
+    transform: translateX(-50%) translateY(0);
     opacity: 1;
     pointer-events: auto;
   }
 }
+
+@media (max-width: 380px){
+  .mobile-pager-btn{
+    min-width: 52px;
+    padding: 9px 12px;
+  }
+  /* 讓按鈕文字更緊湊一點 */
+  .mobile-pager-btn{
+    letter-spacing: .5px;
+  }
+}
+
