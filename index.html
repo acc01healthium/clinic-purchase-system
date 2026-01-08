@@ -16,15 +16,7 @@
   <!-- 前台邏輯 -->
   <script defer src="js/index.js?v=999"></script>
 </head>
-
- <!-- ✅ 手機底部 Sticky 分頁列 -->
-<div id="mobilePager" class="mobile-pager">
-  <button id="mPrevBtn" class="mobile-pager-btn">上一頁</button>
-  <div id="mPageIndicator" class="mobile-pager-indicator">第 1 / 1 頁</div>
-  <button id="mNextBtn" class="mobile-pager-btn">下一頁</button>
-  <button id="mTopBtn" class="mobile-pager-top">↑</button>
-</div>
-
+ 
 <body>
   <!-- Header -->
   <header class="site-header">
@@ -35,10 +27,8 @@
       </div>
 
       <div class="site-header-actions">
-        <button id="allBtn" class="pill pill-primary" type="button">
-          全部商品
-        </button>
-      </div>
+        <button id="allBtn" class="pill-primary" type="button">全部商品</button>
+        </div>
     </div>
   </header>
 
@@ -96,24 +86,19 @@
   <div class="hint-price">
     ※ 本系統所列價格皆為未稅參考價，實際採購金額請以廠商最新報價為準
   </div>
-</div>
+  </div>
+  </div>    
     </section>
 
     <!-- 結果資訊列 + 分頁 -->
     <section class="toolbar">
       <div class="meta" id="statusMessage">載入中…</div>
-
-      <div class="pager">
-        <button id="prevPageBtn" class="btn btn-secondary" type="button">
-          上一頁
-        </button>
-        <div class="page-indicator" id="pageInfo">
-          第 1 / 1 頁
-        </div>
-        <button id="nextPageBtn" class="btn btn-secondary" type="button">
-          下一頁
-        </button>
-      </div>
+     <div class="pager pager--unified">
+  <button id="prevPageBtn" class="mobile-pager-btn" type="button">上一頁</button>
+  <div class="mobile-pager-indicator" id="pageInfo">第 1 / 1 頁</div>
+  <button id="nextPageBtn" class="mobile-pager-btn" type="button">下一頁</button>
+  <button id="topBtn" class="mobile-pager-top" type="button">↑</button>
+</div>
     </section>
 
     <!-- ✅ 商品卡片容器（關鍵） -->
@@ -137,5 +122,13 @@
       </button>
     </section>
   </main>
+  
+<!-- ✅ 手機底部 Sticky 分頁列 -->
+<div id="mobilePager" class="mobile-pager">
+  <button id="mPrevBtn" class="mobile-pager-btn">上一頁</button>
+  <div id="mPageIndicator" class="mobile-pager-indicator">第 1 / 1 頁</div>
+  <button id="mNextBtn" class="mobile-pager-btn">下一頁</button>
+  <button id="mTopBtn" class="mobile-pager-top">↑</button>
+</div>  
 </body>
 </html>
