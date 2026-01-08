@@ -66,7 +66,7 @@ body{
 ========================= */
 .container{
   max-width:1200px;
-  margin:22px auto 56px;
+  margin:22px auto 90px;
   padding:0 18px;
 }
 
@@ -173,6 +173,16 @@ body{
   border-radius:999px;
   background:#fff;
   font-weight:800;
+}
+
+/* ✅上方分頁也套同款底板（跟底部一致） */
+.pager--unified{
+  background: rgba(255,255,255,.92);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0,0,0,.06);
+  border-radius: 999px;
+  padding: 10px 12px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.08);
 }
 
 /* =========================
@@ -490,26 +500,27 @@ body{
    ✅ Mobile Sticky Pager（底部）
 ========================= */
 .mobile-pager{
-  position: fixed;
+  /* ✅桌機：用 sticky，頁面底部就能操作換頁/回頂端 */
+  position: sticky;
   left: 0;
   right: 0;
-  bottom: 0;
+  bottom: 10px;
 
-  display: none; /* 預設不顯示，手機才顯示 */
+  display: flex; /* ✅桌機也顯示 */
   gap: 10px;
   align-items: center;
   justify-content: center;
 
+  margin-top: 18px;
   padding: 10px 12px;
-  padding-bottom: calc(10px + env(safe-area-inset-bottom));
-  padding-bottom: calc(10px + constant(safe-area-inset-bottom));
 
   background: rgba(255,255,255,.92);
   backdrop-filter: blur(10px);
   box-shadow: 0 -10px 24px rgba(0,0,0,.10);
-  border-top: 1px solid rgba(0,0,0,.06);
+  border: 1px solid rgba(0,0,0,.06);
+  border-radius: 999px;
 
-  z-index: 9999;
+  z-index: 50;
 
   transform: translateY(0);
   transition: transform .22s ease, opacity .22s ease;
@@ -547,7 +558,7 @@ body{
 }
 
 .mobile-pager-indicator{
-  font-weight: 900;
+  font-weight: 600; /* ✅不粗體 */
   font-size: var(--fs-md);
   color: #111827;
   padding: 8px 12px;
@@ -579,7 +590,34 @@ body{
 
 /* 手機才顯示 + 預留底部空間，避免被 sticky 擋到 */
 @media (max-width: 640px){
-  .mobile-pager{ display: flex; }
-  body{ padding-bottom: calc(72px + env(safe-area-inset-bottom)); }
-body{ padding-bottom: calc(72px + constant(safe-area-inset-bottom)); }
+  .mobile-pager{
+    position: fixed;
+    bottom: 0;
+
+    left: 0;
+    right: 0;
+
+    margin-top: 0;
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+    border-bottom: 0;
+
+    padding-bottom: calc(10px + env(safe-area-inset-bottom));
+    padding-bottom: calc(10px + constant(safe-area-inset-bottom));
+  }
+
+  body{
+    padding-bottom: calc(72px + env(safe-area-inset-bottom));
+    padding-bottom: calc(72px + constant(safe-area-inset-bottom));
+  }
+}
+
+/* ✅只在手機才允許自動隱藏 */
+@media (min-width: 641px){
+  .mobile-pager.is-hidden{
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
