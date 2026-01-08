@@ -21,6 +21,11 @@
   --fs-xl:20px;
 }
 
+/* ✅上方那組分頁不需要：整段隱藏 */
+.toolbar .pager--unified{
+  display:none !important;
+}
+
 *{box-sizing:border-box}
 body{
   margin:0;
@@ -497,37 +502,38 @@ body{
 }
 
 /* =========================
-   ✅ Mobile Sticky Pager（底部）
+   ✅ Bottom Floating Pager（桌機+手機一致美觀）
 ========================= */
 .mobile-pager{
-  /* ✅桌機：用 sticky，頁面底部就能操作換頁/回頂端 */
-  position: sticky;
-  left: 0;
-  right: 0;
-  bottom: 10px;
+  /* ✅浮動置中膠囊，不撐滿整行 */
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 14px;
 
-  display: flex; /* ✅桌機也顯示 */
+  display: flex;
   gap: 10px;
   align-items: center;
   justify-content: center;
 
-  margin-top: 18px;
+  width: fit-content;
+  max-width: calc(100% - 24px);  /* ✅避免小螢幕超出 */
   padding: 10px 12px;
 
-  background: rgba(255,255,255,.92);
+  background: rgba(255,255,255,.88);
   backdrop-filter: blur(10px);
-  box-shadow: 0 -10px 24px rgba(0,0,0,.10);
-  border: 1px solid rgba(0,0,0,.06);
+  border: 1px solid rgba(0,0,0,.08);
   border-radius: 999px;
 
-  z-index: 50;
+  box-shadow: 0 14px 30px rgba(0,0,0,.12);
+  z-index: 9999;
 
-  transform: translateY(0);
   transition: transform .22s ease, opacity .22s ease;
 }
 
+/* ✅滑動隱藏（手機才會套用 class，但這邊保留動畫） */
 .mobile-pager.is-hidden{
-  transform: translateY(110%);
+  transform: translateX(-50%) translateY(140%);
   opacity: 0;
   pointer-events: none;
 }
@@ -535,15 +541,14 @@ body{
 .mobile-pager-btn{
   border: 0;
   border-radius: 999px;
-  padding: 10px 16px;
+  padding: 9px 14px;           /* ✅稍微變小 */
   font-weight: 900;
   cursor: pointer;
 
-  /* 🔵 主品牌藍 */
   background: linear-gradient(135deg, var(--primary), #14c2c5);
   color: #fff;
 
-  box-shadow: 0 6px 14px rgba(0,174,224,.35);
+  box-shadow: 0 6px 14px rgba(0,174,224,.30);
   transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
 }
 
@@ -558,10 +563,10 @@ body{
 }
 
 .mobile-pager-indicator{
-  font-weight: 600; /* ✅不粗體 */
+  font-weight: 600;            /* ✅不粗體 */
   font-size: var(--fs-md);
   color: #111827;
-  padding: 8px 12px;
+  padding: 7px 10px;           /* ✅變小更精緻 */
   border-radius: 999px;
   background: rgba(2,132,199,.06);
   border: 1px solid rgba(2,132,199,.10);
@@ -571,15 +576,15 @@ body{
 .mobile-pager-top{
   border: 0;
   border-radius: 999px;
-  width: 42px;
-  height: 42px;
+  width: 40px;                 /* ✅略小 */
+  height: 40px;
   font-weight: 900;
   cursor: pointer;
 
   background: linear-gradient(135deg, var(--primary), #14c2c5);
   color: #fff;
 
-  box-shadow: 0 6px 14px rgba(0,174,224,.35);
+  box-shadow: 0 6px 14px rgba(0,174,224,.30);
   transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
 }
 
@@ -591,25 +596,14 @@ body{
 /* 手機才顯示 + 預留底部空間，避免被 sticky 擋到 */
 @media (max-width: 640px){
   .mobile-pager{
-    position: fixed;
-    bottom: 0;
-
-    left: 0;
-    right: 0;
-
-    margin-top: 0;
-    border-radius: 0;
-    border-left: 0;
-    border-right: 0;
-    border-bottom: 0;
-
-    padding-bottom: calc(10px + env(safe-area-inset-bottom));
-    padding-bottom: calc(10px + constant(safe-area-inset-bottom));
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    bottom: calc(12px + constant(safe-area-inset-bottom));
   }
 
+  /* ✅因為是浮動膠囊，不是整條底bar，所以 body 不用留 72px 那麼大 */
   body{
-    padding-bottom: calc(72px + env(safe-area-inset-bottom));
-    padding-bottom: calc(72px + constant(safe-area-inset-bottom));
+    padding-bottom: calc(60px + env(safe-area-inset-bottom));
+    padding-bottom: calc(60px + constant(safe-area-inset-bottom));
   }
 }
 
