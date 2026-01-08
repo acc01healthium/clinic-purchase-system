@@ -19,6 +19,8 @@
   const searchInput = document.getElementById("searchInput");
   const clearBtn = document.getElementById("clearBtn");
   const statusMessage = document.getElementById("statusMessage");
+  const emptyState = document.getElementById("emptyState");
+  const emptyResetBtn = document.getElementById("emptyResetBtn");
 
   const categorySelect = document.getElementById("categorySelect");
   const sortSelect = document.getElementById("sortSelect");
@@ -27,6 +29,7 @@
   const prevBtn = document.getElementById("prevPageBtn");
   const nextBtn = document.getElementById("nextPageBtn");
   const pageInfo = document.getElementById("pageInfo");
+  const topBtn = document.getElementById("topBtn");
 
    // ✅ Mobile pager elements
 const mobilePager = document.getElementById("mobilePager");
@@ -389,6 +392,15 @@ async function loadProducts() {
     });
   }
 
+  if (emptyResetBtn) {
+  emptyResetBtn.addEventListener("click", () => {
+    if (searchInput) searchInput.value = "";
+    if (categorySelect) categorySelect.value = "";
+    currentPage = 1;
+    loadProducts();
+  });
+}
+
   if (categorySelect) {
     categorySelect.addEventListener("change", () => {
       currentPage = 1;
@@ -449,6 +461,12 @@ if (mNextBtn) {
 
 if (mTopBtn) {
   mTopBtn.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+}
+
+  if (topBtn) {
+  topBtn.addEventListener("click", () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   });
 }
