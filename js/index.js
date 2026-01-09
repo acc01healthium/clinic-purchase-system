@@ -75,6 +75,29 @@ const mTopBtn = document.getElementById("mTopBtn");
     return `${y}/${m}/${day} ${hh}:${mm}`;
   }
 
+  // ===== Category Tone (auto color) =====
+const CATEGORY_TONES = [
+  "tone-0","tone-1","tone-2","tone-3","tone-4","tone-5",
+  "tone-6","tone-7","tone-8","tone-9","tone-10","tone-11"
+];
+
+// 穩定 hash：同一個分類字串永遠會對到同一個 tone
+function hashString(str) {
+  const s = String(str || "");
+  let h = 2166136261; // FNV-1a seed
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+function applyCategoryTone(el, categoryName) {
+  if (!el || !categoryName) return;
+  const idx = hashString(categoryName.trim()) % CATEGORY_TONES.length;
+  el.classList.add(CATEGORY_TONES[idx]);
+}
+
   // ===== Card =====
   function createProductCard(p) {
     const card = document.createElement("article");
@@ -114,6 +137,9 @@ if (p.category) {
   const tag = document.createElement("span");
   tag.className = "tag";
   tag.textContent = p.category;
+
+  applyCategoryTone(tag, p.category); // ✅自動配色
+
   meta.appendChild(tag);
 }
 
@@ -242,27 +268,32 @@ price.innerHTML =
 }
 
   // ===== Load Categories =====
-  async function loadCategories() {
-    const { data, error } = await supabaseClient
-      .from("categories")
-      .select("name")
-      .order("name", { ascending: true });
+ async function loadCategories() {
+  const { data, error } = await supabaseClient
+   .from("products")
+   .select("category")
+   .eq("is_active", true)
+   .not("category", "is", null)
+   .neq("category", "")
 
-    if (error) {
-      console.error("❌ 載入分類失敗", error);
-      return;
-    }
-
-    if (!categorySelect) return;
-
-    categorySelect.innerHTML = `<option value="">全部分類</option>`;
-    (data || []).forEach((c) => {
-      const opt = document.createElement("option");
-      opt.value = c.name;
-      opt.textContent = c.name;
-      categorySelect.appendChild(opt);
-    });
+  if (error) {
+    console.error("❌ 載入分類失敗", error);
+    return;
   }
+  if (!categorySelect) return;
+
+  const uniq = Array.from(
+    new Set((data || []).map(x => (x.category || "").trim()).filter(Boolean))
+  ).sort((a, b) => a.localeCompare(b, "zh-Hant"));
+
+  categorySelect.innerHTML = `<option value="">全部分類</option>`;
+  uniq.forEach((name) => {
+    const opt = document.createElement("option");
+    opt.value = name;
+    opt.textContent = name;
+    categorySelect.appendChild(opt);
+  });
+}
 
 // ===== Load Products (server paging) =====
 async function loadProducts() {
