@@ -180,15 +180,6 @@ body{
   font-weight:800;
 }
 
-/* ✅上方分頁也套同款底板（跟底部一致） */
-.pager--unified{
-  background: rgba(255,255,255,.92);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(0,0,0,.06);
-  border-radius: 999px;
-  padding: 10px 12px;
-  box-shadow: 0 10px 24px rgba(0,0,0,.08);
-}
 
 /* =========================
    商品 Grid
@@ -441,16 +432,10 @@ body{
   gap:6px;
   font-weight:700;
   white-space:nowrap;
-  padding:4px 10px;
+  padding:6px 12px;
   border-radius:999px;
   background: rgba(2,132,199,.06);
   border:1px solid rgba(2,132,199,.10);
-}
-
-.meta-icon{
-  font-size:14px;
-  line-height:1;
-  opacity:.9;
 }
 
 .meta-label{
@@ -633,3 +618,9 @@ body{
   }
 }
 
+/* =========================
+   Meta pills：移除 icon（最乾淨版本）
+========================= */
+.meta-icon{
+  display: none;
+}
