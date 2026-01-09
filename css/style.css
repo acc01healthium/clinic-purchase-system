@@ -12,7 +12,8 @@
   --shadow:0 10px 28px rgba(0,0,0,.08);
   --radius:18px;
   --radius-sm:12px;
-     /* 字級層級（全站統一） */
+
+  /* 字級層級（全站統一） */
   --fs-xxs:12px;
   --fs-xs:13px;
   --fs-sm:14px;
@@ -26,7 +27,8 @@
   display:none !important;
 }
 
-*{box-sizing:border-box}
+*{ box-sizing:border-box; }
+
 body{
   margin:0;
   font-family:"Noto Sans TC",system-ui,-apple-system;
@@ -36,6 +38,7 @@ body{
   font-size: var(--fs-md);
   line-height: 1.6;
   -webkit-text-size-adjust: 100%;
+  font-weight:600;
 }
 
 /* =========================
@@ -53,8 +56,17 @@ body{
   justify-content:space-between;
   align-items:center;
 }
-.site-title{margin:0;font-size:28px;font-weight:800}
-.site-subtitle{margin:6px 0 0;font-size:14px;opacity:.9}
+.site-title{
+  margin:0;
+  font-size:28px;
+  font-weight:900;
+}
+.site-subtitle{
+  margin:6px 0 0;
+  font-size:14px;
+  opacity:.9;
+  font-weight:600;
+}
 
 .pill-primary{
   border-radius:999px;
@@ -85,26 +97,22 @@ body{
   padding:18px;
 }
 
-/* =========================
-   搜尋提示文字位置修正
-========================= */
+/* ✅搜尋提示文字位置 */
 .panel-row-bottom{
   display:flex;
   flex-direction:column;
 }
-
 .hint{
   order:-1;
   margin-top:10px;
   margin-bottom:12px;
+  font-weight:600;
 }
-
 .hint-main{
   font-size: var(--fs-sm);
   color:#374151;
   font-weight:700;
 }
-
 .hint-price{
   margin-top:6px;
   font-size: var(--fs-sm);
@@ -144,7 +152,7 @@ body{
   cursor:not-allowed;
 }
 
-/* ✅ 修正 select 比例 */
+/* ✅ select 比例 */
 .select{
   min-width:160px;
   max-width:200px;
@@ -177,9 +185,9 @@ body{
   padding:10px 16px;
   border-radius:999px;
   background:#fff;
-  font-weight:800;
+  font-weight:600;
+  color:#4b5563;
 }
-
 
 /* =========================
    商品 Grid
@@ -190,14 +198,14 @@ body{
   gap:16px;
 }
 @media(max-width:980px){
-  .grid{grid-template-columns:repeat(2,1fr)}
+  .grid{ grid-template-columns:repeat(2,1fr); }
 }
 @media(max-width:640px){
-  .grid{grid-template-columns:1fr}
+  .grid{ grid-template-columns:1fr; }
 }
 
 /* =========================
-   商品卡片（重點）
+   商品卡片
 ========================= */
 .card{
   background:var(--card);
@@ -231,7 +239,7 @@ body{
   flex:1;
 }
 
-/* 商品名 + 標籤區塊 */
+/* 商品名 + 次資訊 */
 .card-head{
   display:flex;
   flex-direction:column;
@@ -239,7 +247,6 @@ body{
   padding-bottom:8px;
   border-bottom:1px solid rgba(0,0,0,.06);
 }
-
 .card-title{
   font-size: var(--fs-lg);
   font-weight: 800;
@@ -248,7 +255,6 @@ body{
   color:#111827;
   letter-spacing: .2px;
 }
-
 .card-sub{
   display:flex;
   justify-content:space-between;
@@ -257,7 +263,7 @@ body{
 }
 
 /* =========================
-   Price（企業級最終版）
+   Price
 ========================= */
 .price{
   display:flex;
@@ -265,22 +271,19 @@ body{
   gap:8px;
   font-size: var(--fs-md);
 }
-
 .price-line{
   display:flex;
-  justify-content:flex-start;   /* ✅不要 space-between */
+  justify-content:flex-start;  /* ✅不要 space-between */
   align-items:baseline;
-  gap:10px;                      /* ✅控制「標籤-金額」距離 */
+  gap:10px;                    /* ✅控制「標籤-金額」距離 */
   padding:2px 0;
 }
-
 .price-label{
   font-size: var(--fs-sm);
   font-weight:800;
   color:#374151;
   white-space:nowrap;
 }
-
 .price-value{
   font-size: var(--fs-md);
   font-weight:900;
@@ -289,10 +292,6 @@ body{
   color:#111827;
 }
 
-
-/* =========================
-   Description（關鍵）
-========================= */
 /* =========================
    Description（精準鎖 2 行）
 ========================= */
@@ -306,15 +305,11 @@ body{
   white-space:pre-line;
   overflow:hidden;
 }
-
-/* ✅ 精準鎖兩行（不露第三行） */
 .desc.clamp{
-  display:block;                 /* 不用 flex / box */
-  max-height:calc(1.6em * 2 + 8px);   /* ← 關鍵：補安全值 */
+  display:block;
+  max-height:calc(1.6em * 2 + 8px); /* ✅精準鎖兩行（補安全值） */
   overflow:hidden;
 }
-
-/* 沒內容不顯示查看更多 */
 .desc-actions{
   display:flex;
   justify-content:flex-end;
@@ -323,7 +318,6 @@ body{
 .desc:empty + .desc-actions{
   display:none;
 }
-
 .link-btn{
   background:none;
   border:0;
@@ -333,7 +327,7 @@ body{
 }
 
 /* =========================
-   Footer 固定底部
+   Footer
 ========================= */
 .card-footer{
   margin-top:auto;
@@ -341,74 +335,40 @@ body{
   font-size:12px;
   color:#8a94a6;
   border-top:1px dashed rgba(0,0,0,.08);
-
-  text-align: center;        /* ✅ 水平置中 */
-  letter-spacing: .3px;   /* 可選：讓時間看起來更舒服 */
+  text-align:center;
+  letter-spacing:.3px;
+  font-weight:600;
 }
 
 /* =========================
    Filters（電商感排列）
 ========================= */
-.filters {
-  display: flex;
-  gap: 20px;
-  align-items: flex-end;
-  flex-wrap: wrap;
+.filters{
+  display:flex;
+  gap:20px;
+  align-items:flex-end;
+  flex-wrap:wrap;
 }
-
-.filter-item {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  align-items: flex-start;
+.filter-item{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  align-items:flex-start;
 }
-
-.filter-label {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--muted);
-  letter-spacing: .5px;
+.filter-label{
+  font-size:13px;
+  font-weight:600;
+  color:var(--muted);
+  letter-spacing:.5px;
 }
-
-.filter-item .select {
-  min-width: 160px;
-  max-width: 200px;
+.filter-item .select{
+  min-width:160px;
+  max-width:200px;
 }
 
 /* =========================
-   全站字體層級統一
+   Meta Hierarchy（分類 > 單位/規格）
 ========================= */
-body{
-  font-weight:600;
-}
-
-.site-title{
-  font-weight:900;
-}
-
-.site-subtitle,
-.filter-label,
-.hint{
-  font-weight:600;
-}
-
-.btn,
-.pill-primary{
-  font-weight:800;
-}
-
-.card-footer,
-.page-indicator{
-  font-weight:600;
-  color:#4b5563;
-}
-
-/* =========================
-   ✅ Meta Hierarchy（企業感：分類 > 單位/規格）
-   放在 .tag / .card-meta / .meta-item 之後（覆蓋原設定）
-========================= */
-
-/* Meta 容器：更乾淨的間距與對齊 */
 .card-meta{
   display:flex;
   flex-wrap:wrap;
@@ -416,7 +376,7 @@ body{
   align-items:center;
 }
 
-/* ✅ 分類：主層級 Tag（更醒目、更企業） */
+/* ✅ 分類 Tag（主層級 + 高光） */
 .tag{
   background: rgba(0,174,224,.14);
   border: 1px solid rgba(0,174,224,.28);
@@ -430,11 +390,13 @@ body{
 
   box-shadow: 0 6px 14px rgba(0,174,224,.12);
 
-  /* ✅高光需要 */
+  /* ✅高光 + 層級穩定 */
   position: relative;
   overflow: hidden;
+  z-index: 0; /* 建立 stacking context，避免合成層造成層級怪 */
 }
 
+/* 極淡上緣高光 */
 .tag::before{
   content:"";
   position:absolute;
@@ -442,43 +404,51 @@ body{
   right:0;
   top:0;
   height:55%;
-  z-index: 0; /* ✅補這行：高光永遠在背景層，不會蓋到文字 */
+
+  z-index: 0; /* 高光層在背景之上 */
   background: linear-gradient(
     to bottom,
     rgba(255,255,255,.55),
     rgba(255,255,255,0)
   );
+
   pointer-events:none;
 }
 
-/* ✅ 次層級：單位/規格 pills（更淡、更資訊感） */
+/* ✅確保文字永遠在高光上層（未來若 tag 內包 span/icon 也安全） */
+.tag > *{
+  position: relative;
+  z-index: 1;
+}
+
+/* ✅ 次層級：單位/規格 pills */
 .meta-item{
   display:inline-flex;
   align-items:center;
   gap:6px;
 
-  background: rgba(17,24,39,.04);              /* 從藍色改成中性灰：更企業 */
+  background: rgba(17,24,39,.04);
   border: 1px solid rgba(17,24,39,.08);
   color: #111827;
 
   font-weight: 700;
-  font-size: var(--fs-xs);                      /* 比分類小一階 */
+  font-size: var(--fs-xs);
   padding: 6px 10px;
   border-radius: 999px;
 }
 
-/* Label 再淡一點（資訊層級更清楚） */
+/* Label 再淡一點 */
 .meta-label{
   color:#6b7280;
   font-weight:700;
 }
 
-/* ✅ 分類永遠第一顆（防呆：就算順序亂掉也一致） */
+/* ✅ 分類永遠第一顆 */
 .card-meta .tag{ order: -10; }
 .card-meta .meta-item{ order: 0; }
 
 /* =========================
-   ✅ 防呆：避免 tag 被包進 meta-item 時出現雙層膠囊 / 高光錯位
+   ✅ 防呆：避免 tag 被包進 meta-item（雙層膠囊 / 高光錯位）
 ========================= */
 .card-meta .meta-item > .tag{
   background: transparent !important;
@@ -491,27 +461,16 @@ body{
   font-weight: inherit !important;
   letter-spacing: 0 !important;
 
-  /* ✅再補一層防呆 */
   position: static !important;
   overflow: visible !important;
 }
 
-/* ✅被包住時連高光也關掉（你問的這一行，位置正確） */
+/* ✅被包住時：關掉高光 */
 .card-meta .meta-item > .tag::before{
   display: none !important;
 }
 
-/* ✅ 高光層級補強（推薦最穩定版本） */
-.tag{
-  z-index: 0;            /* 建立 stacking context */
-}
-
-.tag > *{
-  position: relative;
-  z-index: 1;            /* 如果未來 tag 內有 span/icon，文字永遠在最上層 */
-}
-
-/* 你已經決定不要 icon：保留（避免突兀） */
+/* 不使用 icon */
 .meta-icon{ display:none; }
 
 /* =========================
@@ -540,7 +499,6 @@ body{
     font-size: var(--fs-md);
   }
 
-  /* 篩選區改直排，避免擠在一行很小 */
   .filters{
     display:grid;
     grid-template-columns: 1fr;
@@ -562,10 +520,9 @@ body{
 }
 
 /* =========================
-   ✅ Bottom Floating Pager（桌機+手機一致美觀）
+   Bottom Floating Pager（桌機+手機一致美觀）
 ========================= */
 .mobile-pager{
-  /* ✅浮動置中膠囊，不撐滿整行 */
   position: fixed;
   left: 50%;
   transform: translateX(-50%);
@@ -577,7 +534,7 @@ body{
   justify-content: center;
 
   width: fit-content;
-  max-width: calc(100% - 24px);  /* ✅避免小螢幕超出 */
+  max-width: calc(100% - 24px);
   padding: 10px 12px;
 
   background: rgba(255,255,255,.88);
@@ -589,10 +546,8 @@ body{
   z-index: 9999;
 
   transition: transform .22s ease, opacity .22s ease;
-  flex-wrap: nowrap;          /* ✅整排不要折行 */
+  flex-wrap: nowrap;
 }
-
-/* ✅滑動隱藏（手機才會套用 class，但這邊保留動畫） */
 .mobile-pager.is-hidden{
   transform: translateX(-50%) translateY(140%);
   opacity: 0;
@@ -602,7 +557,7 @@ body{
 .mobile-pager-btn{
   border: 0;
   border-radius: 999px;
-  padding: 9px 14px;           /* ✅稍微變小 */
+  padding: 9px 14px;
   font-weight: 900;
   cursor: pointer;
 
@@ -611,25 +566,23 @@ body{
 
   box-shadow: 0 6px 14px rgba(0,174,224,.30);
   transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
-  white-space: nowrap;        /* ✅按鈕文字不要換行 */
-  min-width: 64px;            /* ✅給基本寬度，避免被擠太窄 */
+  white-space: nowrap;
+  min-width: 64px;
 }
-
 .mobile-pager-btn:active{
   transform: translateY(1px);
   box-shadow: 0 3px 8px rgba(0,174,224,.25);
 }
-
 .mobile-pager-btn:disabled{
   opacity: .45;
   cursor: not-allowed;
 }
 
 .mobile-pager-indicator{
-  font-weight: 600;            /* ✅不粗體 */
+  font-weight: 600;
   font-size: var(--fs-md);
   color: #111827;
-  padding: 7px 10px;           /* ✅變小更精緻 */
+  padding: 7px 10px;
   border-radius: 999px;
   background: rgba(2,132,199,.06);
   border: 1px solid rgba(2,132,199,.10);
@@ -639,7 +592,7 @@ body{
 .mobile-pager-top{
   border: 0;
   border-radius: 999px;
-  width: 40px;                 /* ✅略小 */
+  width: 40px;
   height: 40px;
   font-weight: 900;
   cursor: pointer;
@@ -650,27 +603,25 @@ body{
   box-shadow: 0 6px 14px rgba(0,174,224,.30);
   transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
 }
-
 .mobile-pager-top:active{
   transform: translateY(1px);
   box-shadow: 0 3px 8px rgba(0,174,224,.25);
 }
 
-/* 手機才顯示 + 預留底部空間，避免被 sticky 擋到 */
+/* 手機：安全區 + 預留底部空間 */
 @media (max-width: 640px){
   .mobile-pager{
     bottom: calc(12px + env(safe-area-inset-bottom));
     bottom: calc(12px + constant(safe-area-inset-bottom));
   }
 
-  /* ✅因為是浮動膠囊，不是整條底bar，所以 body 不用留 72px 那麼大 */
   body{
     padding-bottom: calc(60px + env(safe-area-inset-bottom));
     padding-bottom: calc(60px + constant(safe-area-inset-bottom));
   }
 }
 
-/* ✅只在手機才允許自動隱藏 */
+/* 只在手機才允許自動隱藏（桌機固定顯示） */
 @media (min-width: 641px){
   .mobile-pager.is-hidden{
     transform: translateX(-50%) translateY(0);
@@ -679,13 +630,11 @@ body{
   }
 }
 
+/* 超小手機微調 */
 @media (max-width: 380px){
   .mobile-pager-btn{
     min-width: 52px;
     padding: 9px 12px;
-  }
-  /* 讓按鈕文字更緊湊一點 */
-  .mobile-pager-btn{
     letter-spacing: .5px;
   }
 }
