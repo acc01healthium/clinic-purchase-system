@@ -256,16 +256,6 @@ body{
   color:var(--muted);
 }
 
-/* 標籤 */
-.tag{
-  background:rgba(0,174,224,.1);
-  color:#067aa0;
-  font-weight:800;
-  font-size: var(--fs-xs);
-  padding:6px 10px;
-  border-radius:999px;
-}
-
 /* =========================
    Price（企業級最終版）
 ========================= */
@@ -402,7 +392,6 @@ body{
   font-weight:600;
 }
 
-.tag,
 .btn,
 .pill-primary{
   font-weight:800;
@@ -415,33 +404,116 @@ body{
 }
 
 /* =========================
-   商品屬性列（v2 Meta Row）
+   ✅ Meta Hierarchy（企業感：分類 > 單位/規格）
+   放在 .tag / .card-meta / .meta-item 之後（覆蓋原設定）
 ========================= */
+
+/* Meta 容器：更乾淨的間距與對齊 */
 .card-meta{
   display:flex;
   flex-wrap:wrap;
-  gap:10px 14px;
+  gap:8px 8px;
   align-items:center;
-  font-size: var(--fs-sm);
-  color:#374151;
 }
 
+/* ✅ 分類：主層級 Tag（更醒目、更企業） */
+.tag{
+  background: rgba(0,174,224,.14);
+  border: 1px solid rgba(0,174,224,.28);
+  color: #056b8a;
+
+  font-weight: 900;
+  font-size: var(--fs-sm);
+  padding: 7px 12px;
+  border-radius: 999px;
+  letter-spacing: .4px;
+
+  box-shadow: 0 6px 14px rgba(0,174,224,.12);
+
+  /* ✅高光需要 */
+  position: relative;
+  overflow: hidden;
+}
+
+.tag::before{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  top:0;
+  height:55%;
+  z-index: 0; /* ✅補這行：高光永遠在背景層，不會蓋到文字 */
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,.55),
+    rgba(255,255,255,0)
+  );
+  pointer-events:none;
+}
+
+/* ✅ 次層級：單位/規格 pills（更淡、更資訊感） */
 .meta-item{
   display:inline-flex;
   align-items:center;
   gap:6px;
-  font-weight:700;
-  white-space:nowrap;
-  padding:6px 12px;
-  border-radius:999px;
-  background: rgba(2,132,199,.06);
-  border:1px solid rgba(2,132,199,.10);
+
+  background: rgba(17,24,39,.04);              /* 從藍色改成中性灰：更企業 */
+  border: 1px solid rgba(17,24,39,.08);
+  color: #111827;
+
+  font-weight: 700;
+  font-size: var(--fs-xs);                      /* 比分類小一階 */
+  padding: 6px 10px;
+  border-radius: 999px;
 }
 
+/* Label 再淡一點（資訊層級更清楚） */
 .meta-label{
   color:#6b7280;
   font-weight:700;
 }
+
+/* ✅ 分類永遠第一顆（防呆：就算順序亂掉也一致） */
+.card-meta .tag{ order: -10; }
+.card-meta .meta-item{ order: 0; }
+
+/* =========================
+   ✅ 防呆：避免 tag 被包進 meta-item 時出現雙層膠囊 / 高光錯位
+========================= */
+.card-meta .meta-item > .tag{
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  color: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  letter-spacing: 0 !important;
+
+  /* ✅再補一層防呆 */
+  position: static !important;
+  overflow: visible !important;
+}
+
+/* ✅被包住時連高光也關掉（你問的這一行，位置正確） */
+.card-meta .meta-item > .tag::before{
+  display: none !important;
+}
+
+/* ✅ 高光層級補強（推薦最穩定版本） */
+.tag{
+  z-index: 0;            /* 建立 stacking context */
+}
+
+.tag > *{
+  position: relative;
+  z-index: 1;            /* 如果未來 tag 內有 span/icon，文字永遠在最上層 */
+}
+
+/* 你已經決定不要 icon：保留（避免突兀） */
+.meta-icon{ display:none; }
+
 /* =========================
    手機：整體放大 & 更好點
 ========================= */
@@ -616,11 +688,4 @@ body{
   .mobile-pager-btn{
     letter-spacing: .5px;
   }
-}
-
-/* =========================
-   Meta pills：移除 icon（最乾淨版本）
-========================= */
-.meta-icon{
-  display: none;
 }
