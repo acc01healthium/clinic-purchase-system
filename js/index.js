@@ -109,25 +109,18 @@ const mTopBtn = document.getElementById("mTopBtn");
 const meta = document.createElement("div");
 meta.className = "card-meta";
 
+// ✅ 分類：只用 tag，不要 meta-item 外框（避免雙層膠囊）
 if (p.category) {
-  const item = document.createElement("div");
-  item.className = "meta-item";
-
   const tag = document.createElement("span");
   tag.className = "tag";
   tag.textContent = p.category;
-
-  item.appendChild(tag);
-  meta.appendChild(item);
+  meta.appendChild(tag);
 }
 
+// ✅ 單位：用 meta-item（但不要 icon）
 if (p.unit) {
   const item = document.createElement("div");
   item.className = "meta-item";
-
-  const icon = document.createElement("span");
-  icon.className = "meta-icon";
-  icon.textContent = "📦";
 
   const label = document.createElement("span");
   label.className = "meta-label";
@@ -136,19 +129,15 @@ if (p.unit) {
   const val = document.createElement("span");
   val.textContent = p.unit;
 
-  item.appendChild(icon);
   item.appendChild(label);
   item.appendChild(val);
   meta.appendChild(item);
 }
 
+// ✅ 規格：用 meta-item（但不要 icon）
 if (p.spec) {
   const item = document.createElement("div");
   item.className = "meta-item";
-
-  const icon = document.createElement("span");
-  icon.className = "meta-icon";
-  icon.textContent = "📏";
 
   const label = document.createElement("span");
   label.className = "meta-label";
@@ -157,7 +146,6 @@ if (p.spec) {
   const val = document.createElement("span");
   val.textContent = p.spec;
 
-  item.appendChild(icon);
   item.appendChild(label);
   item.appendChild(val);
   meta.appendChild(item);
@@ -283,6 +271,7 @@ async function loadProducts() {
   const to = from + pageSize - 1;
 
   if (statusMessage) statusMessage.textContent = "載入中…";
+  if (!productList) return;
   productList.innerHTML = "";
   setEmpty(false);
 
@@ -298,7 +287,8 @@ async function loadProducts() {
     .eq("is_active", true);
 
   if (cat) qCount = qCount.eq("category", cat);
-  if (kw) qCount = qCount.or(`name.ilike.%${kw}%,spec.ilike.%${kw}%,category.ilike.%${kw}%`);
+  const safeKw = kw.replaceAll(",", " ").trim();
+if (safeKw) qCount = qCount.or(`name.ilike.%${safeKw}%,spec.ilike.%${safeKw}%,category.ilike.%${safeKw}%`);
 
   const { count: exactCount, error: countError } = await qCount;
 
@@ -338,7 +328,7 @@ async function loadProducts() {
     .eq("is_active", true);
 
   if (cat) qData = qData.eq("category", cat);
-  if (kw) qData = qData.or(`name.ilike.%${kw}%,spec.ilike.%${kw}%,category.ilike.%${kw}%`);
+  if (safeKw) qData = qData.or(`name.ilike.%${safeKw}%,spec.ilike.%${safeKw}%,category.ilike.%${safeKw}%`);
 
   // 排序
   if (sort === "updated_asc") {
