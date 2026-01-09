@@ -638,3 +638,97 @@ body{
     letter-spacing: .5px;
   }
 }
+
+/* =========================
+   ✅ Category Tone System (tone-0 ~ tone-11)
+   放在 style.css 最底部（只補這段）
+========================= */
+
+/* 保險：tone 只改色，不動你 tag 的結構/大小/字重 */
+.tag[class*="tone-"]{
+  /* 讓 tone 覆蓋顏色，但不影響你原本的 padding/radius/shadow */
+}
+
+/* tone-0：藍（醫療感、主色系） */
+.tag.tone-0{
+  background: rgba(0,174,224,.14);
+  border: 1px solid rgba(0,174,224,.28);
+  color: #056b8a;
+}
+
+/* tone-1：青綠（清潔/耗材感） */
+.tag.tone-1{
+  background: rgba(20,194,197,.14);
+  border: 1px solid rgba(20,194,197,.28);
+  color: #0b6b6d;
+}
+
+/* tone-2：靛藍（設備/儀器感） */
+.tag.tone-2{
+  background: rgba(79,70,229,.12);
+  border: 1px solid rgba(79,70,229,.22);
+  color: #3730a3;
+}
+
+/* tone-3：紫（特殊品項/耗材） */
+.tag.tone-3{
+  background: rgba(124,58,237,.12);
+  border: 1px solid rgba(124,58,237,.22);
+  color: #5b21b6;
+}
+
+/* tone-4：粉紅（提醒/護理用品） */
+.tag.tone-4{
+  background: rgba(236,72,153,.12);
+  border: 1px solid rgba(236,72,153,.22);
+  color: #9d174d;
+}
+
+/* tone-5：紅（緊急/高風險/管制） */
+.tag.tone-5{
+  background: rgba(239,68,68,.12);
+  border: 1px solid rgba(239,68,68,.22);
+  color: #991b1b;
+}
+
+/* tone-6：橘（消毒/清潔/一般耗材） */
+.tag.tone-6{
+  background: rgba(249,115,22,.12);
+  border: 1px solid rgba(249,115,22,.22);
+  color: #9a3412;
+}
+
+/* tone-7：琥珀（藥品/試劑感，溫和但醒目） */
+.tag.tone-7{
+  background: rgba(245,158,11,.12);
+  border: 1px solid rgba(245,158,11,.22);
+  color: #92400e;
+}
+
+/* tone-8：黃綠（保健/耗材分類） */
+.tag.tone-8{
+  background: rgba(132,204,22,.12);
+  border: 1px solid rgba(132,204,22,.22);
+  color: #3f6212;
+}
+
+/* tone-9：綠（一般/常備品） */
+.tag.tone-9{
+  background: rgba(34,197,94,.12);
+  border: 1px solid rgba(34,197,94,.22);
+  color: #166534;
+}
+
+/* tone-10：石墨灰（行政/其他/未分類也好看） */
+.tag.tone-10{
+  background: rgba(17,24,39,.08);
+  border: 1px solid rgba(17,24,39,.14);
+  color: #111827;
+}
+
+/* tone-11：藍灰（保守企業感） */
+.tag.tone-11{
+  background: rgba(100,116,139,.12);
+  border: 1px solid rgba(100,116,139,.22);
+  color: #334155;
+}
