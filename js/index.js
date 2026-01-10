@@ -43,6 +43,94 @@ const mTopBtn = document.getElementById("mTopBtn");
   let totalPages = 1;
   let totalCount = 0;
 
+  // ===== SelectX (custom select) =====
+  function initSelectX() {
+    const wrappers = document.querySelectorAll(".selectx[data-select]");
+    wrappers.forEach((wrap) => {
+      const selectId = wrap.getAttribute("data-select");
+      const sel = document.getElementById(selectId);
+      const btn = wrap.querySelector(".selectx-btn");
+      const textEl = wrap.querySelector(".selectx-text");
+      const menu = wrap.querySelector(".selectx-menu");
+
+      if (!sel || !btn || !textEl || !menu) return;
+
+      // 建立 / 重建 menu
+      const rebuild = () => {
+        menu.innerHTML = "";
+        const options = Array.from(sel.options);
+
+        options.forEach((opt) => {
+          const item = document.createElement("div");
+          item.className = "selectx-item";
+          item.textContent = opt.textContent;
+
+          // active 標記
+          if (opt.value === sel.value) item.classList.add("is-active");
+
+          item.addEventListener("click", () => {
+            // 更新 select 值並觸發 change 事件（讓你原本的流程照跑）
+            sel.value = opt.value;
+            textEl.textContent = opt.textContent;
+
+            // 更新 active
+            menu.querySelectorAll(".selectx-item").forEach(x => x.classList.remove("is-active"));
+            item.classList.add("is-active");
+
+            // 收合
+            wrap.classList.remove("is-open");
+            btn.setAttribute("aria-expanded", "false");
+
+            // 觸發原生 change（你原本的 loadProducts 會跑）
+            sel.dispatchEvent(new Event("change", { bubbles: true }));
+          });
+
+          menu.appendChild(item);
+        });
+
+        // 同步按鈕文字（避免載入後文字不對）
+        const cur = options.find(o => o.value === sel.value) || options[0];
+        if (cur) textEl.textContent = cur.textContent;
+      };
+
+      // 初次建立
+      rebuild();
+
+      // 點按鈕開關
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const open = wrap.classList.toggle("is-open");
+        btn.setAttribute("aria-expanded", open ? "true" : "false");
+      });
+
+      // select 若被程式改值（例如載入分類後重建），同步顯示
+      sel.addEventListener("change", () => {
+        const cur = Array.from(sel.options).find(o => o.value === sel.value);
+        if (cur) textEl.textContent = cur.textContent;
+        // active 同步
+        menu.querySelectorAll(".selectx-item").forEach((x, i) => {
+          x.classList.toggle("is-active", sel.options[i]?.value === sel.value);
+        });
+      });
+
+      // 點外面自動收合
+      document.addEventListener("click", (e) => {
+        if (!wrap.contains(e.target)) {
+          wrap.classList.remove("is-open");
+          btn.setAttribute("aria-expanded", "false");
+        }
+      });
+
+      // 提供外部呼叫重建（分類載入後會用到）
+      wrap.__rebuildSelectX = rebuild;
+    });
+  }
+
+  function rebuildSelectXById(selectId) {
+    const wrap = document.querySelector(`.selectx[data-select="${selectId}"]`);
+    if (wrap && typeof wrap.__rebuildSelectX === "function") wrap.__rebuildSelectX();
+  }
+  
   // ===== Utils =====
   function escapeHtml(str) {
     return String(str ?? "")
@@ -418,12 +506,15 @@ price.innerHTML =
   ).sort((a, b) => a.localeCompare(b, "zh-Hant"));
 
   categorySelect.innerHTML = `<option value="">全部分類</option>`;
-  uniq.forEach((name) => {
+    uniq.forEach((name) => {
     const opt = document.createElement("option");
     opt.value = name;
     opt.textContent = name;
     categorySelect.appendChild(opt);
   });
+
+  // ✅ 分類選項載入後，重建漂亮下拉選單
+  rebuildSelectXById("categorySelect");
 }
 
 // ===== Load Products (server paging) =====
@@ -652,9 +743,9 @@ window.addEventListener("scroll", () => {
 }, { passive: true });
 
   // ===== Init =====
-    document.addEventListener("DOMContentLoaded", async () => {
-    initSelectX();          // ✅先把 selectx 綁起來
-    await loadCategories();  // ✅分類載入後 option 會變（下一步我們再補一個 refresh）
+     document.addEventListener("DOMContentLoaded", async () => {
+    initSelectX();          // ✅先建立三個下拉的 menu（排序/每頁先有固定選項）
+    await loadCategories(); // ✅分類 options 載入後會 rebuild categorySelect
     await loadProducts();
   });
 })();
