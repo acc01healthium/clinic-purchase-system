@@ -97,6 +97,137 @@ function applyCategoryTone(el, categoryName) {
   const idx = hashString(categoryName.trim()) % CATEGORY_TONES.length;
   el.classList.add(CATEGORY_TONES[idx]);
 }
+  // ===== SelectX (custom dropdown) =====
+  function initSelectX() {
+    const wrappers = document.querySelectorAll(".selectx");
+
+    wrappers.forEach((wrap) => {
+      const selectId = wrap.getAttribute("data-select");
+      if (!selectId) return;
+
+      const select = wrap.querySelector("select");
+      const btn = wrap.querySelector(".selectx-btn");
+      const textEl = wrap.querySelector(".selectx-text");
+      const menu = wrap.querySelector(".selectx-menu");
+
+      if (!select || !btn || !textEl || !menu) return;
+      if (select.id !== selectId) {
+        // 防呆：data-select 要對應到裡面 select 的 id
+        // 不符合就不初始化，避免綁錯
+        return;
+      }
+
+      // 建立 menu
+      const buildMenu = () => {
+        menu.innerHTML = "";
+        const opts = Array.from(select.options);
+
+        opts.forEach((opt, idx) => {
+          const item = document.createElement("div");
+          item.className = "selectx-item";
+          item.setAttribute("role", "option");
+          item.dataset.value = opt.value;
+          item.textContent = opt.textContent;
+
+          if (opt.disabled) {
+            item.classList.add("is-disabled");
+            item.setAttribute("aria-disabled", "true");
+          }
+
+          // 目前選到的
+          if (opt.selected) {
+            item.classList.add("is-active");
+            item.setAttribute("aria-selected", "true");
+          }
+
+          item.addEventListener("click", () => {
+            if (opt.disabled) return;
+
+            // 更新原生 select
+            select.selectedIndex = idx;
+
+            // 更新按鈕文字
+            textEl.textContent = opt.textContent;
+
+            // 標記 active
+            menu.querySelectorAll(".selectx-item").forEach((el) => {
+              el.classList.remove("is-active");
+              el.removeAttribute("aria-selected");
+            });
+            item.classList.add("is-active");
+            item.setAttribute("aria-selected", "true");
+
+            // 關閉
+            closeMenu(wrap);
+
+            // 觸發 change（你的 loadProducts() 會照常跑）
+            select.dispatchEvent(new Event("change", { bubbles: true }));
+          });
+
+          menu.appendChild(item);
+        });
+
+        // 初始化按鈕文字
+        const selectedOpt = select.options[select.selectedIndex];
+        textEl.textContent = selectedOpt ? selectedOpt.textContent : "";
+      };
+
+      const openMenu = () => {
+        wrap.classList.add("is-open");
+        btn.setAttribute("aria-expanded", "true");
+        menu.focus({ preventScroll: true });
+      };
+
+      const closeMenu = (w) => {
+        w.classList.remove("is-open");
+        const b = w.querySelector(".selectx-btn");
+        if (b) b.setAttribute("aria-expanded", "false");
+      };
+
+      const toggleMenu = () => {
+        const isOpen = wrap.classList.contains("is-open");
+        if (isOpen) closeMenu(wrap);
+        else {
+          // 關掉其他開著的
+          document.querySelectorAll(".selectx.is-open").forEach((w) => closeMenu(w));
+          openMenu();
+        }
+      };
+
+      // 初次渲染
+      buildMenu();
+
+      // click 打開
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        toggleMenu();
+      });
+
+      // select 若被程式改變，也同步更新（例如你以後 reset/filter）
+      select.addEventListener("change", () => {
+        const selectedOpt = select.options[select.selectedIndex];
+        if (selectedOpt) textEl.textContent = selectedOpt.textContent;
+
+        // 同步 menu active
+        const val = select.value;
+        menu.querySelectorAll(".selectx-item").forEach((el) => {
+          el.classList.toggle("is-active", el.dataset.value === val);
+          if (el.dataset.value === val) el.setAttribute("aria-selected", "true");
+          else el.removeAttribute("aria-selected");
+        });
+      });
+
+      // 點外面關閉
+      document.addEventListener("click", (e) => {
+        if (!wrap.contains(e.target)) closeMenu(wrap);
+      });
+
+      // Esc 關閉
+      wrap.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeMenu(wrap);
+      });
+    });
+  }
 
   // ===== Card =====
   function createProductCard(p) {
@@ -521,8 +652,10 @@ window.addEventListener("scroll", () => {
 }, { passive: true });
 
   // ===== Init =====
-  document.addEventListener("DOMContentLoaded", async () => {
-    await loadCategories();
+    document.addEventListener("DOMContentLoaded", async () => {
+    initSelectX();          // ✅先把 selectx 綁起來
+    await loadCategories();  // ✅分類載入後 option 會變（下一步我們再補一個 refresh）
     await loadProducts();
   });
 })();
+
