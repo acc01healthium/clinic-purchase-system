@@ -38,7 +38,8 @@ body{
   font-size: var(--fs-md);
   line-height: 1.6;
   -webkit-text-size-adjust: 100%;
-  font-weight:600;
+
+  font-weight: 400; /* ✅回到正常字重，整體立刻變精緻 */
 }
 
 /* =========================
@@ -839,9 +840,8 @@ body{
 .selectx-item.is-active{
   background: rgba(0,174,224,.12);
   border: 1px solid rgba(0,174,224,.20);
-  font-weight: 900;
+  font-weight: 500 !important;
 }
-
 /* disable（如果未來有） */
 .selectx-item.is-disabled{
   opacity: .45;
@@ -859,4 +859,36 @@ body{
     padding: 12px 16px;
     font-size: var(--fs-md);
   }
+}/* =========================
+   SelectX 視覺減重（企業感）
+========================= */
+
+/* 下拉顯示文字（目前選中） */
+.selectx-btn {
+  font-weight: 500;            /* 原本太粗，降一階 */
+  color: #1f3a5f;              /* 深灰藍，比黑色柔和 */
+  letter-spacing: 0.2px;       /* 微企業感 */
 }
+
+/* 下拉選單項目 */
+.selectx-item {
+  font-weight: 400;            /* 正文等級 */
+  color: #243447;
+}
+
+/* 被選中的項目 */
+.selectx-item.is-active {
+  font-weight: 500;            /* 只比一般項目稍重 */
+}
+
+/* hover 不要變粗，只靠背景 */
+.selectx-item:hover {
+  font-weight: 400;
+}
+
+/* caret（▾）也一起降權重 */
+.selectx-caret {
+  font-weight: 400;
+  opacity: 0.7;
+}
+
