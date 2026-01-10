@@ -50,44 +50,77 @@
         </div>
       </div>
 
-      <div class="panel-row panel-row-bottom">
-        <div class="filters">
-          <div class="filter-item">
-            <label class="filter-label" for="categorySelect">分類</label>
-            <select id="categorySelect" class="select">
-              <option value="">全部分類</option>
-            </select>
-          </div>
+<div class="panel-row panel-row-bottom">
+  <div class="filters">
+    <!-- 分類 -->
+    <div class="filter-item">
+      <label class="filter-label" for="categorySelect">分類</label>
 
-          <div class="filter-item">
-            <label class="filter-label" for="sortSelect">排序</label>
-            <select id="sortSelect" class="select">
-              <option value="updated_desc">更新時間：新 → 舊</option>
-              <option value="updated_asc">更新時間：舊 → 新</option>
-              <option value="name_asc">名稱：A → Z</option>
-              <option value="name_desc">名稱：Z → A</option>
-            </select>
-          </div>
+      <div class="selectx" data-select="categorySelect">
+        <select id="categorySelect" class="select">
+          <option value="">全部分類</option>
+        </select>
 
-          <div class="filter-item">
-            <label class="filter-label" for="pageSizeSelect">每頁</label>
-            <select id="pageSizeSelect" class="select">
-              <option value="10" selected>10</option>
-              <option value="20">20</option>
-              <option value="50">50</option>
-            </select>
-          </div>
-        </div>
+        <button type="button" class="selectx-btn" aria-haspopup="listbox" aria-expanded="false">
+          <span class="selectx-text">全部分類</span>
+          <span class="selectx-caret">▾</span>
+        </button>
 
-       <div class="hint">
-  <div class="hint-main">
-    支援商品名稱、分類、規格等關鍵字模糊查詢
+        <div class="selectx-menu" role="listbox" tabindex="-1"></div>
+      </div>
+    </div>
+
+    <!-- 排序 -->
+    <div class="filter-item">
+      <label class="filter-label" for="sortSelect">排序</label>
+
+      <div class="selectx" data-select="sortSelect">
+        <select id="sortSelect" class="select">
+          <option value="updated_desc">更新時間：新 → 舊</option>
+          <option value="updated_asc">更新時間：舊 → 新</option>
+          <option value="name_asc">名稱：A → Z</option>
+          <option value="name_desc">名稱：Z → A</option>
+        </select>
+
+        <button type="button" class="selectx-btn" aria-haspopup="listbox" aria-expanded="false">
+          <span class="selectx-text">更新時間：新 → 舊</span>
+          <span class="selectx-caret">▾</span>
+        </button>
+
+        <div class="selectx-menu" role="listbox" tabindex="-1"></div>
+      </div>
+    </div>
+
+    <!-- 每頁 -->
+    <div class="filter-item">
+      <label class="filter-label" for="pageSizeSelect">每頁</label>
+
+      <div class="selectx" data-select="pageSizeSelect">
+        <select id="pageSizeSelect" class="select">
+          <option value="10" selected>10</option>
+          <option value="20">20</option>
+          <option value="50">50</option>
+        </select>
+
+        <button type="button" class="selectx-btn" aria-haspopup="listbox" aria-expanded="false">
+          <span class="selectx-text">10</span>
+          <span class="selectx-caret">▾</span>
+        </button>
+
+        <div class="selectx-menu" role="listbox" tabindex="-1"></div>
+      </div>
+    </div>
   </div>
-  <div class="hint-price">
-    ※ 本系統所列價格皆為未稅參考價，實際採購金額請以廠商最新報價為準
+
+  <div class="hint">
+    <div class="hint-main">
+      支援商品名稱、分類、規格等關鍵字模糊查詢
+    </div>
+    <div class="hint-price">
+      ※ 本系統所列價格皆為未稅參考價，實際採購金額請以廠商最新報價為準
+    </div>
   </div>
-  </div>
-  </div>    
+</div>
     </section>
 
     <!-- 結果資訊列 + 分頁 -->
