@@ -732,3 +732,131 @@ body{
   border: 1px solid rgba(100,116,139,.22);
   color: #334155;
 }
+
+/* =========================
+   ✅ SelectX (custom select) — 先讓畫面乾淨 + 可用
+========================= */
+.selectx{
+  position: relative;
+  min-width: 160px;
+  max-width: 200px;
+}
+
+/* ✅ 隱藏原生 select（保留值與 change event） */
+.selectx > select{
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 按鈕外觀（跟你整體一致：圓角膠囊 + 乾淨邊框） */
+.selectx-btn{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #fff;
+
+  font-size: var(--fs-sm);
+  font-weight: 800;
+  color: #111827;
+
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(0,0,0,.06);
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+
+.selectx-btn:hover{
+  box-shadow: 0 10px 22px rgba(0,0,0,.08);
+  border-color: rgba(0,174,224,.45);
+}
+
+.selectx-btn:active{
+  transform: translateY(1px);
+}
+
+/* 文字區避免換行亂版 */
+.selectx-text{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: 10px;
+}
+
+/* 小箭頭 */
+.selectx-caret{
+  font-size: 12px;
+  color: var(--primary);
+  flex: 0 0 auto;
+}
+
+/* ✅ 下拉選單（浮層） */
+.selectx-menu{
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 8px);
+
+  background: rgba(255,255,255,.98);
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 16px;
+
+  box-shadow: 0 16px 34px rgba(0,0,0,.14);
+  padding: 6px;
+  display: none;
+
+  max-height: 280px;
+  overflow: auto;
+
+  z-index: 9999;
+}
+
+/* 打開狀態才顯示 */
+.selectx.is-open .selectx-menu{
+  display: block;
+}
+
+/* 選項 */
+.selectx-item{
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: #111827;
+  cursor: pointer;
+  user-select: none;
+}
+
+.selectx-item:hover{
+  background: rgba(2,132,199,.08);
+}
+
+.selectx-item.is-active{
+  background: rgba(0,174,224,.12);
+  border: 1px solid rgba(0,174,224,.20);
+  font-weight: 900;
+}
+
+/* disable（如果未來有） */
+.selectx-item.is-disabled{
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+/* 手機：按鈕稍微大一點更好點 */
+@media (max-width: 640px){
+  .selectx{
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+  }
+  .selectx-btn{
+    padding: 12px 16px;
+    font-size: var(--fs-md);
+  }
+}
