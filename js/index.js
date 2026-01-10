@@ -744,10 +744,6 @@ window.addEventListener("scroll", () => {
     try {
       // ✅ 先載入分類（會把 categorySelect 的 option 塞進去）
       await loadCategories();
-
-      // ✅ 分類塞完後，再初始化/重建 SelectX（三個下拉都會同步）
-      if (typeof initSelectX === "function") initSelectX();
-
       // ✅ 最後載入商品
       await loadProducts();
 
