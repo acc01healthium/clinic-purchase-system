@@ -46,6 +46,7 @@ const mTopBtn = document.getElementById("mTopBtn");
   // ===== SelectX (custom select) =====
   function initSelectX() {
     const wrappers = document.querySelectorAll(".selectx[data-select]");
+
     wrappers.forEach((wrap) => {
       const selectId = wrap.getAttribute("data-select");
       const sel = document.getElementById(selectId);
@@ -55,7 +56,9 @@ const mTopBtn = document.getElementById("mTopBtn");
 
       if (!sel || !btn || !textEl || !menu) return;
 
-      // 建立 / 重建 menu
+      // ✅ 防止重複綁事件（允許多次 initSelectX）
+      const alreadyInited = wrap.dataset.inited === "1";
+
       const rebuild = () => {
         menu.innerHTML = "";
         const options = Array.from(sel.options);
@@ -65,55 +68,53 @@ const mTopBtn = document.getElementById("mTopBtn");
           item.className = "selectx-item";
           item.textContent = opt.textContent;
 
-          // active 標記
           if (opt.value === sel.value) item.classList.add("is-active");
 
           item.addEventListener("click", () => {
-            // 更新 select 值並觸發 change 事件（讓你原本的流程照跑）
             sel.value = opt.value;
             textEl.textContent = opt.textContent;
 
-            // 更新 active
             menu.querySelectorAll(".selectx-item").forEach(x => x.classList.remove("is-active"));
             item.classList.add("is-active");
 
-            // 收合
             wrap.classList.remove("is-open");
             btn.setAttribute("aria-expanded", "false");
 
-            // 觸發原生 change（你原本的 loadProducts 會跑）
             sel.dispatchEvent(new Event("change", { bubbles: true }));
           });
 
           menu.appendChild(item);
         });
 
-        // 同步按鈕文字（避免載入後文字不對）
+        // 同步目前顯示文字
         const cur = options.find(o => o.value === sel.value) || options[0];
         if (cur) textEl.textContent = cur.textContent;
       };
 
-      // 初次建立
+      // ✅ 每次都重建（確保動態 options 能更新到）
       rebuild();
+      wrap.__rebuildSelectX = rebuild;
 
-      // 點按鈕開關
+      // 如果已初始化過，就不要再綁一次事件
+      if (alreadyInited) return;
+
       btn.addEventListener("click", (e) => {
         e.preventDefault();
         const open = wrap.classList.toggle("is-open");
         btn.setAttribute("aria-expanded", open ? "true" : "false");
       });
 
-      // select 若被程式改值（例如載入分類後重建），同步顯示
       sel.addEventListener("change", () => {
         const cur = Array.from(sel.options).find(o => o.value === sel.value);
         if (cur) textEl.textContent = cur.textContent;
+
         // active 同步
-        menu.querySelectorAll(".selectx-item").forEach((x, i) => {
+        const items = menu.querySelectorAll(".selectx-item");
+        items.forEach((x, i) => {
           x.classList.toggle("is-active", sel.options[i]?.value === sel.value);
         });
       });
 
-      // 點外面自動收合
       document.addEventListener("click", (e) => {
         if (!wrap.contains(e.target)) {
           wrap.classList.remove("is-open");
@@ -121,16 +122,10 @@ const mTopBtn = document.getElementById("mTopBtn");
         }
       });
 
-      // 提供外部呼叫重建（分類載入後會用到）
-      wrap.__rebuildSelectX = rebuild;
+      wrap.dataset.inited = "1";
     });
   }
 
-  function rebuildSelectXById(selectId) {
-    const wrap = document.querySelector(`.selectx[data-select="${selectId}"]`);
-    if (wrap && typeof wrap.__rebuildSelectX === "function") wrap.__rebuildSelectX();
-  }
-  
   // ===== Utils =====
   function escapeHtml(str) {
     return String(str ?? "")
@@ -512,6 +507,8 @@ price.innerHTML =
     opt.textContent = name;
     categorySelect.appendChild(opt);
   });
+
+     initSelectX(); // ✅分類 options 更新後，重建 SelectX menu（最穩）
 
   // ✅ 分類選項載入後，重建漂亮下拉選單
   rebuildSelectXById("categorySelect");
