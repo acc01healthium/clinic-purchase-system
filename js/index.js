@@ -740,10 +740,21 @@ window.addEventListener("scroll", () => {
 }, { passive: true });
 
   // ===== Init =====
-     document.addEventListener("DOMContentLoaded", async () => {
-    initSelectX();          // ✅先建立三個下拉的 menu（排序/每頁先有固定選項）
-    await loadCategories(); // ✅分類 options 載入後會 rebuild categorySelect
-    await loadProducts();
+  document.addEventListener("DOMContentLoaded", async () => {
+    try {
+      // ✅ 先載入分類（會把 categorySelect 的 option 塞進去）
+      await loadCategories();
+
+      // ✅ 分類塞完後，再初始化/重建 SelectX（三個下拉都會同步）
+      if (typeof initSelectX === "function") initSelectX();
+
+      // ✅ 最後載入商品
+      await loadProducts();
+
+    } catch (err) {
+      console.error("❌ 初始化失敗：", err);
+      if (statusMessage) statusMessage.textContent = "初始化失敗，請看 Console 錯誤訊息";
+    }
   });
 })();
 
