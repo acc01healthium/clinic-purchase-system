@@ -953,3 +953,33 @@ body{
 }
 
 /* ====== end UI polish ====== */
+
+/* ===== SelectX active / hover hierarchy fix ===== */
+
+/* 1️⃣ 目前選中的項目：很淡、穩定 */
+.selectx-item.is-active{
+  background: rgba(2,132,199,.06);   /* 比現在更淡 */
+  border: 0;
+  font-weight: 400;
+}
+
+/* 左側指示線再細一點 */
+.selectx-item.is-active::before{
+  width: 2px;
+  background: rgba(0,174,224,.35);
+}
+
+/* 2️⃣ hover 狀態：一定要比 active 明顯 */
+.selectx-item:hover{
+  background: rgba(2,132,199,.12);
+}
+
+/* hover 時不要加粗 */
+.selectx-item:hover{
+  font-weight: 400;
+}
+
+/* 3️⃣ 如果 hover 在 active 上，不要疊太重 */
+.selectx-item.is-active:hover{
+  background: rgba(2,132,199,.14);
+}
