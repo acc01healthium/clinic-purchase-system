@@ -892,3 +892,64 @@ body{
   opacity: 0.7;
 }
 
+/* ====== UI polish add-on (v1) ====== */
+
+/* ① SelectX：focus / open 狀態更清楚（不靠粗體） */
+.selectx.is-open .selectx-btn{
+  border-color: rgba(0,174,224,.55);
+  box-shadow:
+    0 0 0 3px rgba(0,174,224,.12),
+    0 10px 22px rgba(0,0,0,.08);
+}
+
+/* hover 提亮一點點，維持企業感 */
+.selectx-btn:hover{
+  background: linear-gradient(to bottom, #ffffff, #f9fcff);
+}
+
+/* ② 下拉選單：可掃描性提升（行距 + active 指示線） */
+.selectx-item{
+  padding: 11px 14px;
+  line-height: 1.4;
+}
+
+/* active 左側淡指示線（不靠粗體也看得出來） */
+.selectx-item.is-active{
+  position: relative;
+}
+
+.selectx-item.is-active::before{
+  content:"";
+  position:absolute;
+  left:6px;
+  top:8px;
+  bottom:8px;
+  width:3px;
+  border-radius:3px;
+  background: rgba(0,174,224,.45);
+}
+
+/* ③ Filters：視覺群組化（輕量分隔，不會變厚重） */
+.filters{
+  padding-top: 8px;
+  margin-top: 10px;
+  border-top: 1px dashed rgba(0,0,0,.06);
+}
+
+/* ④ Header「全部商品」：hover 回饋 + 微光澤（不影響原本風格） */
+.pill-primary{
+  box-shadow: 0 8px 20px rgba(255,255,255,.22);
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+}
+
+.pill-primary:hover{
+  background:#f0fbff;
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(255,255,255,.28);
+}
+
+.pill-primary:active{
+  transform: translateY(0px);
+}
+
+/* ====== end UI polish ====== */
