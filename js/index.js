@@ -156,7 +156,8 @@
     return `${y}/${m}/${day} ${hh}:${mm}`;
   }
 
-  // ===== Category Tone (localStorage stable + auto cleanup) =====
+  // ===== Category Tone (localStorage stable + 12 tones first + auto cleanup) =====
+  // 全域（只留這一份）
   let categoryToneMap = new Map();
 
   const TONES = [
@@ -165,6 +166,10 @@
   ];
 
   const TONE_STORAGE_KEY = "productCategoryToneMap_v1";
+
+  function normalizeCategoryName(name) {
+    return String(name || "").trim();
+  }
 
   function loadToneMapFromStorage() {
     try {
@@ -187,15 +192,18 @@
     }
   }
 
-  function getUsedToneSet(map) {
-    const used = new Set();
-    map.forEach((tone) => tone && used.add(tone));
-    return used;
-  }
+ function getUsedToneSet(map) {
+  const used = new Set();
+  map.forEach((tone) => {
+    if (TONES.includes(tone)) used.add(tone);
+  });
+  return used;
+}
 
+  // 穩定 hash：用來在「12 色都用完」後分散重複
   function hashString(str) {
     const s = String(str || "");
-    let h = 2166136261;
+    let h = 2166136261; // FNV-1a seed
     for (let i = 0; i < s.length; i++) {
       h ^= s.charCodeAt(i);
       h = Math.imul(h, 16777619);
@@ -203,22 +211,32 @@
     return h >>> 0;
   }
 
-  // 1) 新分類：先用完 12 色（找 free tone）
-  // 2) 12 色都用過：hash 分散重複（穩定）
+  /**
+   * 規則：
+   * 1) 已存在 map：永遠沿用（穩定）
+   * 2) 新分類：優先拿「未使用的 tone」（12 色先用完）
+   * 3) 12 色都用過：用 hash 分散重複（穩定，不會每次都撞 tone-0）
+   */
   function pickToneForNewCategory(categoryName, usedSet) {
-    const free = TONES.find((t) => !usedSet.has(t));
+    const free = TONES.find(t => !usedSet.has(t));
     if (free) return free;
+
     const idx = hashString(categoryName) % TONES.length;
     return TONES[idx];
   }
 
-  // ✅ 自動清理：只保留「目前 DB 仍存在」的分類 → 不存在就釋出 tone
+  /**
+   * ✅ 自動清理（釋出 tone）：
+   * - 只保留「目前資料庫還存在」的分類 key
+   * - 不存在的分類會從 map 移除 → tone 釋出
+   * - 再補上新分類 → 12 色先用完
+   */
   function buildStableCategoryToneMap(categories) {
-    const currentSet = new Set(
-      (categories || [])
-        .map((x) => String(x || "").trim())
-        .filter(Boolean)
-    );
+    const currentList = (categories || [])
+      .map(normalizeCategoryName)
+      .filter(Boolean);
+
+    const currentSet = new Set(currentList);
 
     // 1) 讀舊 map
     const map = loadToneMapFromStorage();
@@ -228,14 +246,11 @@
       if (!currentSet.has(key)) map.delete(key);
     }
 
-    // 3) used = 清理後的 tone 集合
+    // 3) 重新計算 used（以清理後 map 為準）
     const used = getUsedToneSet(map);
 
-    // 4) 補上新分類：先用完 12 色，再循環
-    (categories || []).forEach((name) => {
-      const key = String(name || "").trim();
-      if (!key) return;
-
+    // 4) 補新分類
+    currentList.forEach((key) => {
       if (!map.has(key)) {
         const tone = pickToneForNewCategory(key, used);
         map.set(key, tone);
@@ -247,12 +262,14 @@
     return map;
   }
 
+  // 套用到 tag（createProductCard 會用到）
   function applyCategoryTone(el, categoryName) {
     if (!el || !categoryName) return;
-    const key = String(categoryName).trim();
+    const key = normalizeCategoryName(categoryName);
     const tone = categoryToneMap.get(key) || "tone-0";
     el.classList.add(tone);
   }
+
 
   // ===== Card =====
   function createProductCard(p) {
