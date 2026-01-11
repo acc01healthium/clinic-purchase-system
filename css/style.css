@@ -833,15 +833,6 @@ body{
   user-select: none;
 }
 
-.selectx-item:hover{
-  background: rgba(2,132,199,.08);
-}
-
-.selectx-item.is-active{
-  background: rgba(0,174,224,.12);
-  border: 1px solid rgba(0,174,224,.20);
-  font-weight: 500 !important;
-}
 /* disable（如果未來有） */
 .selectx-item.is-disabled{
   opacity: .45;
@@ -859,15 +850,17 @@ body{
     padding: 12px 16px;
     font-size: var(--fs-md);
   }
-}/* =========================
+}
+
+/* =========================
    SelectX 視覺減重（企業感）
 ========================= */
 
 /* 下拉顯示文字（目前選中） */
-.selectx-btn {
-  font-weight: 500;            /* 原本太粗，降一階 */
-  color: #1f3a5f;              /* 深灰藍，比黑色柔和 */
-  letter-spacing: 0.2px;       /* 微企業感 */
+.selectx .selectx-btn{
+  font-weight: 500;
+  color: #1f3a5f;
+  letter-spacing: 0.2px;
 }
 
 /* 下拉選單項目 */
