@@ -30,6 +30,7 @@
   const nextBtn = document.getElementById("nextPageBtn");
   const pageInfo = document.getElementById("pageInfo");
   const topBtn = document.getElementById("topBtn");
+  const allBtn = document.getElementById("allBtn");
 
    // ✅ Mobile pager elements
 const mobilePager = document.getElementById("mobilePager");
@@ -482,6 +483,24 @@ if (safeKw) qCount = qCount.or(`name.ilike.%${safeKw}%,spec.ilike.%${safeKw}%,ca
 }
 
   // ===== Events =====
+  // ✅ 全部商品：清掉搜尋 + 分類，回到第 1 頁並重新載入
+if (allBtn) {
+  allBtn.addEventListener("click", () => {
+    if (searchInput) searchInput.value = "";
+    if (categorySelect) categorySelect.value = "";
+
+    currentPage = 1;
+
+    // 讓 SelectX 的按鈕文字同步回「全部分類」
+    initSelectX();
+
+    // 重新載入商品
+    loadProducts();
+
+    //（可選）點完回到上方，使用者體感更像「回到全部」
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+}
   if (searchInput) {
     searchInput.addEventListener("input", () => {
       currentPage = 1;
