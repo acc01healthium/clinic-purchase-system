@@ -735,15 +735,17 @@ body{
 }
 
 /* =========================
-   ✅ SelectX (custom select) — 先讓畫面乾淨 + 可用
+   ✅ SelectX (custom select) — Clean merged version
+   企業感：字重減輕 + hover/active 層級清楚 + open 狀態光暈
 ========================= */
+
 .selectx{
   position: relative;
   min-width: 160px;
   max-width: 200px;
 }
 
-/* ✅ 隱藏原生 select（保留值與 change event） */
+/* 隱藏原生 select（保留值與 change event） */
 .selectx > select{
   position: absolute;
   inset: 0;
@@ -751,8 +753,8 @@ body{
   pointer-events: none;
 }
 
-/* 按鈕外觀（跟你整體一致：圓角膠囊 + 乾淨邊框） */
-.selectx-btn{
+/* 按鈕外觀（膠囊 + 乾淨邊框） */
+.selectx .selectx-btn{
   width: 100%;
   display: flex;
   align-items: center;
@@ -764,40 +766,53 @@ body{
   background: #fff;
 
   font-size: var(--fs-sm);
-  font-weight: 800;
-  color: #111827;
+  font-weight: 500;         /* ✅企業感：不厚重 */
+  color: #1f3a5f;           /* ✅深灰藍 */
+  letter-spacing: 0.2px;
 
   cursor: pointer;
   box-shadow: 0 6px 14px rgba(0,0,0,.06);
-  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+  transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
 }
 
-.selectx-btn:hover{
+/* hover：回饋（陰影 + 微漸層），不靠字變粗 */
+.selectx .selectx-btn:hover{
   box-shadow: 0 10px 22px rgba(0,0,0,.08);
   border-color: rgba(0,174,224,.45);
+  background: linear-gradient(to bottom, #ffffff, #f9fcff);
 }
 
-.selectx-btn:active{
+.selectx .selectx-btn:active{
   transform: translateY(1px);
 }
 
+/* open 狀態：更清楚（光暈） */
+.selectx.is-open .selectx-btn{
+  border-color: rgba(0,174,224,.55);
+  box-shadow:
+    0 0 0 3px rgba(0,174,224,.12),
+    0 10px 22px rgba(0,0,0,.08);
+}
+
 /* 文字區避免換行亂版 */
-.selectx-text{
+.selectx .selectx-text{
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   padding-right: 10px;
 }
 
-/* 小箭頭 */
-.selectx-caret{
+/* caret */
+.selectx .selectx-caret{
   font-size: 12px;
   color: var(--primary);
   flex: 0 0 auto;
+  font-weight: 400;
+  opacity: 0.7;
 }
 
-/* ✅ 下拉選單（浮層） */
-.selectx-menu{
+/* 下拉選單（浮層） */
+.selectx .selectx-menu{
   position: absolute;
   left: 0;
   right: 0;
@@ -817,162 +832,66 @@ body{
   z-index: 9999;
 }
 
-/* 打開狀態才顯示 */
 .selectx.is-open .selectx-menu{
   display: block;
 }
 
-/* 選項 */
-.selectx-item{
-  padding: 10px 12px;
+/* 選項（統一只寫一次，避免打架） */
+.selectx .selectx-item{
+  position: relative;
+  padding: 11px 14px;       /* ✅可掃描性提升 */
+  line-height: 1.4;
+
   border-radius: 12px;
   font-size: var(--fs-sm);
-  font-weight: 700;
-  color: #111827;
+  font-weight: 400;         /* ✅正文字重 */
+  color: #243447;
+
   cursor: pointer;
   user-select: none;
 }
 
+/* hover：一定比 active 明顯（但不加粗） */
+.selectx .selectx-item:hover{
+  background: rgba(2,132,199,.12);
+}
+
+/* active：淡底 + 左側指示線（穩定、不厚重） */
+.selectx .selectx-item.is-active{
+  background: rgba(2,132,199,.06);
+}
+
+.selectx .selectx-item.is-active::before{
+  content:"";
+  position:absolute;
+  left:6px;
+  top:8px;
+  bottom:8px;
+  width: 2px;
+  border-radius: 3px;
+  background: rgba(0,174,224,.35);
+}
+
+/* 如果 hover 在 active 上，不要疊太重 */
+.selectx .selectx-item.is-active:hover{
+  background: rgba(2,132,199,.14);
+}
+
 /* disable（如果未來有） */
-.selectx-item.is-disabled{
+.selectx .selectx-item.is-disabled{
   opacity: .45;
   cursor: not-allowed;
 }
 
-/* 手機：按鈕稍微大一點更好點 */
+/* 手機：按鈕更大更好點 */
 @media (max-width: 640px){
   .selectx{
     max-width: 100%;
     min-width: 0;
     width: 100%;
   }
-  .selectx-btn{
+  .selectx .selectx-btn{
     padding: 12px 16px;
     font-size: var(--fs-md);
   }
-}
-
-/* =========================
-   SelectX 視覺減重（企業感）
-========================= */
-
-/* 下拉顯示文字（目前選中） */
-.selectx .selectx-btn{
-  font-weight: 500;
-  color: #1f3a5f;
-  letter-spacing: 0.2px;
-}
-
-/* 下拉選單項目 */
-.selectx-item {
-  font-weight: 400;            /* 正文等級 */
-  color: #243447;
-}
-
-/* 被選中的項目 */
-.selectx-item.is-active {
-  font-weight: 500;            /* 只比一般項目稍重 */
-}
-
-/* hover 不要變粗，只靠背景 */
-.selectx-item:hover {
-  font-weight: 400;
-}
-
-/* caret（▾）也一起降權重 */
-.selectx-caret {
-  font-weight: 400;
-  opacity: 0.7;
-}
-
-/* ====== UI polish add-on (v1) ====== */
-
-/* ① SelectX：focus / open 狀態更清楚（不靠粗體） */
-.selectx.is-open .selectx-btn{
-  border-color: rgba(0,174,224,.55);
-  box-shadow:
-    0 0 0 3px rgba(0,174,224,.12),
-    0 10px 22px rgba(0,0,0,.08);
-}
-
-/* hover 提亮一點點，維持企業感 */
-.selectx-btn:hover{
-  background: linear-gradient(to bottom, #ffffff, #f9fcff);
-}
-
-/* ② 下拉選單：可掃描性提升（行距 + active 指示線） */
-.selectx-item{
-  padding: 11px 14px;
-  line-height: 1.4;
-}
-
-/* active 左側淡指示線（不靠粗體也看得出來） */
-.selectx-item.is-active{
-  position: relative;
-}
-
-.selectx-item.is-active::before{
-  content:"";
-  position:absolute;
-  left:6px;
-  top:8px;
-  bottom:8px;
-  width:3px;
-  border-radius:3px;
-  background: rgba(0,174,224,.45);
-}
-
-/* ③ Filters：視覺群組化（輕量分隔，不會變厚重） */
-.filters{
-  padding-top: 8px;
-  margin-top: 10px;
-  border-top: 1px dashed rgba(0,0,0,.06);
-}
-
-/* ④ Header「全部商品」：hover 回饋 + 微光澤（不影響原本風格） */
-.pill-primary{
-  box-shadow: 0 8px 20px rgba(255,255,255,.22);
-  transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
-}
-
-.pill-primary:hover{
-  background:#f0fbff;
-  transform: translateY(-1px);
-  box-shadow: 0 10px 24px rgba(255,255,255,.28);
-}
-
-.pill-primary:active{
-  transform: translateY(0px);
-}
-
-/* ====== end UI polish ====== */
-
-/* ===== SelectX active / hover hierarchy fix ===== */
-
-/* 1️⃣ 目前選中的項目：很淡、穩定 */
-.selectx-item.is-active{
-  background: rgba(2,132,199,.06);   /* 比現在更淡 */
-  border: 0;
-  font-weight: 400;
-}
-
-/* 左側指示線再細一點 */
-.selectx-item.is-active::before{
-  width: 2px;
-  background: rgba(0,174,224,.35);
-}
-
-/* 2️⃣ hover 狀態：一定要比 active 明顯 */
-.selectx-item:hover{
-  background: rgba(2,132,199,.12);
-}
-
-/* hover 時不要加粗 */
-.selectx-item:hover{
-  font-weight: 400;
-}
-
-/* 3️⃣ 如果 hover 在 active 上，不要疊太重 */
-.selectx-item.is-active:hover{
-  background: rgba(2,132,199,.14);
 }
