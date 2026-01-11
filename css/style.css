@@ -917,3 +917,61 @@ body{
     font-size: var(--fs-md);
   }
 }
+
+/* =========================
+   ✅ SelectX polish (Step 2)
+   - 開合更滑順（不跳動）
+   - scrollbar 更乾淨
+========================= */
+
+/* 讓 menu 用動畫顯示（不要用 display:none 動畫不了） */
+.selectx .selectx-menu{
+  display: block;              /* 覆蓋你原本的 display:none */
+  opacity: 0;
+  transform: translateY(-6px) scale(.98);
+  pointer-events: none;
+  visibility: hidden;
+
+  transition: opacity .16s ease, transform .16s ease, visibility .16s ease;
+  transform-origin: top;
+}
+
+/* 打開狀態：淡入 + 落下 */
+.selectx.is-open .selectx-menu{
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+  visibility: visible;
+}
+
+/* 讓選單滾動更順（iOS） */
+.selectx .selectx-menu{
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ✅ scrollbar 乾淨版（Chrome / Edge / Safari） */
+.selectx .selectx-menu::-webkit-scrollbar{
+  width: 10px;
+}
+.selectx .selectx-menu::-webkit-scrollbar-track{
+  background: transparent;
+}
+.selectx .selectx-menu::-webkit-scrollbar-thumb{
+  background: rgba(17,24,39,.14);
+  border-radius: 999px;
+  border: 3px solid rgba(255,255,255,.9);
+}
+.selectx .selectx-menu::-webkit-scrollbar-thumb:hover{
+  background: rgba(17,24,39,.22);
+}
+
+/* ✅ Firefox scrollbar */
+.selectx .selectx-menu{
+  scrollbar-width: thin;
+  scrollbar-color: rgba(17,24,39,.22) transparent;
+}
+
+/* ✅ 選項點下去的回饋（更像原生 App） */
+.selectx-item:active{
+  transform: translateY(1px);
+}
