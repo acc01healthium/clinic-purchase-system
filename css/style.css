@@ -77,6 +77,23 @@ body{
   background:#fff;
   color:#008bb7;
   cursor:pointer;
+
+  transition: transform .12s ease, box-shadow .12s ease, background .12s ease, opacity .12s ease;
+}
+
+.pill-primary:hover{
+  background:#f0fbff;
+  transform: translateY(-1px);
+}
+
+.pill-primary:active{
+  transform: translateY(0px);
+  opacity: .95;
+}
+
+.pill-primary:focus-visible{
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(255,255,255,.45), 0 0 0 6px rgba(0,174,224,.25);
 }
 
 /* =========================
@@ -349,6 +366,11 @@ body{
   gap:20px;
   align-items:flex-end;
   flex-wrap:wrap;
+}
+.panel .filters{
+  padding-top: 10px;
+  margin-top: 10px;
+  border-top: 1px dashed rgba(0,0,0,.08);
 }
 .filter-item{
   display:flex;
