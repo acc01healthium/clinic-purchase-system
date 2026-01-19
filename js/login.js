@@ -2,95 +2,80 @@
 (() => {
   "use strict";
 
-  const supabaseClient = window.supabaseClient;
-  if (!supabaseClient) {
-    console.error("❌ supabaseClient 不存在，請確認 /js/supabase.js 是否正確載入。");
-    return;
-  }
-
   const SESSION_KEY = "front_session_v1";
 
-  const form = document.getElementById("loginForm");
-  const usernameEl = document.getElementById("username");
-  const passwordEl = document.getElementById("password");
-  const msgEl = document.getElementById("loginMsg");
-
-  function setMsg(text, type = "error") {
-    if (!msgEl) return;
-    msgEl.textContent = text || "";
-    msgEl.style.display = text ? "block" : "none";
-    msgEl.dataset.type = type;
-  }
-
-  function writeSession({ username, clinic_code }) {
-    const now = Date.now();
-    const session = {
-      username,
-      clinic_code,
-      issuedAt: now,
-      lastActiveAt: now,
-    };
-    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-  }
-
-  function gotoApp() {
-    // ✅ 用 replace：避免按上一頁回到 login
-    const url = new URL(location.href);
-    url.pathname = url.pathname.replace(/\/[^/]*$/, "/index.html");
-    url.search = ""; // 清掉 reason 參數
-    location.replace(url.toString());
-  }
-
-  // 若已登入就直接進前台
-  try {
-    const raw = localStorage.getItem(SESSION_KEY);
-    if (raw) {
-      const s = JSON.parse(raw);
-      if (s && s.username) gotoApp();
-    }
-  } catch {}
-
-  if (!form) {
-    console.warn("⚠️ 找不到 #loginForm，請確認 login.html 的表單 id。");
+  const supabaseClient = window.supabaseClient;
+  if (!supabaseClient) {
+    console.error("❌ supabaseClient 不存在，請確認 ./js/supabase.js 是否載入成功");
     return;
   }
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  const form = document.getElementById("loginForm");
+  const errEl = document.getElementById("err");
+  const userEl = document.getElementById("username");
+  const passEl = document.getElementById("password");
 
-    const username = (usernameEl?.value || "").trim();
-    const password = (passwordEl?.value || "").trim();
+  function showError(msg = "帳號或密碼錯誤") {
+    if (!errEl) return;
+    errEl.textContent = msg;
+    errEl.style.display = "block";
+  }
+
+  function hideError() {
+    if (!errEl) return;
+    errEl.style.display = "none";
+  }
+
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    hideError();
+
+    const username = (userEl?.value || "").trim();
+    const password = passEl?.value || "";
 
     if (!username || !password) {
-      setMsg("請輸入帳號與密碼");
+      showError("請輸入帳號與密碼");
       return;
     }
 
-    setMsg("登入中…", "info");
+    try {
+      // ✅ 呼叫 RPC（不會把 password_hash 拉到前端）
+      const { data, error } = await supabaseClient.rpc("clinic_login", {
+        p_username: username,
+        p_password: password,
+      });
 
-    // ✅ 用 RPC 驗證（不把 password_hash 拉到前端）
-    const { data, error } = await supabaseClient.rpc("clinic_login", {
-      p_username: username,
-      p_password: password,
-    });
+      if (error) {
+        console.error("❌ RPC clinic_login error:", error);
+        showError("登入失敗（RPC 錯誤）");
+        return;
+      }
 
-    if (error) {
-      // 這裡最常見就是「沒有 grant execute」或「被 RLS 擋」
-      console.error("❌ clinic_login RPC error:", error);
-      setMsg(`登入失敗（權限/設定問題）：${error.message}`);
-      return;
+      // data 可能是 [] 或 [{username, clinic_code}]
+      const row = Array.isArray(data) ? data[0] : data;
+
+      if (!row || !row.username) {
+        showError("帳號或密碼錯誤");
+        return;
+      }
+
+      // ✅ 寫 session（不存明文密碼）
+      const now = Date.now();
+      localStorage.setItem(
+        SESSION_KEY,
+        JSON.stringify({
+          username: row.username,
+          clinic_code: row.clinic_code || null,
+          issuedAt: now,
+          lastActiveAt: now,
+        })
+      );
+
+      // ✅ 成功：進前台
+      location.replace("./index.html");
+    } catch (err) {
+      console.error("❌ login exception:", err);
+      showError("登入失敗（例外錯誤）");
     }
-
-    // Supabase rpc 回傳：可能是物件或陣列（看 function 寫法）
-    const row = Array.isArray(data) ? data[0] : data;
-
-    if (!row || !row.username) {
-      setMsg("帳號或密碼錯誤");
-      return;
-    }
-
-    writeSession({ username: row.username, clinic_code: row.clinic_code });
-    setMsg(""); // 清訊息
-    gotoApp();
   });
 })();
