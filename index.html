@@ -11,11 +11,15 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- 共用 Supabase client -->
- <script defer src="js/supabase.js?v=1"></script>
-<script defer src="js/auth-guard.js?v=1"></script>
-<script defer src="js/index.js?v=999"></script>
+  <script defer src="js/supabase.js?v=1"></script>
+
+  <!-- ✅ 必須在 index.js 前 -->
+  <script defer src="js/auth-guard.js?v=1"></script>
+
+  <!-- 前台邏輯 -->
+  <script defer src="js/index.js?v=999"></script>
 </head>
- 
+
 <body>
   <!-- Header -->
   <header class="site-header">
