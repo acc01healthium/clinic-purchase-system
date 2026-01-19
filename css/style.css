@@ -57,6 +57,30 @@ body{
   justify-content:space-between;
   align-items:center;
 }
+.site-header-actions{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+/* 登出＋倒數 垂直排列 */
+.header-auth{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:6px;
+}
+
+.idle-timer{
+  font-size:12px;
+  font-weight:800;
+  color:rgba(255,255,255,.92);
+  background:rgba(0,0,0,.12);
+  border:1px solid rgba(255,255,255,.25);
+  padding:6px 10px;
+  border-radius:999px;
+  backdrop-filter: blur(6px);
+}
 .site-title{
   margin:0;
   font-size:28px;
@@ -663,16 +687,6 @@ body{
 }
 
 /* =========================
-   ✅ Category Tone System (tone-0 ~ tone-11)
-   放在 style.css 最底部（只補這段）
-========================= */
-
-/* 保險：tone 只改色，不動你 tag 的結構/大小/字重 */
-.tag[class*="tone-"]{
-  /* 讓 tone 覆蓋顏色，但不影響你原本的 padding/radius/shadow */
-}
-
-/* =========================
    ✅ Category Tone System — Rainbow Safe Palette
 ========================= */
 
@@ -761,8 +775,11 @@ body{
 }
 
 /* =========================
-   ✅ SelectX (custom select) — Clean merged version
-   企業感：字重減輕 + hover/active 層級清楚 + open 狀態光暈
+   ✅ SelectX (custom select) — Final clean version
+   - 單一顯示邏輯（opacity/visibility）不打架
+   - 企業感：字重不厚、hover/active 明顯
+   - open 狀態光暈
+   - menu 動畫 + scrollbar polish
 ========================= */
 
 .selectx{
@@ -792,8 +809,8 @@ body{
   background: #fff;
 
   font-size: var(--fs-sm);
-  font-weight: 500;         /* ✅企業感：不厚重 */
-  color: #1f3a5f;           /* ✅深灰藍 */
+  font-weight: 500;      /* ✅不厚重 */
+  color: #1f3a5f;        /* ✅深灰藍 */
   letter-spacing: 0.2px;
 
   cursor: pointer;
@@ -801,7 +818,6 @@ body{
   transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease, background .12s ease;
 }
 
-/* hover：回饋（陰影 + 微漸層），不靠字變粗 */
 .selectx .selectx-btn:hover{
   box-shadow: 0 10px 22px rgba(0,0,0,.08);
   border-color: rgba(0,174,224,.45);
@@ -850,39 +866,52 @@ body{
 
   box-shadow: 0 16px 34px rgba(0,0,0,.14);
   padding: 6px;
-  display: none;
 
   max-height: 280px;
   overflow: auto;
-
   z-index: 9999;
+
+  /* ✅ 單一顯示邏輯：用 opacity / visibility 控制 */
+  opacity: 0;
+  transform: translateY(-6px) scale(.98);
+  pointer-events: none;
+  visibility: hidden;
+
+  transition: opacity .16s ease, transform .16s ease, visibility .16s ease;
+  transform-origin: top;
+
+  -webkit-overflow-scrolling: touch;
 }
 
 .selectx.is-open .selectx-menu{
-  display: block;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+  visibility: visible;
 }
 
-/* 選項（統一只寫一次，避免打架） */
+/* 選項 */
 .selectx .selectx-item{
   position: relative;
-  padding: 11px 14px;       /* ✅可掃描性提升 */
+  padding: 11px 14px;
   line-height: 1.4;
 
   border-radius: 12px;
   font-size: var(--fs-sm);
-  font-weight: 400;         /* ✅正文字重 */
+  font-weight: 400;     /* ✅正文字重 */
   color: #243447;
 
   cursor: pointer;
   user-select: none;
+
+  transition: background .12s ease, transform .08s ease;
 }
 
-/* hover：一定比 active 明顯（但不加粗） */
 .selectx .selectx-item:hover{
   background: rgba(2,132,199,.12);
 }
 
-/* active：淡底 + 左側指示線（穩定、不厚重） */
+/* active：淡底 + 左側指示線 */
 .selectx .selectx-item.is-active{
   background: rgba(2,132,199,.06);
 }
@@ -898,62 +927,16 @@ body{
   background: rgba(0,174,224,.35);
 }
 
-/* 如果 hover 在 active 上，不要疊太重 */
 .selectx .selectx-item.is-active:hover{
   background: rgba(2,132,199,.14);
 }
 
-/* disable（如果未來有） */
-.selectx .selectx-item.is-disabled{
-  opacity: .45;
-  cursor: not-allowed;
+/* 點下去的回饋（更像原生 App） */
+.selectx .selectx-item:active{
+  transform: translateY(1px);
 }
 
-/* 手機：按鈕更大更好點 */
-@media (max-width: 640px){
-  .selectx{
-    max-width: 100%;
-    min-width: 0;
-    width: 100%;
-  }
-  .selectx .selectx-btn{
-    padding: 12px 16px;
-    font-size: var(--fs-md);
-  }
-}
-
-/* =========================
-   ✅ SelectX polish (Step 2)
-   - 開合更滑順（不跳動）
-   - scrollbar 更乾淨
-========================= */
-
-/* 讓 menu 用動畫顯示（不要用 display:none 動畫不了） */
-.selectx .selectx-menu{
-  display: block;              /* 覆蓋你原本的 display:none */
-  opacity: 0;
-  transform: translateY(-6px) scale(.98);
-  pointer-events: none;
-  visibility: hidden;
-
-  transition: opacity .16s ease, transform .16s ease, visibility .16s ease;
-  transform-origin: top;
-}
-
-/* 打開狀態：淡入 + 落下 */
-.selectx.is-open .selectx-menu{
-  opacity: 1;
-  transform: translateY(0) scale(1);
-  pointer-events: auto;
-  visibility: visible;
-}
-
-/* 讓選單滾動更順（iOS） */
-.selectx .selectx-menu{
-  -webkit-overflow-scrolling: touch;
-}
-
-/* ✅ scrollbar 乾淨版（Chrome / Edge / Safari） */
+/* scrollbar（Chrome/Edge/Safari） */
 .selectx .selectx-menu::-webkit-scrollbar{
   width: 10px;
 }
@@ -969,13 +952,22 @@ body{
   background: rgba(17,24,39,.22);
 }
 
-/* ✅ Firefox scrollbar */
+/* Firefox scrollbar */
 .selectx .selectx-menu{
   scrollbar-width: thin;
   scrollbar-color: rgba(17,24,39,.22) transparent;
 }
 
-/* ✅ 選項點下去的回饋（更像原生 App） */
-.selectx-item:active{
-  transform: translateY(1px);
+/* 手機：按鈕更大更好點 */
+@media (max-width: 640px){
+  .selectx{
+    max-width: 100%;
+    min-width: 0;
+    width: 100%;
+  }
+  .selectx .selectx-btn{
+    padding: 12px 16px;
+    font-size: var(--fs-md);
+  }
 }
+
