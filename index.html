@@ -20,18 +20,27 @@
 <body>
   <!-- Header -->
   <header class="site-header">
-    <div class="site-header-inner">
-      <div class="site-title-wrap">
-        <h1 class="site-title">康醫採購查詢系統</h1>
-        <p class="site-subtitle">商品列表</p>
-      </div>
-
-      <div class="site-header-actions">
-        <button id="allBtn" class="pill-primary" type="button">全部商品</button>
-        </div>
+  <div class="site-header-inner">
+    <div class="site-title-wrap">
+      <h1 class="site-title">康醫採購查詢系統</h1>
+      <p class="site-subtitle">商品列表</p>
     </div>
-  </header>
 
+    <!-- 右上角 actions（全部商品 + 登出 + 倒數） -->
+    <div class="site-header-actions">
+      <button id="allBtn" class="pill-primary" type="button">全部商品</button>
+
+      <div class="header-auth">
+        <button id="logoutBtn" class="pill-primary pill-ghost" type="button">
+          登出
+        </button>
+        <div id="idleTimer" class="idle-timer">
+          閒置登出倒數：10:00
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
   <main class="container">
     <!-- 搜尋 + 控制列 -->
     <section class="panel">
