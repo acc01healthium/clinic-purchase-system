@@ -39,40 +39,16 @@
       </form>
     </div>
   </div>
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  <script>
-    // ✅ 先用最簡版「前端帳密表」：你可自行改成讀 DB / Edge Function 驗證
-    const USERS = [
-      { u: "clinic01", p: "1234" },
-      { u: "clinic02", p: "5678" },
-    ];
+  <!-- 你自己的 supabase 初始化（會產生 window.supabaseClient） -->
+  <script src="./js/supabase.js?v=1"></script>
 
-    const SESSION_KEY = "front_session_v1";
-
-    document.getElementById("loginForm").addEventListener("submit", (e) => {
-      e.preventDefault();
-      const u = document.getElementById("username").value.trim();
-      const p = document.getElementById("password").value;
-
-      const ok = USERS.some(x => x.u === u && x.p === p);
-      const err = document.getElementById("err");
-
-      if (!ok) {
-        err.style.display = "block";
-        return;
-      }
-
-      // ✅ 建 session（不放明文密碼）
-      const now = Date.now();
-      localStorage.setItem(SESSION_KEY, JSON.stringify({
-        username: u,
-        issuedAt: now,
-        lastActiveAt: now
-      }));
-
-      // 登入成功 → 回前台
-      location.href = "./index.html";
-    });
-  </script>
+  <!-- 真正登入邏輯：呼叫 RPC clinic_login -->
+  <script src="./js/login.js?v=1"></script>
 </body>
 </html>
+
+
+
