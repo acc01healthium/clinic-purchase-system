@@ -8,116 +8,89 @@
     return;
   }
 
-  // ===== DOM (依你的 login.html 調整) =====
-  const elUser = document.getElementById("username");
-  const elPass = document.getElementById("password");
-  const elBtn = document.getElementById("loginBtn");
-  const elMsg = document.getElementById("loginMsg");
+  const SESSION_KEY = "front_session_v1";
 
-  // ===== Config =====
-  const SESSION_KEY = "clinic_front_session_v1";
-  const SESSION_TTL_MS = 10 * 60 * 1000; // 10 分鐘（你之後 idle timer 也用這個）
+  const form = document.getElementById("loginForm");
+  const usernameEl = document.getElementById("username");
+  const passwordEl = document.getElementById("password");
+  const msgEl = document.getElementById("loginMsg");
 
-  function setMsg(text, type = "info") {
-    if (!elMsg) return;
-    elMsg.textContent = text || "";
-    elMsg.style.color = type === "error" ? "#b91c1c" : "#334155";
+  function setMsg(text, type = "error") {
+    if (!msgEl) return;
+    msgEl.textContent = text || "";
+    msgEl.style.display = text ? "block" : "none";
+    msgEl.dataset.type = type;
   }
 
-  function setLoading(isLoading) {
-    if (!elBtn) return;
-    elBtn.disabled = isLoading;
-    elBtn.textContent = isLoading ? "登入中…" : "登入";
-  }
-
-  function saveSession(payload) {
-    try {
-      localStorage.setItem(SESSION_KEY, JSON.stringify(payload));
-    } catch (e) {
-      console.warn("saveSession failed:", e);
-    }
-  }
-
-  function buildSession({ username, clinic_code }) {
+  function writeSession({ username, clinic_code }) {
     const now = Date.now();
-    return {
+    const session = {
       username,
       clinic_code,
-      login_at: now,
-      expires_at: now + SESSION_TTL_MS,
-      last_activity_at: now, // 之後 idle timer 會更新它
+      issuedAt: now,
+      lastActiveAt: now,
     };
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
   }
 
-  async function doLogin() {
-    const username = (elUser?.value || "").trim();
-    const password = (elPass?.value || "").trim();
-
-    if (!username || !password) {
-      setMsg("請輸入帳號與密碼", "error");
-      return;
-    }
-
-    setMsg("");
-    setLoading(true);
-
-    try {
-      // ✅ 用 RPC 驗證（安全：不會把 password_hash 拉到前端）
-      const { data, error } = await supabaseClient.rpc("clinic_login", {
-        p_username: username,
-        p_password: password,
-      });
-
-      if (error) {
-        console.error("clinic_login error:", error);
-        setMsg("登入失敗（系統錯誤），請稍後再試", "error");
-        return;
-      }
-
-      // RPC 回傳的是 table（陣列），取第一筆
-      const row = Array.isArray(data) ? data[0] : data;
-      const ok = !!row?.ok;
-
-      if (!ok) {
-        setMsg("帳號或密碼錯誤，或此帳號已停用", "error");
-        return;
-      }
-
-      const session = buildSession({
-        username: row.username || username,
-        clinic_code: row.clinic_code || null,
-      });
-
-      saveSession(session);
-
-      // 登入成功 → 回到前台
-      window.location.href = "./index.html";
-    } catch (e) {
-      console.error(e);
-      setMsg("登入失敗，請稍後再試", "error");
-    } finally {
-      setLoading(false);
-    }
+  function gotoApp() {
+    // ✅ 用 replace：避免按上一頁回到 login
+    const url = new URL(location.href);
+    url.pathname = url.pathname.replace(/\/[^/]*$/, "/index.html");
+    url.search = ""; // 清掉 reason 參數
+    location.replace(url.toString());
   }
 
-  // ===== Events =====
-  if (elBtn) elBtn.addEventListener("click", doLogin);
-
-  // Enter 直接登入
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") doLogin();
-  });
-
-  // 若已登入且 session 還有效，直接導回 index
+  // 若已登入就直接進前台
   try {
     const raw = localStorage.getItem(SESSION_KEY);
     if (raw) {
       const s = JSON.parse(raw);
-      if (s?.expires_at && Date.now() < s.expires_at) {
-        window.location.href = "./index.html";
-      }
+      if (s && s.username) gotoApp();
     }
-  } catch {
-    // ignore
+  } catch {}
+
+  if (!form) {
+    console.warn("⚠️ 找不到 #loginForm，請確認 login.html 的表單 id。");
+    return;
   }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const username = (usernameEl?.value || "").trim();
+    const password = (passwordEl?.value || "").trim();
+
+    if (!username || !password) {
+      setMsg("請輸入帳號與密碼");
+      return;
+    }
+
+    setMsg("登入中…", "info");
+
+    // ✅ 用 RPC 驗證（不把 password_hash 拉到前端）
+    const { data, error } = await supabaseClient.rpc("clinic_login", {
+      p_username: username,
+      p_password: password,
+    });
+
+    if (error) {
+      // 這裡最常見就是「沒有 grant execute」或「被 RLS 擋」
+      console.error("❌ clinic_login RPC error:", error);
+      setMsg(`登入失敗（權限/設定問題）：${error.message}`);
+      return;
+    }
+
+    // Supabase rpc 回傳：可能是物件或陣列（看 function 寫法）
+    const row = Array.isArray(data) ? data[0] : data;
+
+    if (!row || !row.username) {
+      setMsg("帳號或密碼錯誤");
+      return;
+    }
+
+    writeSession({ username: row.username, clinic_code: row.clinic_code });
+    setMsg(""); // 清訊息
+    gotoApp();
+  });
 })();
