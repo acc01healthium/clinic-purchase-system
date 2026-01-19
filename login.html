@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>登入｜康醫採購查詢系統</title>
+  <link rel="stylesheet" href="./css/style.css" />
+  <style>
+    .login-wrap{min-height:100vh;display:grid;place-items:center;padding:24px;background:#eef5ff}
+    .login-card{width:min(420px,100%);background:#fff;border-radius:18px;box-shadow:0 10px 28px rgba(0,0,0,.08);padding:22px}
+    .login-title{font-size:20px;font-weight:800;margin:0 0 8px}
+    .login-sub{color:#6b7280;margin:0 0 18px;line-height:1.5}
+    .login-row{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+    .login-row label{font-weight:700}
+    .login-row input{height:44px;border-radius:12px;border:1px solid rgba(2,132,199,.25);padding:0 12px;font-size:15px}
+    .login-btn{width:100%;height:46px;border-radius:999px;border:0;background:#00aee0;color:#fff;font-weight:800;cursor:pointer}
+    .login-btn:active{opacity:.95}
+    .login-err{margin-top:10px;color:#b91c1c;font-weight:700;display:none}
+  </style>
+</head>
+<body>
+  <div class="login-wrap">
+    <div class="login-card">
+      <h1 class="login-title">康醫採購查詢系統</h1>
+      <p class="login-sub">請先登入後查看商品與價格資訊。</p>
+
+      <form id="loginForm">
+        <div class="login-row">
+          <label for="username">帳號</label>
+          <input id="username" autocomplete="username" required />
+        </div>
+        <div class="login-row">
+          <label for="password">密碼</label>
+          <input id="password" type="password" autocomplete="current-password" required />
+        </div>
+
+        <button class="login-btn" type="submit">登入</button>
+        <div id="err" class="login-err">帳號或密碼錯誤</div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ✅ 先用最簡版「前端帳密表」：你可自行改成讀 DB / Edge Function 驗證
+    const USERS = [
+      { u: "clinic01", p: "1234" },
+      { u: "clinic02", p: "5678" },
+    ];
+
+    const SESSION_KEY = "front_session_v1";
+
+    document.getElementById("loginForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const u = document.getElementById("username").value.trim();
+      const p = document.getElementById("password").value;
+
+      const ok = USERS.some(x => x.u === u && x.p === p);
+      const err = document.getElementById("err");
+
+      if (!ok) {
+        err.style.display = "block";
+        return;
+      }
+
+      // ✅ 建 session（不放明文密碼）
+      const now = Date.now();
+      localStorage.setItem(SESSION_KEY, JSON.stringify({
+        username: u,
+        issuedAt: now,
+        lastActiveAt: now
+      }));
+
+      // 登入成功 → 回前台
+      location.href = "./index.html";
+    });
+  </script>
+</body>
+</html>
