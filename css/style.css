@@ -63,6 +63,44 @@ body{
   gap:14px;
 }
 
+.site-header-actions{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+/* ✅ 右上角：登出 + 倒數整齊垂直 */
+.header-auth{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:6px;
+}
+
+/* ✅ 讓倒數不要太長把版面擠爆 */
+.idle-timer{
+  font-size:12px;
+  font-weight:800;
+  color:rgba(255,255,255,.92);
+  background:rgba(0,0,0,.12);
+  border:1px solid rgba(255,255,255,.25);
+  padding:6px 10px;
+  border-radius:999px;
+  backdrop-filter: blur(6px);
+  white-space: nowrap;
+}
+
+/* ✅ 登出按鈕用 ghost，跟「全部商品」有層級差 */
+.pill-ghost{
+  background: rgba(255,255,255,.18);
+  color:#fff;
+  border: 1px solid rgba(255,255,255,.35);
+}
+
+.pill-ghost:hover{
+  background: rgba(255,255,255,.26);
+}
+
 /* 登出＋倒數 垂直排列 */
 .header-auth{
   display:flex;
