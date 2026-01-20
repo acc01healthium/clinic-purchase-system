@@ -240,6 +240,11 @@ body{
 .btn{
   appearance:none;
   -webkit-appearance:none;
+}
+
+/* 只有這兩種新版按鈕才不要邊框 */
+.btn--primary,
+.btn--ghost{
   border:0;
 }
 
