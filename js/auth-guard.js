@@ -4,9 +4,11 @@
 
   const SESSION_KEY = "front_session_v1";
   const idleSeconds = 600; // 10 分鐘
+
+  // ✅ 對應你現在的 HTML：idleCounter（並兼容舊版 idleTimer）
   const timerEl =
-  document.getElementById("idleCounter") ||
-  document.getElementById("idleTimer");
+    document.getElementById("idleCounter") ||
+    document.getElementById("idleTimer");
 
   function readSession() {
     try {
@@ -43,6 +45,9 @@
   session.lastActiveAt = Date.now();
   writeSession(session);
 
+  // ✅（可選）進頁面立刻顯示一次
+  if (timerEl) timerEl.textContent = "閒置登出倒數：10:00";
+
   // ③ 使用者操作 → 更新 lastActiveAt
   const markActive = () => {
     const s = readSession();
@@ -73,6 +78,6 @@
     if (remain <= 0) logout("idle_timeout");
   }, 1000);
 
-  // 手動登出
+  // 手動登出（index.js 會呼叫）
   window.frontLogout = () => logout("manual");
 })();
