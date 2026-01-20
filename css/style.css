@@ -105,14 +105,22 @@ body{
 /* =========================
    Header（對應 index.html 的 app-header）
 ========================= */
+/* ✅ Header：更有質感（高光 + 漸層 + 陰影） */
 .app-header{
-  background:linear-gradient(90deg,var(--primary),#14c2c5);
+  position: relative;
   color:#fff;
   padding:22px 26px;
   display:flex;
   justify-content:space-between;
   align-items:flex-start;
   gap:16px;
+
+  background:
+    radial-gradient(1200px 240px at 20% 0%, rgba(255,255,255,.22), rgba(255,255,255,0) 60%),
+    linear-gradient(90deg, var(--primary), #14c2c5);
+
+  box-shadow: 0 16px 34px rgba(0,0,0,.12);
+  border-bottom: 1px solid rgba(255,255,255,.18);
 }
 
 .header-left .app-title{
@@ -242,10 +250,25 @@ body{
   -webkit-appearance:none;
 }
 
-/* 只有這兩種新版按鈕才不要邊框 */
+/* ✅ Header 右上：品牌色按鈕（全部商品 / 登出 一致） */
 .btn--primary,
 .btn--ghost{
-  border:0;
+  border: 1px solid rgba(255,255,255,.28);
+  color:#fff;
+  background: linear-gradient(135deg, var(--primary), #14c2c5);
+  box-shadow: 0 10px 22px rgba(0,0,0,.14);
+}
+
+.btn--primary:hover,
+.btn--ghost:hover{
+  box-shadow: 0 14px 28px rgba(0,0,0,.18);
+  filter: brightness(1.03);
+}
+
+.btn--primary:active,
+.btn--ghost:active{
+  transform: translateY(1px);
+  box-shadow: 0 7px 16px rgba(0,0,0,.14);
 }
 
 /* Header：主要動作（登出） */
