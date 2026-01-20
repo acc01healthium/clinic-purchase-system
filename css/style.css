@@ -43,7 +43,7 @@ body{
 }
 
 /* =========================
-   Header（右上角排版修正）
+   Header（右上角排版修正）- 舊版保留，不動（避免其他頁面用到）
 ========================= */
 .site-header{
   background:linear-gradient(90deg,var(--primary),#14c2c5);
@@ -102,6 +102,7 @@ body{
   .site-header-actions{ flex-wrap:wrap; justify-content:flex-end; }
   .header-auth{ width:100%; align-items:flex-end; }
 }
+
 /* =========================
    Header（對應 index.html 的 app-header）
 ========================= */
@@ -163,10 +164,85 @@ body{
   white-space: nowrap;
 }
 
+/* =========================
+   ✅ Header 手機版：最終最佳化（不跑版、最像 App）
+========================= */
 @media (max-width: 640px){
-  .app-header{ align-items:flex-start; }
-  .header-actions{ flex-wrap:wrap; justify-content:flex-end; }
-  .header-right{ width:100%; align-items:flex-end; }
+
+  .app-header{
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 16px 16px 14px;
+
+    /* 手機高光再柔一點更精緻 */
+    background:
+      radial-gradient(900px 220px at 15% 0%, rgba(255,255,255,.18), rgba(255,255,255,0) 60%),
+      linear-gradient(90deg, var(--primary), #14c2c5);
+
+    box-shadow: 0 14px 28px rgba(0,0,0,.12);
+  }
+
+  .header-left,
+  .header-right{
+    width: 100%;
+  }
+
+  .header-left .app-title{
+    font-size: 34px;
+    line-height: 1.08;
+    letter-spacing: .4px;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .header-left .app-subtitle{
+    margin-top: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    opacity: .95;
+  }
+
+  .header-right{
+    margin-top: 2px;
+    align-items: flex-end;
+    gap: 10px;
+  }
+
+  /* 兩顆按鈕同列、不擠爆 */
+  .header-actions{
+    width: 100%;
+    justify-content: flex-end;
+    flex-wrap: nowrap;
+    gap: 10px;
+  }
+
+  .header-actions .btn{
+    padding: 10px 14px;
+    font-size: 15px;
+    line-height: 1;
+    min-height: 40px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .pill{
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+}
+
+/* 超小手機微調 */
+@media (max-width: 380px){
+  .header-left .app-title{ font-size: 30px; }
+  .header-actions .btn{
+    padding: 9px 12px;
+    font-size: 14px;
+    min-height: 38px;
+  }
 }
 
 /* =========================
@@ -227,12 +303,19 @@ body{
   font-size: var(--fs-md);
 }
 
+/* =========================
+   Buttons
+========================= */
 .btn{
   border-radius:999px;
   padding:10px 18px;
   font-weight:800;
   cursor:pointer;
+  appearance:none;
+  -webkit-appearance:none;
 }
+
+/* 清除按鈕 */
 .btn-secondary{
   background:#fff;
   border:2px solid rgba(0,174,224,.5);
@@ -242,15 +325,8 @@ body{
   opacity:.45;
   cursor:not-allowed;
 }
-/* === 新版 Header 專用按鈕 === */
 
-/* 移除瀏覽器預設 button 外觀（關鍵） */
-.btn{
-  appearance:none;
-  -webkit-appearance:none;
-}
-
-/* ✅ Header 右上：品牌色按鈕（全部商品 / 登出 一致） */
+/* ✅ Header 右上按鈕：全部統一品牌色（不使用綠色） */
 .btn--primary,
 .btn--ghost{
   border: 1px solid rgba(255,255,255,.28);
@@ -396,9 +472,9 @@ body{
 }
 .price-line{
   display:flex;
-  justify-content:flex-start;  /* ✅不要 space-between */
+  justify-content:flex-start;
   align-items:baseline;
-  gap:10px;                    /* ✅控制「標籤-金額」距離 */
+  gap:10px;
   padding:2px 0;
 }
 .price-label{
@@ -430,7 +506,7 @@ body{
 }
 .desc.clamp{
   display:block;
-  max-height:calc(1.6em * 2 + 8px); /* ✅精準鎖兩行（補安全值） */
+  max-height:calc(1.6em * 2 + 8px);
   overflow:hidden;
 }
 .desc-actions{
@@ -518,13 +594,11 @@ body{
 
   box-shadow: 0 6px 14px rgba(0,174,224,.12);
 
-  /* ✅高光 + 層級穩定 */
   position: relative;
   overflow: hidden;
-  z-index: 0; /* 建立 stacking context，避免合成層造成層級怪 */
+  z-index: 0;
 }
 
-/* 極淡上緣高光 */
 .tag::before{
   content:"";
   position:absolute;
@@ -532,18 +606,15 @@ body{
   right:0;
   top:0;
   height:55%;
-
-  z-index: 0; /* 高光層在背景之上 */
+  z-index: 0;
   background: linear-gradient(
     to bottom,
     rgba(255,255,255,.55),
     rgba(255,255,255,0)
   );
-
   pointer-events:none;
 }
 
-/* ✅確保文字永遠在高光上層（未來若 tag 內包 span/icon 也安全） */
 .tag > *{
   position: relative;
   z-index: 1;
@@ -565,19 +636,15 @@ body{
   border-radius: 999px;
 }
 
-/* Label 再淡一點 */
 .meta-label{
   color:#6b7280;
   font-weight:700;
 }
 
-/* ✅ 分類永遠第一顆 */
 .card-meta .tag{ order: -10; }
 .card-meta .meta-item{ order: 0; }
 
-/* =========================
-   ✅ 防呆：避免 tag 被包進 meta-item（雙層膠囊 / 高光錯位）
-========================= */
+/* 防呆：避免 tag 被包進 meta-item */
 .card-meta .meta-item > .tag{
   background: transparent !important;
   border: 0 !important;
@@ -592,17 +659,14 @@ body{
   position: static !important;
   overflow: visible !important;
 }
-
-/* ✅被包住時：關掉高光 */
 .card-meta .meta-item > .tag::before{
   display: none !important;
 }
 
-/* 不使用 icon */
 .meta-icon{ display:none; }
 
 /* =========================
-   手機：整體放大 & 更好點
+   手機：整體放大 & 更好點（保留原設定）
 ========================= */
 @media (max-width: 640px){
   :root{
@@ -736,7 +800,6 @@ body{
   box-shadow: 0 3px 8px rgba(0,174,224,.25);
 }
 
-/* 手機：安全區 + 預留底部空間 */
 @media (max-width: 640px){
   .mobile-pager{
     bottom: calc(12px + env(safe-area-inset-bottom));
@@ -749,7 +812,6 @@ body{
   }
 }
 
-/* 只在手機才允許自動隱藏（桌機固定顯示） */
 @media (min-width: 641px){
   .mobile-pager.is-hidden{
     transform: translateX(-50%) translateY(0);
@@ -758,7 +820,6 @@ body{
   }
 }
 
-/* 超小手機微調 */
 @media (max-width: 380px){
   .mobile-pager-btn{
     min-width: 52px;
@@ -770,85 +831,61 @@ body{
 /* =========================
    ✅ Category Tone System — Rainbow Safe Palette
 ========================= */
-
-/* tone-0：品牌藍（保留原醫療主色） */
 .tag.tone-0{
   background: rgba(14,165,233,.16);
   border: 1px solid rgba(14,165,233,.32);
   color: #075985;
 }
-
-/* tone-1：翠綠（生活用品 / 清潔） */
 .tag.tone-1{
   background: rgba(16,185,129,.18);
   border: 1px solid rgba(16,185,129,.34);
   color: #065f46;
 }
-
-/* tone-2：琥珀橘（針劑 / 藥品） */
 .tag.tone-2{
   background: rgba(245,158,11,.18);
   border: 1px solid rgba(245,158,11,.34);
   color: #92400e;
 }
-
-/* tone-3：紫（醫療耗材） */
 .tag.tone-3{
   background: rgba(139,92,246,.18);
   border: 1px solid rgba(139,92,246,.34);
   color: #5b21b6;
 }
-
-/* tone-4：粉紅（護理 / 提醒） */
 .tag.tone-4{
   background: rgba(236,72,153,.18);
   border: 1px solid rgba(236,72,153,.34);
   color: #9d174d;
 }
-
-/* tone-5：紅（高風險 / 管制） */
 .tag.tone-5{
   background: rgba(239,68,68,.18);
   border: 1px solid rgba(239,68,68,.34);
   color: #991b1b;
 }
-
-/* tone-6：亮黃（消毒 / 一般耗材） */
 .tag.tone-6{
   background: rgba(250,204,21,.22);
   border: 1px solid rgba(250,204,21,.36);
   color: #854d0e;
 }
-
-/* tone-7：青藍（設備 / 儀器） */
 .tag.tone-7{
   background: rgba(6,182,212,.18);
   border: 1px solid rgba(6,182,212,.34);
   color: #155e75;
 }
-
-/* tone-8：酸綠（保健 / 常備） */
 .tag.tone-8{
   background: rgba(132,204,22,.20);
   border: 1px solid rgba(132,204,22,.36);
   color: #3f6212;
 }
-
-/* tone-9：深綠（行政 / 常用） */
 .tag.tone-9{
   background: rgba(34,197,94,.18);
   border: 1px solid rgba(34,197,94,.34);
   color: #166534;
 }
-
-/* tone-10：石墨灰（未分類） */
 .tag.tone-10{
   background: rgba(17,24,39,.10);
   border: 1px solid rgba(17,24,39,.18);
   color: #111827;
 }
-
-/* tone-11：藍灰（企業保守） */
 .tag.tone-11{
   background: rgba(100,116,139,.18);
   border: 1px solid rgba(100,116,139,.34);
@@ -857,19 +894,13 @@ body{
 
 /* =========================
    ✅ SelectX (custom select) — Final clean version
-   - 單一顯示邏輯（opacity/visibility）不打架
-   - 企業感：字重不厚、hover/active 明顯
-   - open 狀態光暈
-   - menu 動畫 + scrollbar polish
 ========================= */
-
 .selectx{
   position: relative;
   min-width: 160px;
   max-width: 200px;
 }
 
-/* 隱藏原生 select（保留值與 change event） */
 .selectx > select{
   position: absolute;
   inset: 0;
@@ -877,7 +908,6 @@ body{
   pointer-events: none;
 }
 
-/* 按鈕外觀（膠囊 + 乾淨邊框） */
 .selectx .selectx-btn{
   width: 100%;
   display: flex;
@@ -890,8 +920,8 @@ body{
   background: #fff;
 
   font-size: var(--fs-sm);
-  font-weight: 500;      /* ✅不厚重 */
-  color: #1f3a5f;        /* ✅深灰藍 */
+  font-weight: 500;
+  color: #1f3a5f;
   letter-spacing: 0.2px;
 
   cursor: pointer;
@@ -909,7 +939,6 @@ body{
   transform: translateY(1px);
 }
 
-/* open 狀態：更清楚（光暈） */
 .selectx.is-open .selectx-btn{
   border-color: rgba(0,174,224,.55);
   box-shadow:
@@ -917,7 +946,6 @@ body{
     0 10px 22px rgba(0,0,0,.08);
 }
 
-/* 文字區避免換行亂版 */
 .selectx .selectx-text{
   overflow: hidden;
   text-overflow: ellipsis;
@@ -925,7 +953,6 @@ body{
   padding-right: 10px;
 }
 
-/* caret */
 .selectx .selectx-caret{
   font-size: 12px;
   color: var(--primary);
@@ -934,7 +961,6 @@ body{
   opacity: 0.7;
 }
 
-/* 下拉選單（浮層） */
 .selectx .selectx-menu{
   position: absolute;
   left: 0;
@@ -952,7 +978,6 @@ body{
   overflow: auto;
   z-index: 9999;
 
-  /* ✅ 單一顯示邏輯：用 opacity / visibility 控制 */
   opacity: 0;
   transform: translateY(-6px) scale(.98);
   pointer-events: none;
@@ -971,7 +996,6 @@ body{
   visibility: visible;
 }
 
-/* 選項 */
 .selectx .selectx-item{
   position: relative;
   padding: 11px 14px;
@@ -979,7 +1003,7 @@ body{
 
   border-radius: 12px;
   font-size: var(--fs-sm);
-  font-weight: 400;     /* ✅正文字重 */
+  font-weight: 400;
   color: #243447;
 
   cursor: pointer;
@@ -992,7 +1016,6 @@ body{
   background: rgba(2,132,199,.12);
 }
 
-/* active：淡底 + 左側指示線 */
 .selectx .selectx-item.is-active{
   background: rgba(2,132,199,.06);
 }
@@ -1012,12 +1035,10 @@ body{
   background: rgba(2,132,199,.14);
 }
 
-/* 點下去的回饋（更像原生 App） */
 .selectx .selectx-item:active{
   transform: translateY(1px);
 }
 
-/* scrollbar（Chrome/Edge/Safari） */
 .selectx .selectx-menu::-webkit-scrollbar{
   width: 10px;
 }
@@ -1033,13 +1054,11 @@ body{
   background: rgba(17,24,39,.22);
 }
 
-/* Firefox scrollbar */
 .selectx .selectx-menu{
   scrollbar-width: thin;
   scrollbar-color: rgba(17,24,39,.22) transparent;
 }
 
-/* 手機：按鈕更大更好點 */
 @media (max-width: 640px){
   .selectx{
     max-width: 100%;
@@ -1051,4 +1070,3 @@ body{
     font-size: var(--fs-md);
   }
 }
-
