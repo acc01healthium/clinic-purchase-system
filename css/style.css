@@ -102,6 +102,64 @@ body{
   .site-header-actions{ flex-wrap:wrap; justify-content:flex-end; }
   .header-auth{ width:100%; align-items:flex-end; }
 }
+/* =========================
+   Header（對應 index.html 的 app-header）
+========================= */
+.app-header{
+  background:linear-gradient(90deg,var(--primary),#14c2c5);
+  color:#fff;
+  padding:22px 26px;
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:16px;
+}
+
+.header-left .app-title{
+  margin:0;
+  font-size:42px;
+  font-weight:800;
+  letter-spacing:1px;
+}
+
+.header-left .app-subtitle{
+  margin-top:18px;
+  font-size:18px;
+  opacity:.95;
+  font-weight:700;
+}
+
+.header-right{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:10px;
+  margin-top:4px;
+}
+
+.header-actions{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.pill{
+  font-size:12px;
+  font-weight:800;
+  color:rgba(255,255,255,.92);
+  background:rgba(0,0,0,.12);
+  border:1px solid rgba(255,255,255,.25);
+  padding:6px 10px;
+  border-radius:999px;
+  backdrop-filter: blur(6px);
+  white-space: nowrap;
+}
+
+@media (max-width: 640px){
+  .app-header{ align-items:flex-start; }
+  .header-actions{ flex-wrap:wrap; justify-content:flex-end; }
+  .header-right{ width:100%; align-items:flex-end; }
+}
 
 /* =========================
    Layout
