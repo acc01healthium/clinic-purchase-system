@@ -722,4 +722,31 @@
       if (statusMessage) statusMessage.textContent = "商品載入失敗，請看 Console 錯誤訊息";
     }
   });
+  
+  // ===== Init =====
+document.addEventListener("DOMContentLoaded", async () => {
+
+  // ✅ 登出按鈕事件（一定要在 DOM ready 後）
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      if (window.frontLogout) window.frontLogout();
+      else location.href = "./login.html?reason=manual";
+    });
+  }
+
+  try {
+    await loadCategories();
+  } catch (e) {
+    console.error("loadCategories failed:", e);
+  }
+
+  try {
+    await loadProducts();
+  } catch (e) {
+    console.error("loadProducts failed:", e);
+    if (statusMessage) statusMessage.textContent = "商品載入失敗，請看 Console 錯誤訊息";
+  }
+});
 })();
+
