@@ -3,7 +3,7 @@
   "use strict";
 
   const SESSION_KEY = "front_session_v1";
-  const idleSeconds = 600; // 10 分鐘
+  const idleSeconds = 60; // 10 分鐘
   const timerEl = document.getElementById("idleTimer");
 
   function readSession() {
