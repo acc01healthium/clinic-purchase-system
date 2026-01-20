@@ -30,7 +30,7 @@
   const nextBtn = document.getElementById("nextPageBtn");
   const pageInfo = document.getElementById("pageInfo");
   const topBtn = document.getElementById("topBtn");
-  const allBtn = document.getElementById("allBtn");
+  const allBtn = document.getElementById("btnAllProducts");
 
   // ✅ Mobile pager elements
   const mobilePager = document.getElementById("mobilePager");
@@ -707,27 +707,11 @@
     { passive: true }
   );
 
-  // ===== Init =====
-  document.addEventListener("DOMContentLoaded", async () => {
-    try {
-      await loadCategories();
-    } catch (e) {
-      console.error("loadCategories failed:", e);
-    }
-
-    try {
-      await loadProducts();
-    } catch (e) {
-      console.error("loadProducts failed:", e);
-      if (statusMessage) statusMessage.textContent = "商品載入失敗，請看 Console 錯誤訊息";
-    }
-  });
-  
-  // ===== Init =====
+ // ===== Init =====
 document.addEventListener("DOMContentLoaded", async () => {
 
-  // ✅ 登出按鈕事件（一定要在 DOM ready 後）
-  const logoutBtn = document.getElementById("logoutBtn");
+  // ✅ 登出按鈕（對應 index.html 的 btnLogout）
+  const logoutBtn = document.getElementById("btnLogout");
   if (logoutBtn) {
     logoutBtn.addEventListener("click", () => {
       if (window.frontLogout) window.frontLogout();
