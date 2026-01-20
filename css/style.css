@@ -43,33 +43,30 @@ body{
 }
 
 /* =========================
-   Header
+   Header（右上角排版修正）
 ========================= */
 .site-header{
   background:linear-gradient(90deg,var(--primary),#14c2c5);
   color:#fff;
   padding:22px 26px;
 }
+
 .site-header-inner{
   max-width:1200px;
   margin:auto;
   display:flex;
   justify-content:space-between;
   align-items:center;
-}
-.site-header-actions{
-  display:flex;
-  align-items:center;
-  gap:14px;
+  gap:16px;
 }
 
 .site-header-actions{
   display:flex;
   align-items:center;
-  gap:14px;
+  gap:12px;
 }
 
-/* ✅ 右上角：登出 + 倒數整齊垂直 */
+/* ✅ 右上角：登出 + 倒數垂直、整齊靠右 */
 .header-auth{
   display:flex;
   flex-direction:column;
@@ -77,7 +74,6 @@ body{
   gap:6px;
 }
 
-/* ✅ 讓倒數不要太長把版面擠爆 */
 .idle-timer{
   font-size:12px;
   font-weight:800;
@@ -90,72 +86,21 @@ body{
   white-space: nowrap;
 }
 
-/* ✅ 登出按鈕用 ghost，跟「全部商品」有層級差 */
+/* ✅ 登出按鈕 ghost */
 .pill-ghost{
   background: rgba(255,255,255,.18);
   color:#fff;
   border: 1px solid rgba(255,255,255,.35);
 }
-
 .pill-ghost:hover{
   background: rgba(255,255,255,.26);
 }
 
-/* 登出＋倒數 垂直排列 */
-.header-auth{
-  display:flex;
-  flex-direction:column;
-  align-items:flex-end;
-  gap:6px;
-}
-
-.idle-timer{
-  font-size:12px;
-  font-weight:800;
-  color:rgba(255,255,255,.92);
-  background:rgba(0,0,0,.12);
-  border:1px solid rgba(255,255,255,.25);
-  padding:6px 10px;
-  border-radius:999px;
-  backdrop-filter: blur(6px);
-}
-.site-title{
-  margin:0;
-  font-size:28px;
-  font-weight:900;
-}
-.site-subtitle{
-  margin:6px 0 0;
-  font-size:14px;
-  opacity:.9;
-  font-weight:600;
-}
-
-.pill-primary{
-  border-radius:999px;
-  padding:10px 18px;
-  font-weight:800;
-  border:0;
-  background:#fff;
-  color:#008bb7;
-  cursor:pointer;
-
-  transition: transform .12s ease, box-shadow .12s ease, background .12s ease, opacity .12s ease;
-}
-
-.pill-primary:hover{
-  background:#f0fbff;
-  transform: translateY(-1px);
-}
-
-.pill-primary:active{
-  transform: translateY(0px);
-  opacity: .95;
-}
-
-.pill-primary:focus-visible{
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(255,255,255,.45), 0 0 0 6px rgba(0,174,224,.25);
+/* ✅ 小螢幕：右上角不要擠爆，改成自動換行 */
+@media (max-width: 640px){
+  .site-header-inner{ align-items:flex-start; }
+  .site-header-actions{ flex-wrap:wrap; justify-content:flex-end; }
+  .header-auth{ width:100%; align-items:flex-end; }
 }
 
 /* =========================
