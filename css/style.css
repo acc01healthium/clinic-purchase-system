@@ -176,6 +176,39 @@ body{
   opacity:.45;
   cursor:not-allowed;
 }
+/* === 新版 Header 專用按鈕 === */
+
+/* 移除瀏覽器預設 button 外觀（關鍵） */
+.btn{
+  appearance:none;
+  -webkit-appearance:none;
+  border:0;
+}
+
+/* Header：主要動作（登出） */
+.btn--primary{
+  background:#19c37d;
+  color:#fff;
+  box-shadow:0 8px 18px rgba(0,0,0,.12);
+}
+
+/* Header：次要動作（全部商品） */
+.btn--ghost{
+  background:rgba(255,255,255,.18);
+  color:#fff;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.35);
+}
+
+/* Hover / Active */
+.btn--primary:hover{
+  box-shadow:0 10px 22px rgba(0,0,0,.16);
+}
+.btn--ghost:hover{
+  background:rgba(255,255,255,.24);
+}
+.btn:active{
+  transform:translateY(1px);
+}
 
 /* ✅ select 比例 */
 .select{
