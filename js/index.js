@@ -264,12 +264,14 @@
 
   // 套用到 tag（createProductCard 會用到）
   function applyCategoryTone(el, categoryName) {
-    if (!el || !categoryName) return;
-    const key = normalizeCategoryName(categoryName);
-    const tone = categoryToneMap.get(key) || "tone-0";
-    el.classList.add(tone);
-  }
+  if (!el || !categoryName) return;
+  const key = String(categoryName).trim();
 
+  const toneNum = window.categoryToneMap?.get(key);
+  const toneClass = Number.isFinite(toneNum) ? `tone-${toneNum}` : "tone-10"; // 找不到就灰色
+
+  el.classList.add(toneClass);
+}
 
   // ===== Card =====
   function createProductCard(p) {
@@ -437,38 +439,33 @@
 
   // ===== Load Categories =====
   async function loadCategories() {
-    const { data, error } = await supabaseClient
-      .from("products")
-      .select("category")
-      .eq("is_active", true)
-      .not("category", "is", null)
-      .neq("category", "");
+  const { data, error } = await supabaseClient
+    .from("categories")
+    .select("name, tone")
+    .eq("is_active", true)
+    .order("name", { ascending: true });
 
-    if (error) {
-      console.error("❌ 載入分類失敗", error);
-      return;
-    }
-    if (!categorySelect) return;
-
-    const uniq = Array.from(
-      new Set((data || []).map((x) => (x.category || "").trim()).filter(Boolean))
-    ).sort((a, b) => a.localeCompare(b, "zh-Hant"));
-
-    // ✅ 建立/更新 tone map（含自動清理不存在分類）
-    categoryToneMap = buildStableCategoryToneMap(uniq);
-    console.log("[tone map]", Object.fromEntries(categoryToneMap.entries()));
-
-    categorySelect.innerHTML = `<option value="">全部分類</option>`;
-    uniq.forEach((name) => {
-      const opt = document.createElement("option");
-      opt.value = name;
-      opt.textContent = name;
-      categorySelect.appendChild(opt);
-    });
-
-    // ✅ 分類 options 動態更新後：重建 SelectX menu
-    initSelectX();
+  if (error) {
+    console.error("❌ 載入分類失敗", error);
+    return;
   }
+  if (!categorySelect) return;
+
+  // 建一個 map：name -> tone數字(0~11)
+  window.categoryToneMap = new Map(
+    (data || []).map((r) => [String(r.name).trim(), Number(r.tone)])
+  );
+
+  categorySelect.innerHTML = `<option value="">全部分類</option>`;
+  (data || []).forEach((r) => {
+    const opt = document.createElement("option");
+    opt.value = r.name;
+    opt.textContent = r.name;
+    categorySelect.appendChild(opt);
+  });
+
+  initSelectX();
+}
 
   // ===== Load Products (server paging) =====
   async function loadProducts() {
