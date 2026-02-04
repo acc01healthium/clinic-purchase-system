@@ -322,38 +322,35 @@
 
   // ===== Load Categories (✅改查 categories) =====
   async function loadCategories() {
-    if (!categorySelect) return;
+  // ✅ 直接從 products 抓分類（不用 categories 表，也不會卡 is_active）
+  const { data, error } = await supabaseClient
+    .from("products")
+    .select("category")
+    .not("category", "is", null)
+    .neq("category", "")
+    .eq("is_active", true);
 
-    const { data, error } = await supabaseClient
-      .from("categories")
-      .select("name,tone,is_active")
-      .eq("is_active", true)
-      .order("name", { ascending: true });
-
-    if (error) {
-      console.error("❌ 載入分類失敗（categories）", error);
-      return;
-    }
-
-    const rows = (data || [])
-      .map((r) => ({ name: normalizeCategoryName(r.name), tone: r.tone }))
-      .filter((r) => !!r.name);
-
-    // 建 tone map（跨瀏覽器一致：用 DB tone）
-    categoryToneMap = new Map(rows.map((r) => [r.name, toneToClass(r.tone)]));
-
-    // 填入 select options
-    categorySelect.innerHTML = `<option value="">全部分類</option>`;
-    rows.forEach((r) => {
-      const opt = document.createElement("option");
-      opt.value = r.name;
-      opt.textContent = r.name;
-      categorySelect.appendChild(opt);
-    });
-
-    // 重建 SelectX menu
-    initSelectX();
+  if (error) {
+    console.error("❌ 載入分類失敗", error);
+    return;
   }
+  if (!categorySelect) return;
+
+  const uniq = Array.from(
+    new Set((data || []).map((r) => String(r.category || "").trim()).filter(Boolean))
+  ).sort((a, b) => a.localeCompare(b, "zh-Hant"));
+
+  categorySelect.innerHTML = `<option value="">全部分類</option>`;
+  uniq.forEach((name) => {
+    const opt = document.createElement("option");
+    opt.value = name;
+    opt.textContent = name;
+    categorySelect.appendChild(opt);
+  });
+
+  // ✅ 分類 options 更新後，重建 SelectX
+  initSelectX();
+}
 
   // ===== Load Products (你原本的查詢邏輯保留) =====
   async function loadProducts() {
