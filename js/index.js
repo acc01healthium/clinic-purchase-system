@@ -37,6 +37,19 @@
   const mPageIndicator = document.getElementById("mPageIndicator");
   const mTopBtn = document.getElementById("mTopBtn");
 
+   // ✅ 登出按鈕：立刻綁定（避免後面任何錯誤導致沒綁上）
+(() => {
+  const logoutBtn = document.getElementById("btnLogout");
+  if (!logoutBtn) return;
+
+  logoutBtn.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (typeof window.frontLogout === "function") window.frontLogout();
+    else location.href = "./login.html?reason=manual";
+  });
+})();
+  
   // ===== State =====
   let currentPage = 1;
   let totalPages = 1;
