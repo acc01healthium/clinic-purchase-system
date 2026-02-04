@@ -161,11 +161,14 @@
   }
 
   function applyCategoryTone(el, categoryName) {
-    if (!el || !categoryName) return;
-    const key = normalizeCategoryName(categoryName);
-    const toneClass = categoryToneMap.get(key) || "tone-0";
-    el.classList.add(toneClass);
-  }
+  if (!el || !categoryName) return;
+
+  const key = String(categoryName).trim();
+
+  // ✅ 用 hash 產生 0~11，跨瀏覽器固定、也不需要 localStorage/DB
+  const toneNum = hashString(key) % TONES.length;
+  el.classList.add(`tone-${toneNum}`);
+}
 
   // ===== Card =====
   function createProductCard(p) {
