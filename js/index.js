@@ -165,8 +165,15 @@
 
   const key = String(categoryName).trim();
 
-  // ✅ 用 hash 產生 0~11，跨瀏覽器固定、也不需要 localStorage/DB
-  const toneNum = hashString(key) % TONES.length;
+  // ✅ 自帶 hash（不依賴外部 hashString）
+  let h = 2166136261; // FNV-1a
+  for (let i = 0; i < key.length; i++) {
+    h ^= key.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+
+  // ✅ tone-0 ~ tone-11
+  const toneNum = (h >>> 0) % 12;
   el.classList.add(`tone-${toneNum}`);
 }
 
