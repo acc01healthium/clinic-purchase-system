@@ -1,11 +1,9 @@
 // /js/index.js
-// 前台：分類（categories）+ 排序 + 分頁（伺服器分頁）+ description 展開/收合
-// ✅ 變數 / DOM id 完全對應你目前 index.html
-
+// 前台：分類 + 排序 + 分頁（伺服器分頁）+ description 展開/收合
 (() => {
   "use strict";
 
-  console.log("前台商品查詢初始化（穩定版）");
+  console.log("前台商品查詢初始化（final）");
 
   // ===== Supabase =====
   const supabaseClient = window.supabaseClient;
@@ -32,7 +30,7 @@
   const topBtn = document.getElementById("topBtn");
   const allBtn = document.getElementById("btnAllProducts");
 
-  // ✅ Mobile pager elements
+  // Mobile pager
   const mobilePager = document.getElementById("mobilePager");
   const mPrevBtn = document.getElementById("mPrevBtn");
   const mNextBtn = document.getElementById("mNextBtn");
@@ -44,7 +42,7 @@
   let totalPages = 1;
   let totalCount = 0;
 
-  // ===== SelectX (custom select) =====
+  // ===== SelectX =====
   function initSelectX() {
     const wrappers = document.querySelectorAll(".selectx[data-select]");
 
@@ -57,7 +55,6 @@
 
       if (!sel || !btn || !textEl || !menu) return;
 
-      // ✅ 防止重複綁事件（允許多次 initSelectX）
       const alreadyInited = wrap.dataset.inited === "1";
 
       const rebuild = () => {
@@ -87,16 +84,13 @@
           menu.appendChild(item);
         });
 
-        // 同步目前顯示文字
         const cur = options.find((o) => o.value === sel.value) || options[0];
         if (cur) textEl.textContent = cur.textContent;
       };
 
-      // ✅ 每次都重建（確保動態 options 能更新到）
       rebuild();
       wrap.__rebuildSelectX = rebuild;
 
-      // 如果已初始化過，就不要再綁一次事件
       if (alreadyInited) return;
 
       btn.addEventListener("click", (e) => {
@@ -109,11 +103,8 @@
         const cur = Array.from(sel.options).find((o) => o.value === sel.value);
         if (cur) textEl.textContent = cur.textContent;
 
-        // active 同步
         const items = menu.querySelectorAll(".selectx-item");
-        items.forEach((x, i) => {
-          x.classList.toggle("is-active", sel.options[i]?.value === sel.value);
-        });
+        items.forEach((x, i) => x.classList.toggle("is-active", sel.options[i]?.value === sel.value));
       });
 
       document.addEventListener("click", (e) => {
@@ -156,129 +147,31 @@
     return `${y}/${m}/${day} ${hh}:${mm}`;
   }
 
-  // ===== Category Tone (localStorage stable + 12 tones first + auto cleanup) =====
-  // 全域（只留這一份）
+  // ===== Category tone (✅改成 DB tone，跨瀏覽器一致) =====
   let categoryToneMap = new Map();
-
-  const TONES = [
-    "tone-0","tone-1","tone-2","tone-3","tone-4","tone-5",
-    "tone-6","tone-7","tone-8","tone-9","tone-10","tone-11"
-  ];
-
-  const TONE_STORAGE_KEY = "productCategoryToneMap_v1";
 
   function normalizeCategoryName(name) {
     return String(name || "").trim();
   }
 
-  function loadToneMapFromStorage() {
-    try {
-      const raw = localStorage.getItem(TONE_STORAGE_KEY);
-      if (!raw) return new Map();
-      const obj = JSON.parse(raw);
-      if (!obj || typeof obj !== "object") return new Map();
-      return new Map(Object.entries(obj));
-    } catch {
-      return new Map();
-    }
+  function toneToClass(tone) {
+    const n = Number(tone);
+    if (Number.isFinite(n) && n >= 0 && n <= 11) return `tone-${n}`;
+    return "tone-0";
   }
 
-  function saveToneMapToStorage(map) {
-    try {
-      const obj = Object.fromEntries(map.entries());
-      localStorage.setItem(TONE_STORAGE_KEY, JSON.stringify(obj));
-    } catch {
-      // ignore
-    }
-  }
-
- function getUsedToneSet(map) {
-  const used = new Set();
-  map.forEach((tone) => {
-    if (TONES.includes(tone)) used.add(tone);
-  });
-  return used;
-}
-
-  // 穩定 hash：用來在「12 色都用完」後分散重複
-  function hashString(str) {
-    const s = String(str || "");
-    let h = 2166136261; // FNV-1a seed
-    for (let i = 0; i < s.length; i++) {
-      h ^= s.charCodeAt(i);
-      h = Math.imul(h, 16777619);
-    }
-    return h >>> 0;
-  }
-
-  /**
-   * 規則：
-   * 1) 已存在 map：永遠沿用（穩定）
-   * 2) 新分類：優先拿「未使用的 tone」（12 色先用完）
-   * 3) 12 色都用過：用 hash 分散重複（穩定，不會每次都撞 tone-0）
-   */
-  function pickToneForNewCategory(categoryName, usedSet) {
-    const free = TONES.find(t => !usedSet.has(t));
-    if (free) return free;
-
-    const idx = hashString(categoryName) % TONES.length;
-    return TONES[idx];
-  }
-
-  /**
-   * ✅ 自動清理（釋出 tone）：
-   * - 只保留「目前資料庫還存在」的分類 key
-   * - 不存在的分類會從 map 移除 → tone 釋出
-   * - 再補上新分類 → 12 色先用完
-   */
-  function buildStableCategoryToneMap(categories) {
-    const currentList = (categories || [])
-      .map(normalizeCategoryName)
-      .filter(Boolean);
-
-    const currentSet = new Set(currentList);
-
-    // 1) 讀舊 map
-    const map = loadToneMapFromStorage();
-
-    // 2) 清掉不存在分類（釋出 tone）
-    for (const key of Array.from(map.keys())) {
-      if (!currentSet.has(key)) map.delete(key);
-    }
-
-    // 3) 重新計算 used（以清理後 map 為準）
-    const used = getUsedToneSet(map);
-
-    // 4) 補新分類
-    currentList.forEach((key) => {
-      if (!map.has(key)) {
-        const tone = pickToneForNewCategory(key, used);
-        map.set(key, tone);
-        used.add(tone);
-      }
-    });
-
-    saveToneMapToStorage(map);
-    return map;
-  }
-
-  // 套用到 tag（createProductCard 會用到）
   function applyCategoryTone(el, categoryName) {
-  if (!el || !categoryName) return;
-  const key = String(categoryName).trim();
-
-  const toneNum = window.categoryToneMap?.get(key);
-  const toneClass = Number.isFinite(toneNum) ? `tone-${toneNum}` : "tone-10"; // 找不到就灰色
-
-  el.classList.add(toneClass);
-}
+    if (!el || !categoryName) return;
+    const key = normalizeCategoryName(categoryName);
+    const toneClass = categoryToneMap.get(key) || "tone-0";
+    el.classList.add(toneClass);
+  }
 
   // ===== Card =====
   function createProductCard(p) {
     const card = document.createElement("article");
     card.className = "card";
 
-    // 圖片
     const imgWrap = document.createElement("div");
     imgWrap.className = "card-img";
 
@@ -296,7 +189,6 @@
       imgWrap.appendChild(ph);
     }
 
-    // 內容
     const body = document.createElement("div");
     body.className = "card-body";
 
@@ -307,7 +199,6 @@
     const meta = document.createElement("div");
     meta.className = "card-meta";
 
-    // ✅ 分類：只用 tag，不要 meta-item 外框（避免雙層膠囊）
     if (p.category) {
       const tag = document.createElement("span");
       tag.className = "tag";
@@ -316,7 +207,6 @@
       meta.appendChild(tag);
     }
 
-    // ✅ 單位：用 meta-item（但不要 icon）
     if (p.unit) {
       const item = document.createElement("div");
       item.className = "meta-item";
@@ -333,7 +223,6 @@
       meta.appendChild(item);
     }
 
-    // ✅ 規格：用 meta-item（但不要 icon）
     if (p.spec) {
       const item = document.createElement("div");
       item.className = "meta-item";
@@ -350,10 +239,8 @@
       meta.appendChild(item);
     }
 
-    // 價格
     const price = document.createElement("div");
     price.className = "price";
-
     price.innerHTML =
       '<div class="price-line">' +
         '<span class="price-label">參考進價：</span>' +
@@ -364,7 +251,6 @@
         '<span class="price-value">NT$ ' + escapeHtml(formatPrice(p.suggested_price)) + "</span>" +
       "</div>";
 
-    // description + 查看更多/收合
     const descText = (p.description || "").trim();
     let descBlock = null;
 
@@ -399,10 +285,8 @@
       descBlock.appendChild(actions);
     }
 
-    // footer
     const footer = document.createElement("div");
     footer.className = "card-footer";
-
     const t = document.createElement("div");
     t.textContent = p.last_price_updated_at ? `價格更新時間：${formatDateTime(p.last_price_updated_at)}` : "";
     footer.appendChild(t);
@@ -431,43 +315,47 @@
     if (prevBtn) prevBtn.disabled = currentPage <= 1;
     if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
 
-    // ✅ mobile sync
     if (mPageIndicator) mPageIndicator.textContent = text;
     if (mPrevBtn) mPrevBtn.disabled = currentPage <= 1;
     if (mNextBtn) mNextBtn.disabled = currentPage >= totalPages;
   }
 
-  // ===== Load Categories =====
+  // ===== Load Categories (✅改查 categories) =====
   async function loadCategories() {
-  const { data, error } = await supabaseClient
-    .from("categories")
-    .select("name, tone")
-    .eq("is_active", true)
-    .order("name", { ascending: true });
+    if (!categorySelect) return;
 
-  if (error) {
-    console.error("❌ 載入分類失敗", error);
-    return;
+    const { data, error } = await supabaseClient
+      .from("categories")
+      .select("name,tone,is_active")
+      .eq("is_active", true)
+      .order("name", { ascending: true });
+
+    if (error) {
+      console.error("❌ 載入分類失敗（categories）", error);
+      return;
+    }
+
+    const rows = (data || [])
+      .map((r) => ({ name: normalizeCategoryName(r.name), tone: r.tone }))
+      .filter((r) => !!r.name);
+
+    // 建 tone map（跨瀏覽器一致：用 DB tone）
+    categoryToneMap = new Map(rows.map((r) => [r.name, toneToClass(r.tone)]));
+
+    // 填入 select options
+    categorySelect.innerHTML = `<option value="">全部分類</option>`;
+    rows.forEach((r) => {
+      const opt = document.createElement("option");
+      opt.value = r.name;
+      opt.textContent = r.name;
+      categorySelect.appendChild(opt);
+    });
+
+    // 重建 SelectX menu
+    initSelectX();
   }
-  if (!categorySelect) return;
 
-  // 建一個 map：name -> tone數字(0~11)
-  window.categoryToneMap = new Map(
-    (data || []).map((r) => [String(r.name).trim(), Number(r.tone)])
-  );
-
-  categorySelect.innerHTML = `<option value="">全部分類</option>`;
-  (data || []).forEach((r) => {
-    const opt = document.createElement("option");
-    opt.value = r.name;
-    opt.textContent = r.name;
-    categorySelect.appendChild(opt);
-  });
-
-  initSelectX();
-}
-
-  // ===== Load Products (server paging) =====
+  // ===== Load Products (你原本的查詢邏輯保留) =====
   async function loadProducts() {
     const pageSize = Number(pageSizeSelect?.value || 10);
     const from = (currentPage - 1) * pageSize;
@@ -512,21 +400,19 @@
     // ② data
     let qData = supabaseClient
       .from("products")
-      .select(
-        `
-          id,
-          name,
-          category,
-          spec,
-          unit,
-          last_price,
-          suggested_price,
-          description,
-          image_url,
-          is_active,
-          last_price_updated_at
-        `
-      )
+      .select(`
+        id,
+        name,
+        category,
+        spec,
+        unit,
+        last_price,
+        suggested_price,
+        description,
+        image_url,
+        is_active,
+        last_price_updated_at
+      `)
       .eq("is_active", true);
 
     if (cat) qData = qData.eq("category", cat);
@@ -571,9 +457,7 @@
       if (categorySelect) categorySelect.value = "";
       currentPage = 1;
 
-      // 讓 SelectX 的按鈕文字同步回「全部分類」
       initSelectX();
-
       loadProducts();
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
@@ -604,77 +488,20 @@
     });
   }
 
-  if (categorySelect) {
-    categorySelect.addEventListener("change", () => {
-      currentPage = 1;
-      loadProducts();
-    });
-  }
+  if (categorySelect) categorySelect.addEventListener("change", () => { currentPage = 1; loadProducts(); });
+  if (sortSelect) sortSelect.addEventListener("change", () => { currentPage = 1; loadProducts(); });
+  if (pageSizeSelect) pageSizeSelect.addEventListener("change", () => { currentPage = 1; loadProducts(); });
 
-  if (sortSelect) {
-    sortSelect.addEventListener("change", () => {
-      currentPage = 1;
-      loadProducts();
-    });
-  }
+  if (prevBtn) prevBtn.addEventListener("click", () => { if (currentPage > 1) { currentPage--; loadProducts(); } });
+  if (nextBtn) nextBtn.addEventListener("click", () => { if (currentPage < totalPages) { currentPage++; loadProducts(); } });
 
-  if (pageSizeSelect) {
-    pageSizeSelect.addEventListener("change", () => {
-      currentPage = 1;
-      loadProducts();
-    });
-  }
+  if (mPrevBtn) mPrevBtn.addEventListener("click", () => { if (currentPage > 1) { currentPage--; loadProducts(); } });
+  if (mNextBtn) mNextBtn.addEventListener("click", () => { if (currentPage < totalPages) { currentPage++; loadProducts(); } });
 
-  if (prevBtn) {
-    prevBtn.addEventListener("click", () => {
-      if (currentPage > 1) {
-        currentPage--;
-        loadProducts();
-      }
-    });
-  }
+  if (mTopBtn) mTopBtn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+  if (topBtn) topBtn.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
 
-  if (nextBtn) {
-    nextBtn.addEventListener("click", () => {
-      if (currentPage < totalPages) {
-        currentPage++;
-        loadProducts();
-      }
-    });
-  }
-
-  // ✅ Mobile pager events
-  if (mPrevBtn) {
-    mPrevBtn.addEventListener("click", () => {
-      if (currentPage > 1) {
-        currentPage--;
-        loadProducts();
-      }
-    });
-  }
-
-  if (mNextBtn) {
-    mNextBtn.addEventListener("click", () => {
-      if (currentPage < totalPages) {
-        currentPage++;
-        loadProducts();
-      }
-    });
-  }
-
-  if (mTopBtn) {
-    mTopBtn.addEventListener("click", () => {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-  }
-
-  if (topBtn) {
-    topBtn.addEventListener("click", () => {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
-  }
-
-  // ✅ 滑動自動隱藏/顯示（像原生 App）
+  // 滑動隱藏 mobilePager
   let lastY = window.scrollY;
   let ticking = false;
 
@@ -691,43 +518,31 @@
     ticking = false;
   }
 
-  window.addEventListener(
-    "scroll",
-    () => {
-      if (window.matchMedia("(max-width: 640px)").matches) {
-        if (!ticking) {
-          window.requestAnimationFrame(handleScroll);
-          ticking = true;
-        }
+  window.addEventListener("scroll", () => {
+    if (window.matchMedia("(max-width: 640px)").matches) {
+      if (!ticking) {
+        window.requestAnimationFrame(handleScroll);
+        ticking = true;
       }
-    },
-    { passive: true }
-  );
+    }
+  }, { passive: true });
 
- // ===== Init =====
-document.addEventListener("DOMContentLoaded", async () => {
+  // ===== Init（✅只留一個） =====
+  document.addEventListener("DOMContentLoaded", async () => {
+    // 先初始化 SelectX：確保下拉立刻可點
+    initSelectX();
 
-  // ✅ 登出按鈕（對應 index.html 的 btnLogout）
-  const logoutBtn = document.getElementById("btnLogout");
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", () => {
-      if (window.frontLogout) window.frontLogout();
-      else location.href = "./login.html?reason=manual";
-    });
-  }
+    try {
+      await loadCategories();
+    } catch (e) {
+      console.error("loadCategories failed:", e);
+    }
 
-  try {
-    await loadCategories();
-  } catch (e) {
-    console.error("loadCategories failed:", e);
-  }
-
-  try {
-    await loadProducts();
-  } catch (e) {
-    console.error("loadProducts failed:", e);
-    if (statusMessage) statusMessage.textContent = "商品載入失敗，請看 Console 錯誤訊息";
-  }
-});
+    try {
+      await loadProducts();
+    } catch (e) {
+      console.error("loadProducts failed:", e);
+      if (statusMessage) statusMessage.textContent = "商品載入失敗，請看 Console 錯誤訊息";
+    }
+  });
 })();
-
