@@ -165,16 +165,20 @@
 
   const key = String(categoryName).trim();
 
-  // ✅ 自帶 hash（不依賴外部 hashString）
+  // ✅ 先用 DB tone（跨瀏覽器一致）
+  const toneNum = Number(window.categoryToneMap?.get(key));
+  if (Number.isFinite(toneNum)) {
+    el.classList.add(`tone-${toneNum}`);
+    return;
+  }
+
+  // ✅ 找不到就用 hash 當備援（也會跨瀏覽器一致）
   let h = 2166136261; // FNV-1a
   for (let i = 0; i < key.length; i++) {
     h ^= key.charCodeAt(i);
     h = Math.imul(h, 16777619);
   }
-
-  // ✅ tone-0 ~ tone-11
-  const toneNum = (h >>> 0) % 12;
-  el.classList.add(`tone-${toneNum}`);
+  el.classList.add(`tone-${(h >>> 0) % 12}`);
 }
 
   // ===== Card =====
@@ -332,13 +336,10 @@
 
   // ===== Load Categories (✅改查 categories) =====
   async function loadCategories() {
-  // ✅ 直接從 products 抓分類（不用 categories 表，也不會卡 is_active）
   const { data, error } = await supabaseClient
-    .from("products")
-    .select("category")
-    .not("category", "is", null)
-    .neq("category", "")
-    .eq("is_active", true);
+    .from("categories")
+    .select("name, tone")
+    .order("name", { ascending: true });
 
   if (error) {
     console.error("❌ 載入分類失敗", error);
@@ -346,19 +347,22 @@
   }
   if (!categorySelect) return;
 
-  const uniq = Array.from(
-    new Set((data || []).map((r) => String(r.category || "").trim()).filter(Boolean))
-  ).sort((a, b) => a.localeCompare(b, "zh-Hant"));
+  // 建一個 map：name -> tone數字(0~11)
+  window.categoryToneMap = new Map(
+    (data || []).map((r) => [String(r.name).trim(), Number(r.tone)])
+  );
+
+  // ✅ Debug：你可以先看這個是不是正確
+  console.log("[categoryToneMap]", Array.from(window.categoryToneMap.entries()));
 
   categorySelect.innerHTML = `<option value="">全部分類</option>`;
-  uniq.forEach((name) => {
+  (data || []).forEach((r) => {
     const opt = document.createElement("option");
-    opt.value = name;
-    opt.textContent = name;
+    opt.value = String(r.name).trim();
+    opt.textContent = String(r.name).trim();
     categorySelect.appendChild(opt);
   });
 
-  // ✅ 分類 options 更新後，重建 SelectX
   initSelectX();
 }
 
