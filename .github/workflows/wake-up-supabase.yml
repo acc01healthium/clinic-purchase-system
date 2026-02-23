@@ -1,0 +1,58 @@
+name: Wake Up Supabase Projects
+
+on:
+  schedule:
+    # 每天 UTC 時間 0 點執行 (台灣時間早上 8 點)
+    - cron: '0 0 * * *'
+  # 也可以手動觸發
+  workflow_dispatch:
+
+jobs:
+  wake-up:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Create wake-up script
+        run: |
+          cat > wake-up.js << 'EOF'
+          const projects = ${{ toJSON(secrets.SUPABASE_PROJECTS) }};
+          
+          async function wakeUpProject(project) {
+            console.log(`正在喚醒專案: ${project.name}...`);
+            
+            try {
+              const response = await fetch(`${project.url}/auth/v1/health`, {
+                headers: {
+                  'apikey': project.key,
+                  'Authorization': `Bearer ${project.key}`
+                }
+              });
+              
+              if (response.ok) {
+                console.log(`✅ 專案 ${project.name} 喚醒成功！`);
+              } else {
+                console.log(`❌ 專案 ${project.name} 喚醒失敗，狀態碼: ${response.status}`);
+              }
+            } catch (error) {
+              console.log(`❌ 專案 ${project.name} 發生錯誤:`, error.message);
+            }
+          }
+          
+          async function main() {
+            console.log('開始喚醒 Supabase 專案...');
+            await Promise.all(projects.map(wakeUpProject));
+            console.log('所有專案喚醒程序執行完畢！');
+          }
+          
+          main();
+          EOF
+
+      - name: Run wake-up script
+        run: node wake-up.js
