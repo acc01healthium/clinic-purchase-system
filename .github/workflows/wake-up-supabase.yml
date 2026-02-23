@@ -22,37 +22,55 @@ jobs:
       - name: Create wake-up script
         run: |
           cat > wake-up.js << 'EOF'
-          const projects = ${{ toJSON(secrets.SUPABASE_PROJECTS) }};
+          // 直接從環境變數讀取 JSON 字串
+          const projectsJson = process.env.SUPABASE_PROJECTS;
+          console.log('讀取到的原始資料:', projectsJson);
           
-          async function wakeUpProject(project) {
-            console.log(`正在喚醒專案: ${project.name}...`);
+          try {
+            // 解析 JSON 字串為 JavaScript 物件
+            const projects = JSON.parse(projectsJson);
+            console.log(`找到 ${projects.length} 個專案`);
             
-            try {
-              const response = await fetch(`${project.url}/auth/v1/health`, {
-                headers: {
-                  'apikey': project.key,
-                  'Authorization': `Bearer ${project.key}`
-                }
-              });
+            async function wakeUpProject(project) {
+              console.log(`正在喚醒專案: ${project.name}...`);
               
-              if (response.ok) {
-                console.log(`✅ 專案 ${project.name} 喚醒成功！`);
-              } else {
-                console.log(`❌ 專案 ${project.name} 喚醒失敗，狀態碼: ${response.status}`);
+              try {
+                const response = await fetch(`${project.url}/auth/v1/health`, {
+                  headers: {
+                    'apikey': project.key,
+                    'Authorization': `Bearer ${project.key}`
+                  }
+                });
+                
+                if (response.ok) {
+                  console.log(`✅ 專案 ${project.name} 喚醒成功！`);
+                } else {
+                  console.log(`❌ 專案 ${project.name} 喚醒失敗，狀態碼: ${response.status}`);
+                }
+              } catch (error) {
+                console.log(`❌ 專案 ${project.name} 發生錯誤:`, error.message);
               }
-            } catch (error) {
-              console.log(`❌ 專案 ${project.name} 發生錯誤:`, error.message);
             }
+            
+            async function main() {
+              console.log('開始喚醒 Supabase 專案...');
+              // 逐個執行，不要用 Promise.all 以便追蹤
+              for (const project of projects) {
+                await wakeUpProject(project);
+              }
+              console.log('所有專案喚醒程序執行完畢！');
+            }
+            
+            main();
+          } catch (error) {
+            console.error('解析專案資料失敗:', error.message);
+            process.exit(1);
           }
-          
-          async function main() {
-            console.log('開始喚醒 Supabase 專案...');
-            await Promise.all(projects.map(wakeUpProject));
-            console.log('所有專案喚醒程序執行完畢！');
-          }
-          
-          main();
           EOF
+        env:
+          SUPABASE_PROJECTS: ${{ secrets.SUPABASE_PROJECTS }}
 
       - name: Run wake-up script
         run: node wake-up.js
+        env:
+          SUPABASE_PROJECTS: ${{ secrets.SUPABASE_PROJECTS }}
